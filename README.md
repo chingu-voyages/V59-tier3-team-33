@@ -36,6 +36,7 @@ coding!
 
 - Teammate name: Chris: [GitHub](https://github.com/chalrees876) / [LinkedIn](https://www.linkedin.com/in/cmckenzie12/)
 - Teammate name: Samantha (Kayleigh): [GitHub](https://github.com/samanthakgraham) / [LinkedIn](www.linkedin.com/in/samantha-graham-339b6b37)
+- Teammate name: Min Sik Hein (Direwen): [GitHub](https://github.com/Direwen) / [LinkedIn](https://www.linkedin.com/in/min-sik-hein/)
 - Teammate name #2: [GitHub](https://github.com/ghaccountname) / [LinkedIn](https://linkedin.com/in/liaccountname)
 
    ...
