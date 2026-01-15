@@ -8,7 +8,7 @@ you like the best.
 | Python (vanilla) | | | | | | | | | |
 | Django | x | | | | | x | | | |
 | FastAPI | x | | | | | | | | |
-| GoLang | | | | | | | x | | |
+| GoLang | | | | | | x | | | |
 | JS (vanilla) | | | | | | | | | |
 | NodeJS | | | | | | | | | |
 | TypeScript | | | | | | | | | |
