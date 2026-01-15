@@ -6,15 +6,16 @@ you like the best.
 | Stack | Chris | Bastien | Devim | Rob | Gobinath | Direwen | Roni | Kayleigh | Chanae |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | 
 | Python (vanilla) | | | | | | | | | |
-| Django | x | | | | | | | | |
+| Django | x | | | | | x | | | |
 | FastAPI | x | | | | | | | | |
-| GoLang | | | | | | | | | |
+| GoLang | | | | | | | x | | |
 | JS (vanilla) | | | | | | | | | |
 | NodeJS | | | | | | | | | |
 | TypeScript | | | | | | | | | |
 | ExpressJS | | | | | | | | | |
 | NestJS | | | | | | | | | |
-| VueJS | | | | | | | | | |
+| VueJS | | | | | | x | | | |
+| Nuxt | | | | | | x | | | |
 | React | | | | | | | | | |
 | Angular | | | | | | | | | |
 | PHP | | | | | | | | | |
