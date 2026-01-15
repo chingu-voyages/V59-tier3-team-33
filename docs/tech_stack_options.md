@@ -6,8 +6,8 @@ you like the best.
 | Stack | Chris | Bastien | Devim | Rob | Gobinath | Direwen | Roni | Kayleigh | Chanae |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | 
 | Python (vanilla) | | | | | | | | | |
-| Django | | | | | | | | | |
-| FastAPI | | | | | | | | | |
+| Django | x | | | | | | | | |
+| FastAPI | x | | | | | | | | |
 | GoLang | | | | | | | | | |
 | JS (vanilla) | | | | | | | | | |
 | NodeJS | | | | | | | | | |
