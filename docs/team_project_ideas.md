@@ -10,7 +10,7 @@ sentences.
 Each team member should Place an 'X' under their name to vote for the ideas 
 you like the best.
 
-| Project Idea | Description | Chris | Bastien | Devim | Rob | Gobinath | Direwen | Roni | Kayleigh | Chanae |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | 
-| Itinerary Planner | A tool for event planning where users can make custom itineraries and plan out routes for vacations. | x | | | | | x | | x | x |
-| AI Interview Question Generator | This application will allow Chingus of different roles to practice questions in preparation for interviews as Scrum Masters, Product Owners, Developers, UX/UI Designers, and more! | | x | | | | | | x | |
+| Project Idea | Description | Margaret | Chris | Bastien | Devim | Rob | Gobinath | Direwen | Roni | Kayleigh | Chanae |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| Itinerary Planner | A tool for event planning where users can make custom itineraries and plan out routes for vacations. | | x | | | | | x | | x | x |
+| AI Interview Question Generator | This application will allow Chingus of different roles to practice questions in preparation for interviews as Scrum Masters, Product Owners, Developers, UX/UI Designers, and more! | | | x | | | | | | x | |
