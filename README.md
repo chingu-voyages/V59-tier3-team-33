@@ -41,6 +41,6 @@ coding!
 - Roni Egbu: [GitHub](https://github.com/ronniiii-i) / [LinkedIn](https://linkedin.com/in/princess-roni-egbu)
 - Margaret Wu: [GitHub](https://github.com/margaretcwu) / [LinkedIn](https://linkedin.com/in/margaretcwu)
 - Oshada Kularathne: [GitHub](https://github.com/devimalka) / [LinkedIn](https://www.linkedin.com/in/oshada-kularathne/)
-- Teammate name #n: [GitHub](https://github.com/ghaccountname) / [LinkedIn](https://linkedin.com/in/liaccountname)
+- Chanae Pickett 
 
 
