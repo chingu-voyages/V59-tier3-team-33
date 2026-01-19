@@ -8,4 +8,4 @@ Use this file to vote on a name for our Itinerary planner!
 | Itenera | | | | | | | | | | |
 | Legit | | | | | | | | | | |
 | Voyaj | | | | | | | | | | |
-| Add your suggestion here! | | | | | | | | | | |
+| Roam Well | | | | | | | | | | |x
