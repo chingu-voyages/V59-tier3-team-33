@@ -17,6 +17,7 @@ you like the best.
 | VueJS            |          |       |         |       |     |          |         |      |          |        |
 | Nuxt             |          |       |         |       |     |          |         |      |          |        |
 | React            |          |       |         |       |     | x        |         | x    |          |        |
+| Next.js            |          |       |         |       |     |        |         | x    |          |        |
 | Angular          |          |       |         |       |     |          |         |      |          |        |
 | PHP              |          |       |         |       |     |          |         |      |          |        |
 | COBOL 😂         |          |       |         |       |     |          |         |      |          |        |
