@@ -9,7 +9,7 @@ Use this file to vote on a name for our Itinerary planner!
 | Legit | | x | | | | | | | | |
 | Voyaj | | | | | | | | | | |
 | Roam Well | | | | | | | | | |x |
-| JoyRoute | | | |x| | | x | | |x |
+| JoyRoute | | | x |x| | | x | | |x |
 | Planora | | | | | | | x | | | |
 | Roamie | | | | | | | | x | | |
 | Roamly | | | | | | | | x | | |
