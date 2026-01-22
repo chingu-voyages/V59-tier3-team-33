@@ -1,17 +1,11 @@
-from django.db import models
-from apps.core.models import BaseModel
-
-from django.conf import settings
 from datetime import timedelta, datetime
 
-#TODO: review event types and add/remove as needed
-class EventType(models.TextChoices):
-    FLIGHT = 'FLIGHT', 'Flight'
-    TRAIN = 'TRAIN', 'Train'
-    BUS = 'BUS', 'Bus'
-    MEAL = 'MEAL', 'Meal'
-    ACTIVITY = 'ACTIVITY', 'Activity'
-    OTHER = 'OTHER', 'Other'
+from django.db import models
+from django.conf import settings
+
+from .constants import EventType
+from apps.core.models import BaseModel
+
 
 
 class Trip(BaseModel):
@@ -136,7 +130,7 @@ class Event(BaseModel):
     )
     location_text = models.CharField(max_length=255, blank=True, null=True)
     start_time = models.TimeField(blank=True, null=True)
-    duration = models.IntegerField(blank=True, null=True) # duration in minutes
+    duration = models.PositiveIntegerField(blank=True, null=True) # duration in minutes
 
     trip_day = models.ForeignKey(
         'TripDay', 
@@ -157,8 +151,16 @@ class Event(BaseModel):
         return f"{self.name} on {self.trip_day.date}"
         
     def end_time(self):
-        if self.start_time and self.duration is not None:
-            return self.start_time + timedelta(minutes=self.duration)
+        if self.start_time is not None and self.duration is not None:
+            start_datetime = datetime.combine(datetime.today(), self.start_time)
+            return start_datetime + timedelta(minutes=self.duration)
         return None
-
     
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['trip_day', 'place', 'start_time'],
+                name='unique_event_per_trip_day',
+                condition=models.Q(place__isnull=False, start_time__isnull=False)
+            ),
+        ]
