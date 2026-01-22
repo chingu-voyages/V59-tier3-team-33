@@ -1,7 +1,6 @@
 from django.db import models
 
-from backend.config import settings
-
+from django.conf import settings
 from datetime import timedelta, datetime
 
 #TODO: review event types and add/remove as needed
@@ -76,14 +75,28 @@ class TripDay(models.Model):
                 fields=['trip', 'date'],
                 name='unique_trip_day_per_trip'
             ),
-            models.CheckConstraint(
-                condition=
-                models.Q(date__gte=models.F('trip__start_date')) &
-                models.Q(date__lte=models.F('trip__end_date')),
-                name='date_within_trip_dates'
+        ]
+        
+class TripSavedPlace(models.Model):
+    trip = models.ForeignKey(
+        'Trip',
+        on_delete=models.CASCADE,
+        related_name='saved_places'
+    )
+    place = models.ForeignKey(
+        'places.Place',
+        on_delete=models.CASCADE,
+        related_name='trip_saved_places'
+    )
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['trip', 'place'],
+                name='unique_saved_place_per_trip'
             )
         ]
-
+    
 #TODO: make tests to make sure constraints are behaving as expected
 class Lodging(models.Model):
     name = models.CharField(max_length=255)
@@ -97,7 +110,7 @@ class Lodging(models.Model):
         related_name='lodgings'
     )
     place = models.ForeignKey(
-        'Place', 
+        'places.Place', 
         on_delete=models.SET_NULL, 
         null=True, blank=True
     )
@@ -110,18 +123,13 @@ class Lodging(models.Model):
     
     class Meta:
         constraints = [
-            models.uniqueConstraint(
+            models.UniqueConstraint(
                 fields=['name', 'trip'],
+                name='unique_lodging_per_trip'
             ),
             models.CheckConstraint(
                 condition = models.Q(arrival_date__lte=models.F('departure_date')),
-                name = 'arrival_date_before_departure_date'
-            ),
-            models.CheckConstraint(
-                condition= 
-                models.Q(arrival_date__gte=models.F('trip__start_date')) &
-                models.Q(departure_date__lte=models.F('trip__end_date')),
-                name = 'lodging_dates_within_trip_dates'
+                name = 'arrival_date_before_departure_date',
             )
         ]
 
@@ -144,7 +152,7 @@ class Event(models.Model):
         related_name='events'
     )
     place = models.ForeignKey(
-        'Place', 
+        'places.Place', 
         on_delete=models.SET_NULL, 
         null=True, blank=True
     )
@@ -158,18 +166,6 @@ class Event(models.Model):
     
     def __str__(self):
         return f"{self.name} on {self.trip_day.date}"
-    
-    class Meta:
-        constraints = [
-            models.CheckConstraint(
-                condition=models.Q(start_time__lte=models.F('end_time')),
-                name='event_start_time_before_end_time'
-            ),
-            models.CheckConstraint(
-                condition=models.Q(duration=models.F('end_time') - models.F('start_time')),
-                name='event_duration_consistency'
-            )
-        ]
         
     def end_time(self):
         if self.start_time and self.duration is not None:
