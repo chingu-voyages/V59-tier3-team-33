@@ -1,4 +1,5 @@
 from django.db import models
+from apps.core.models import BaseModel
 
 from django.conf import settings
 from datetime import timedelta, datetime
@@ -13,7 +14,7 @@ class EventType(models.TextChoices):
     OTHER = 'OTHER', 'Other'
 
 
-class Trip(models.Model):
+class Trip(BaseModel):
     
     name = models.CharField(max_length=255)
     start_date = models.DateField()
@@ -24,9 +25,6 @@ class Trip(models.Model):
         on_delete=models.CASCADE,
         related_name='trips'
     )
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.name} ({self.start_date} to {self.end_date})"
@@ -39,7 +37,7 @@ class Trip(models.Model):
             )
         ]
     
-class UserTrip(models.Model):
+class UserTrip(BaseModel):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -53,7 +51,7 @@ class UserTrip(models.Model):
     )
     
 #TODO: make tests to make sure constraints are behaving as expected
-class TripDay(models.Model):
+class TripDay(BaseModel):
     date = models.DateField()
     name = models.CharField(max_length=255, blank=True, null=True)
     
@@ -62,9 +60,6 @@ class TripDay(models.Model):
         on_delete=models.CASCADE, 
         related_name='trip_days'
     )
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return f"{self.trip.name} - {self.date}"
@@ -77,7 +72,7 @@ class TripDay(models.Model):
             ),
         ]
         
-class TripSavedPlace(models.Model):
+class TripSavedPlace(BaseModel):
     trip = models.ForeignKey(
         'Trip',
         on_delete=models.CASCADE,
@@ -98,7 +93,7 @@ class TripSavedPlace(models.Model):
         ]
     
 #TODO: make tests to make sure constraints are behaving as expected
-class Lodging(models.Model):
+class Lodging(BaseModel):
     name = models.CharField(max_length=255)
     arrival_date = models.DateField()
     departure_date = models.DateField()
@@ -114,9 +109,6 @@ class Lodging(models.Model):
         on_delete=models.SET_NULL, 
         null=True, blank=True
     )
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return f"{self.name} ({self.arrival_date} to {self.departure_date})"
@@ -135,7 +127,7 @@ class Lodging(models.Model):
 
 #TODO: make tests to make sure constraints are behaving as expected
 #TODO: consider adding constraint to prevent overlapping events in the same trip day
-class Event(models.Model):
+class Event(BaseModel):
     name = models.CharField(max_length=255)
     type = models.CharField(
         max_length=20,
@@ -158,9 +150,6 @@ class Event(models.Model):
     )
 
     position = models.IntegerField(blank=True, null=True) # index of order of events in a day
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     
     notes = models.TextField(blank=True, null=True)
     
