@@ -138,6 +138,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # TODO: need to create user model in accounts app
 AUTH_USER_MODEL = "accounts.User"
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 REST_AUTH = {
     'USE_JWT': True,
