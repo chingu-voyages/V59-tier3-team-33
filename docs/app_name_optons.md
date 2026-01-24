@@ -7,9 +7,9 @@ Use this file to vote on a name for our Itinerary planner!
 | Legwise | | | | | | | | | | |
 | Itenera | | | | | | | | | | |
 | Legit | | x | | | | | | | | |
-| Voyaj | | | | | | | | | | |
+| Voyaj | | | | | | | | | x | |
 | Roam Well | | | | | | | | | |x |
-| JoyRoute | | | x |x| | | x | | |x |
+| JoyRoute | | | x |x| | | x | | x |x |
 | Planora | | | | | | | x | | | |
 | Roamie | | | | | | | | x | | |
-| Roamly | | | x | | | | | x | | |
+| Roamly | | | x | | | | | x | x | |
