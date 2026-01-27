@@ -76,11 +76,14 @@ class Lodging(BaseModel):
     name = models.CharField(max_length=255)
     arrival_date = models.DateField()
     departure_date = models.DateField()
-    location_text = models.CharField(max_length=255)
+    location_text = models.CharField(max_length=255, blank =True, null=True)
 
     trip = models.ForeignKey("Trip", on_delete=models.CASCADE, related_name="lodgings")
     place = models.ForeignKey(
         "places.Place", on_delete=models.SET_NULL, null=True, blank=True
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="lodgings"
     )
 
     def __str__(self):
@@ -114,6 +117,9 @@ class Event(BaseModel):
     )
     place = models.ForeignKey(
         "places.Place", on_delete=models.SET_NULL, null=True, blank=True
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="events"
     )
 
     position = models.IntegerField(

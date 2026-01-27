@@ -1,6 +1,7 @@
 from django.db import models
 
 from apps.core.models import BaseModel
+from django.conf import settings
 
 
 class Place(BaseModel):
@@ -14,6 +15,9 @@ class Place(BaseModel):
     )
     longitude = models.DecimalField(
         max_digits=9, decimal_places=6, blank=True, null=True
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="places"
     )
 
     def __str__(self):
