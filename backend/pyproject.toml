@@ -8,6 +8,7 @@ dependencies = [
     "dj-rest-auth>=5.0.2",
     "django>=6.0.1",
     "django-allauth>=65.14.0",
+    "django-cors-headers>=4.9.0",
     "djangorestframework>=3.16.1",
     "djangorestframework-simplejwt>=5.5.1",
     "requests>=2.32.5",
