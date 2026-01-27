@@ -11,6 +11,7 @@ you like the best.
 | No. | Question/Option | Margaret | Chris | Bastien | Devim | Rob | Gobinath | Direwen | Roni | Kayleigh | Chanae |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | 1 | Chosen project: Itinerary planner | | | | | | | | | | |
+| 1 | App name: JoyRoute | | | | | | | | | | |
 | 2	| Tech. Stack: Django, FastAPI backend. Frontend TBD | | | | | | | | | | |
 | 3	| Project Backlog Tool: Github Projects | | | | | | | | | | |
 | 4 | Team meeting schedule | | | | | | | | | | |
