@@ -66,7 +66,11 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         # Accept authorization header tokens
         "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
-    )
+    ),
+    "DEFAULT_RENDERER_CLASSES": (
+        "apps.core.renderer.StandardResponseRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    ),
 }
 
 ROOT_URLCONF = "config.urls"
