@@ -71,6 +71,14 @@ REST_FRAMEWORK = {
         "apps.core.renderer.StandardResponseRenderer",
         "rest_framework.renderers.BrowsableAPIRenderer",
     ),
+    "DEFAULT_THROTTLE_CLASSES": [
+        'rest_framework.throttling.AnonRateThrottle', # Limits guests
+        'rest_framework.throttling.UserRateThrottle' # Limits authenticated requests
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        'anon': '10/minute',
+        'user': '100/minute'
+    }
 }
 
 ROOT_URLCONF = "config.urls"
