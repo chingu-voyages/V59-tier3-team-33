@@ -24,8 +24,4 @@ class Migration(migrations.Migration):
             name='duration',
             field=models.PositiveIntegerField(blank=True, null=True),
         ),
-        migrations.AddConstraint(
-            model_name='event',
-            constraint=models.UniqueConstraint(condition=models.Q(('place__isnull', False), ('start_time__isnull', False)), fields=('trip_day', 'place', 'start_time'), name='unique_event_per_trip_day'),
-        ),
     ]
