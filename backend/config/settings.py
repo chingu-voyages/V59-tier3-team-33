@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "rest_framework",
     "rest_framework.authtoken",
+    "drf_spectacular",
     "dj_rest_auth",
     "dj_rest_auth.registration",
     "allauth",
@@ -79,7 +80,15 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         'anon': '10/minute',
         'user': '100/minute'
-    }
+    },
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "JoyRoute API",
+    "DESCRIPTION": "API documentation for JoyRoute",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }
 
 ROOT_URLCONF = "config.urls"
