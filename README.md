@@ -34,9 +34,9 @@ Everyone on your team should add their name along with a link to their GitHub
 your repo access and to practice PR'ing with your team *before* you start
 coding!
 
-- Teammate name: Chris: [GitHub](https://github.com/chalrees876) / [LinkedIn](https://www.linkedin.com/in/cmckenzie12/)
-- Teammate name: Samantha (Kayleigh): [GitHub](https://github.com/samanthakgraham) / [LinkedIn](www.linkedin.com/in/samantha-graham-339b6b37)
-- Teammate name: Min Sik Hein (Direwen): [GitHub](https://github.com/Direwen) / [LinkedIn](https://www.linkedin.com/in/min-sik-hein/)
+- Chris: [GitHub](https://github.com/chalrees876) / [LinkedIn](https://www.linkedin.com/in/cmckenzie12/)
+- Samantha (Kayleigh): [GitHub](https://github.com/samanthakgraham) / [LinkedIn](www.linkedin.com/in/samantha-graham-339b6b37)
+- Min Sik Hein (Direwen): [GitHub](https://github.com/Direwen) / [LinkedIn](https://www.linkedin.com/in/min-sik-hein/)
 - Bastien Winant: [GitHub](https://github.com/BastienWinant)
 - Roni Egbu: [GitHub](https://github.com/ronniiii-i) / [LinkedIn](https://linkedin.com/in/princess-roni-egbu)
 - Margaret Wu: [GitHub](https://github.com/margaretcwu) / [LinkedIn](https://linkedin.com/in/margaretcwu)
