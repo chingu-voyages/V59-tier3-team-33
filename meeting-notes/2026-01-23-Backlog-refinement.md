@@ -30,5 +30,5 @@
 | Who | Deadline | Task | Status |
 | --- | --- | --- | --- |
 | Kayleigh | 23 Jan midnight ET | Post meeting notes | Done |
-| Kayleigh | 24 Jan midnight ET | Determine if we need 2nd repo | Open |
-| Kayleigh | 25 Jan midnight ET | Update user stories related to places, accommodation | Open |
+| Kayleigh | 24 Jan midnight ET | Determine if we need 2nd repo | Done |
+| Kayleigh | 25 Jan midnight ET | Update user stories related to places, accommodation | Done |

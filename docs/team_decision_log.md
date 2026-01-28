@@ -11,16 +11,17 @@ you like the best.
 | No. | Question/Option | Margaret | Chris | Bastien | Devim | Rob | Gobinath | Direwen | Roni | Kayleigh | Chanae |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | 1 | Chosen project: Itinerary planner | | | | | | | | | | |
+|  | App name: JoyRoute | | | | | | | | | | |
 | 2	| Tech. Stack: Django, FastAPI backend. Frontend TBD | | | | | | | | | | |
 | 3	| Project Backlog Tool: Github Projects | | | | | | | | | | |
 | 4 | Team meeting schedule | | | | | | | | | | |
-|   |	- Sprint Planning: | | | | | | | | | | |
-|   |	- Sprint Review: | | | | | | | | | | |
-|   |	- Sprint Retrospective: | | | | | | | | | | |
+|   |	- Sprint Planning: Monday 7 pm ET| | | | | | | | | | |
+|   |	- Sprint Review: Monday 7 pm ET | | | | | | | | | | |
+|   |	- Sprint Retrospective: Monday 7 pm ET | | | | | | | | | | |
+|   |	- Backlog refinement: 7 pm ET | | | | | | | | | | |
 |   |	- Collaborative Working Sessions: | | | | | | | | | | |
 | 5	| Where to host the app? | | | | | | | | | | |
 |   |	- Heroku (suitable for FE, BE, & Postgres) | | | | | | | | | | |
 |   |	- Mongo Atlas (suitable only for MongoDB) | | | | | | | | | | |
 | 6	| BE/FE repos organization | | | | | | | | | | |
-|   |	- Separate GitHub repos for each | | | | | | | | | | |
 |   |	- Single GitHub repo for both | | | | | | | | | | |
