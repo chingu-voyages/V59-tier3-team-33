@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "corsheaders",
+    "django_extensions",
     "apps.accounts",
     "apps.itineraries",
     "apps.places",

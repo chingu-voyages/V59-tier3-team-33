@@ -9,6 +9,7 @@ dependencies = [
     "django>=6.0.1",
     "django-allauth>=65.14.0",
     "django-cors-headers>=4.9.0",
+    "django-extensions>=4.1",
     "djangorestframework>=3.16.1",
     "djangorestframework-simplejwt>=5.5.1",
     "python-dotenv>=1.0.0",
