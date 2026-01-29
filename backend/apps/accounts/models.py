@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from apps.core.models import BaseModel
+from .manager import CustomUserManager
 
 
 class User(AbstractUser, BaseModel):
@@ -11,6 +12,7 @@ class User(AbstractUser, BaseModel):
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["first_name", "last_name"]
+    objects = CustomUserManager()
 
     def save(self, *args, **kwargs):
         if self.email:
