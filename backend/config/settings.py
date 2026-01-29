@@ -184,6 +184,7 @@ REST_AUTH = {
     "JWT_AUTH_COOKIE": "my-app-auth",
     "JWT_AUTH_REFRESH_COOKIE": "my-refresh-token",
     "REGISTER_SERIALIZER": "apps.accounts.serializers.CustomRegisterSerializer",
+    "LOGIN_SERIALIZER": "apps.accounts.serializers.CustomLoginSerializer",
 }
 
 SIMPLE_JWT = {
