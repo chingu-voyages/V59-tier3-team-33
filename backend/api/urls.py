@@ -1,5 +1,5 @@
 from rest_framework.routers import DefaultRouter
-from dj_rest_auth.views import PasswordResetConfirmView
+from apps.core.views import PasswordResetConfirmView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from django.urls import path, include
