@@ -1,7 +1,9 @@
 from dj_rest_auth.registration.serializers import RegisterSerializer
-from dj_rest_auth.serializers import LoginSerializer
+from dj_rest_auth.serializers import LoginSerializer, PasswordResetSerializer
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from django.conf import settings
+from allauth.account.utils import user_pk_to_url_str
 
 User = get_user_model()
 
@@ -22,3 +24,13 @@ class CustomRegisterSerializer(RegisterSerializer):
 
 class CustomLoginSerializer(LoginSerializer):
     username = None
+    
+# Custom URL generator for password reset emails
+def custom_url_generator(request, user, temp_key):
+    return f"{settings.FRONTEND_URL}/{settings.FRONTEND_PASSWORD_RESET_PATH_NAME}/{user_pk_to_url_str(user)}/{temp_key}/"
+
+class CustomPasswordResetSerializer(PasswordResetSerializer):
+    def get_email_options(self):
+        return {
+            'url_generator': custom_url_generator
+        }
