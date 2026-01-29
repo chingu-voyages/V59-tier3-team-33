@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "rest_framework",
     "rest_framework.authtoken",
+    "drf_spectacular",
     "dj_rest_auth",
     "dj_rest_auth.registration",
     "allauth",
@@ -79,7 +80,15 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         'anon': '10/minute',
         'user': '100/minute'
-    }
+    },
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "JoyRoute API",
+    "DESCRIPTION": "API documentation for JoyRoute",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }
 
 ROOT_URLCONF = "config.urls"
@@ -175,6 +184,8 @@ REST_AUTH = {
     "JWT_AUTH_COOKIE": "my-app-auth",
     "JWT_AUTH_REFRESH_COOKIE": "my-refresh-token",
     "REGISTER_SERIALIZER": "apps.accounts.serializers.CustomRegisterSerializer",
+    "LOGIN_SERIALIZER": "apps.accounts.serializers.CustomLoginSerializer",
+    "PASSWORD_RESET_SERIALIZER": "apps.accounts.serializers.CustomPasswordResetSerializer"
 }
 
 SIMPLE_JWT = {
@@ -201,7 +212,7 @@ ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
-ACCOUNT_EMAIL_REQUIRED = True
+
 
 # Use custom adapter for email confirmation URLs
 ACCOUNT_ADAPTER = "apps.accounts.adapters.CustomAccountAdapter"
@@ -219,4 +230,7 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 # FRONTEND CONFIG
 FRONTEND_EMAIL_VERIFICATION_PATH_NAME = os.environ.get(
     "FRONTEND_EMAIL_VERIFICATION_PATH_NAME", "verify-email"
+)
+FRONTEND_PASSWORD_RESET_PATH_NAME = os.environ.get(
+    "FRONTEND_PASSWORD_RESET_PATH_NAME", "reset-password"
 )
