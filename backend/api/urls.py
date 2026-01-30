@@ -1,3 +1,4 @@
+from apps.places.views import PlaceViewSearch
 from rest_framework.routers import DefaultRouter
 from apps.core.views import PasswordResetConfirmView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
@@ -16,4 +17,5 @@ urlpatterns = [
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     # Optional UI:
     path('schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('search/', PlaceViewSearch.as_view(), name="place-search")
 ]
