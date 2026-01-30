@@ -10,6 +10,9 @@ class PlaceViewSearch(APIView):
     * Requires token authentication.
     * Only admin users are able to access this view.
     """
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAdminUser]
+
     def get(self, request):
         """
         Return a list of places.
@@ -24,7 +27,7 @@ class PlaceViewSearch(APIView):
         limit = max(1, min(limit,10))
         
         if len(query) < 2:
-            return Response({"detail": "query must be at least 2 chars"}, status=400)
+            return Response({"detail": "query must be at least 2 chars"})
         
         results = get_place_suggestions(
             query=query, 
