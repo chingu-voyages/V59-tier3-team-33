@@ -35,6 +35,12 @@ class UserTrip(BaseModel):
     trip = models.ForeignKey(
         "Trip", on_delete=models.CASCADE, null=True, related_name="user_trips"
     )
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "trip"], name="unique_user_trip_per_user"
+            ),
+        ]
 
 
 # TODO: make tests to make sure constraints are behaving as expected
