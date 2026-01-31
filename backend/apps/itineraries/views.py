@@ -1,6 +1,9 @@
 from rest_framework import viewsets, permissions
 from .models import Trip, UserTrip, TripDay
-from .serializers import TripSerializer
+from .serializers import (
+    TripDetailSerializer,
+    TripSerializer,
+)
 from django.db import transaction
 from datetime import timedelta
 
@@ -8,6 +11,11 @@ class TripViewset(viewsets.ModelViewSet):
     queryset = Trip.objects.all()
     serializer_class = TripSerializer
     permission_classes = [permissions.IsAuthenticated]
+    
+    def get_serializer_class(self):
+        if self.action in ["retrieve"]:
+            return TripDetailSerializer
+        return TripSerializer
     
     def get_queryset(self):
         return Trip.objects.filter(user_trips__user=self.request.user)
