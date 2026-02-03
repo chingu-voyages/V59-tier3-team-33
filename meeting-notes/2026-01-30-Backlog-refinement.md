@@ -28,5 +28,5 @@
 | --- | --- | --- | --- |
 | Kayleigh | 30 Jan midnight ET | Post meeting notes | Done |
 | Kayleigh | 31 Jan noon ET | Update place list, place deletion, manual itinerary planning stories | Done |
-| Margaret | 31 Jan midnight ET | Review notes, updated stories; reach out if not clear on next steps | Open |
-| Kayleigh | 1 Feb noon ET | Add story for user profile page | Open |
+| Margaret | 31 Jan midnight ET | Review notes, updated stories; reach out if not clear on next steps | Done |
+| Kayleigh | 1 Feb noon ET | Add story for user profile page | Done |
