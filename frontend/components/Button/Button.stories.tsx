@@ -1,89 +1,33 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { FaHeart, FaShoppingCart } from "react-icons/fa";
+import { FaHeart, FaMap } from "react-icons/fa";
 import { Button } from "./Button";
 
 const meta: Meta<typeof Button> = {
   title: "Components/Button",
   component: Button,
-  parameters: {
-    layout: "centered",
-  },
+  parameters: { layout: "centered" },
   tags: ["autodocs"],
-  argTypes: {
-    variant: {
-      control: "select",
-      options: ["primary", "secondary", "clear"],
-      description: "Button variant",
-    },
-    size: {
-      control: "select",
-      options: ["small", "medium", "large"],
-      description: "Button size",
-    },
-    round: {
-      control: "boolean",
-      description: "Round button style",
-    },
-    iconOnly: {
-      control: "boolean",
-      description: "Icon only button",
-    },
-    disabled: {
-      control: "boolean",
-      description: "Disabled state",
-    },
-  },
 };
 
 export default meta;
 type Story = StoryObj<typeof Button>;
 
 export const Primary: Story = {
-  args: {
-    children: "Primary Button",
-    variant: "primary",
-  },
+  args: { children: "Primary Button" },
 };
 
 export const Secondary: Story = {
-  args: {
-    children: "Secondary Button",
-    variant: "secondary",
-  },
+  args: { children: "Secondary Button", variant: "secondary" },
 };
 
 export const Clear: Story = {
-  args: {
-    children: "Clear Button",
-    variant: "clear",
-  },
-};
-
-export const Small: Story = {
-  args: {
-    children: "Small Button",
-    size: "small",
-  },
-};
-
-export const Large: Story = {
-  args: {
-    children: "Large Button",
-    size: "large",
-  },
-};
-
-export const Round: Story = {
-  args: {
-    children: "Round Button",
-    round: true,
-  },
+  args: { children: "Clear Button", variant: "clear" },
 };
 
 export const WithIcon: Story = {
   args: {
-    children: "Add to Cart",
-    icon: <FaShoppingCart />,
+    children: "Location",
+    icon: <FaMap />,
   },
 };
 
@@ -96,8 +40,5 @@ export const IconOnly: Story = {
 };
 
 export const Disabled: Story = {
-  args: {
-    children: "Disabled Button",
-    disabled: true,
-  },
+  args: { children: "Disabled", disabled: true },
 };

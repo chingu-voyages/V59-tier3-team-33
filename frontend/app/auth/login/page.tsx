@@ -3,112 +3,59 @@
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { Logo } from "@/components/Logo";
-import {
-  hasErrors,
-  validateField,
-  validationRules,
-} from "@/helpers/validation";
-import { LoginFormData, LoginFormErrors } from "@/interface/pages/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 import { FaEnvelope, FaEye, FaEyeSlash, FaLock } from "react-icons/fa";
+import { useState } from "react";
+import { LoginFormData, loginSchema } from "@/schema/auth.schema";
 
 export default function LoginPage() {
-  const [formData, setFormData] = useState<LoginFormData>({
-    email: "",
-    password: "",
-  });
-  const [errors, setErrors] = useState<LoginFormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
 
-  const handleChange =
-    (field: keyof LoginFormData) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setFormData((prev) => ({ ...prev, [field]: value }));
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
 
-      // Clear error when user starts typing
-      if (errors[field]) {
-        setErrors((prev) => ({ ...prev, [field]: undefined }));
-      }
-    };
-
-  const handleBlur = (field: keyof LoginFormData) => () => {
-    const error = validateField(formData[field], validationRules[field]);
-    if (error) {
-      setErrors((prev) => ({ ...prev, [field]: error }));
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validate all fields
-    const newErrors: LoginFormErrors = {};
-    newErrors.email = validateField(formData.email, validationRules.email);
-    newErrors.password = validateField(
-      formData.password,
-      validationRules.password,
-    );
-
-    setErrors(newErrors);
-
-    if (hasErrors(newErrors)) {
-      return;
-    }
-
-    // Simulate API call
-    setIsLoading(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Login successful:", formData);
-      // TODO: Handle successful login (redirect, store token, etc.)
-    } catch (error) {
-      console.error("Login failed:", error);
-      setErrors({ email: "Invalid email or password" });
-    } finally {
-      setIsLoading(false);
-    }
+  const onSubmit = async (data: LoginFormData) => {
+    await new Promise((r) => setTimeout(r, 1500));
+    console.log("Login success:", data);
   };
 
   return (
-    <div className="bg-background-secondary flex min-h-screen items-center justify-center px-4 py-12">
+    <div className="bg-background-secondary flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="mb-8 flex justify-center">
           <Logo large />
         </div>
 
-        {/* Card */}
         <div className="bg-background rounded-2xl p-8 shadow-lg">
           <div className="mb-6 text-center">
-            <h1 className="text-foreground text-3xl font-bold">Welcome Back</h1>
-            <p className="text-foreground-light mt-2">
-              Sign in to your account to continue
+            <h1 className="text-3xl font-bold">Welcome Back</h1>
+            <p className="mt-2 text-foreground-light">
+              Sign in to continue
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email Field */}
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-5"
+          >
             <Input
-              id="email"
-              label="Email Address"
+              label="Email"
               type="email"
               placeholder="john@example.com"
               leftIcon={<FaEnvelope />}
-              value={formData.email}
-              onChange={handleChange("email")}
-              onBlur={handleBlur("email")}
-              error={errors.email}
+              error={errors.email?.message}
               fullWidth
-              required
+              {...register("email")}
             />
 
-            {/* Password Field */}
             <Input
-              id="password"
               label="Password"
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
@@ -116,82 +63,46 @@ export default function LoginPage() {
               rightIcon={
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="text-foreground-light hover:text-foreground pointer-events-auto cursor-pointer"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="pointer-events-auto"
+                  aria-label="Toggle password"
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               }
-              value={formData.password}
-              onChange={handleChange("password")}
-              onBlur={handleBlur("password")}
-              error={errors.password}
+              error={errors.password?.message}
               fullWidth
-              required
+              {...register("password")}
             />
 
-            {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between">
-              <label className="flex cursor-pointer items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="border-border text-primary focus:ring-primary/20 h-4 w-4 rounded focus:ring-2"
-                />
-                <span className="text-foreground text-sm">Remember me</span>
-              </label>
-              <Link
-                href="/auth/forgot-password"
-                className="text-primary hover:text-primary-600 text-sm font-medium transition-colors"
-              >
-                Forgot password?
-              </Link>
-            </div>
-
-            {/* Submit Button */}
             <Button
               type="submit"
-              variant="primary"
               size="large"
               fullWidth
-              disabled={isLoading}
+              disabled={isSubmitting}
             >
-              {isLoading ? "Signing in..." : "Sign In"}
+              {isSubmitting ? "Signing in…" : "Sign In"}
             </Button>
           </form>
 
-          {/* Divider */}
           <div className="my-6 flex items-center">
-            <div className="border-border flex-1 border-t"></div>
-            <span className="text-foreground-light px-4 text-sm">or</span>
-            <div className="border-border flex-1 border-t"></div>
+            <div className="flex-1 border-t" />
+            <span className="px-4 text-sm text-foreground-light">
+              or
+            </span>
+            <div className="flex-1 border-t" />
           </div>
 
-          {/* Sign Up Link */}
-          <p className="text-foreground-light text-center text-sm">
-            Don't have an account?{" "}
+          <p className="text-center text-sm">
+            Don’t have an account?{" "}
             <Link
               href="/auth/signup"
-              className="text-primary hover:text-primary-600 font-medium transition-colors"
+              className="text-primary font-medium"
             >
-              Sign up for free
+              Sign up
             </Link>
           </p>
         </div>
-
-        {/* Footer */}
-        <p className="text-foreground-light mt-6 text-center text-xs">
-          By continuing, you agree to our{" "}
-          <Link href="/terms" className="text-primary hover:underline">
-            Terms of Service
-          </Link>{" "}
-          and{" "}
-          <Link href="/privacy" className="text-primary hover:underline">
-            Privacy Policy
-          </Link>
-        </p>
       </div>
     </div>
   );

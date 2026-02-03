@@ -27,9 +27,7 @@ export const CustomLinks: Story = {
   args: {
     links: [
       { label: "Destinations", href: "/destinations" },
-      { label: "Itineraries", href: "/itineraries" },
       { label: "Places", href: "/places" },
-      { label: "Contact", href: "/contact" },
     ],
   },
 };

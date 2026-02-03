@@ -1,73 +1,89 @@
-import { ButtonProps } from "@/types/button";
-import React from "react";
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
 import { twMerge } from "tailwind-merge";
+import { ButtonProps } from "./button.types";
 
-/**
- * Button component for user interactions
- */
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const buttonVariants = cva(
+  [
+    "inline-flex items-center justify-center font-medium transition-all",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+    "disabled:pointer-events-none disabled:opacity-40",
+  ],
+  {
+    variants: {
+      variant: {
+        primary:
+          "bg-primary text-white hover:bg-primary-light focus-visible:ring-primary",
+        secondary:
+          "bg-secondary text-foreground hover:bg-secondary-dark focus-visible:ring-secondary",
+        clear:
+          "bg-transparent text-foreground hover:bg-background-secondary",
+      },
+      size: {
+        small: "px-4 py-2 text-sm",
+        medium: "px-6 py-3 text-base",
+        large: "px-8 py-4 text-lg",
+      },
+      round: {
+        true: "rounded-full",
+        false: "rounded-lg",
+      },
+      fullWidth: {
+        true: "w-full",
+      },
+    },
+    defaultVariants: {
+      variant: "primary",
+      size: "medium",
+      round: false,
+    },
+  }
+);
+
+type ButtonVariantProps = VariantProps<typeof buttonVariants>;
+
+export const Button = React.forwardRef<
+  HTMLButtonElement,
+  ButtonProps & ButtonVariantProps
+>(
   (
     {
-      variant = "primary",
-      size = "medium",
-      round = false,
+      asChild = false,
       icon,
       iconOnly = false,
-      fullWidth = false,
+      variant,
+      size,
+      round,
+     fullWidth,
+      className,
       children,
-      className,
-      disabled,
-      ...props
+      ...rest
     },
-    ref,
+    ref
   ) => {
-    const baseClasses =
-      "inline-flex items-center justify-center font-medium transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-40 disabled:cursor-not-allowed";
-
-    const variantClasses = {
-      primary:
-        "bg-primary text-white hover:bg-primary-light focus:ring-primary disabled:hover:bg-primary",
-      secondary:
-        "bg-secondary text-foreground hover:bg-secondary-dark focus:ring-secondary disabled:hover:bg-secondary",
-      clear:
-        "bg-transparent text-foreground hover:bg-background-secondary focus:ring-neutral-300 disabled:hover:bg-transparent",
-    };
-
-    const sizeClasses = iconOnly
-      ? {
-          small: "p-2",
-          medium: "p-3",
-          large: "p-4",
-        }
-      : {
-          small: "px-4 py-2 text-sm",
-          medium: "px-6 py-3 text-base",
-          large: "px-8 py-4 text-lg",
-        };
-
-    const radiusClasses = round ? "rounded-full" : "rounded-lg";
-
-    const buttonClasses = twMerge(
-      baseClasses,
-      variantClasses[variant],
-      sizeClasses[size],
-      radiusClasses,
-      fullWidth && "w-full",
-      className,
-    );
+    const Comp = asChild ? Slot : "button";
 
     return (
-      <button
+      <Comp
         ref={ref}
-        className={buttonClasses}
-        disabled={disabled}
-        {...props}
+        className={twMerge(
+          buttonVariants({
+            variant,
+            size,
+            round,
+            fullWidth,
+          }),
+          iconOnly && "p-3",
+          className
+        )}
+        {...rest}
       >
         {icon && <span className={children ? "mr-2" : ""}>{icon}</span>}
         {children}
-      </button>
+      </Comp>
     );
-  },
+  }
 );
 
 Button.displayName = "Button";

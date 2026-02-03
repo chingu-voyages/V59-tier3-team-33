@@ -1,36 +1,65 @@
-import { LogoProps } from "@/interface/components/logo";
+// components/Logo/Logo.tsx
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { twMerge } from "tailwind-merge";
+import { LogoProps } from "./logo.types";
+import { cva } from "class-variance-authority";
 
-/**
- * Logo component for branding - uses JoyRoute icon.svg
- */
+export const logoContainer = cva(
+  "flex items-center transition-opacity hover:opacity-80",
+  {
+    variants: {
+      size: {
+        default: "",
+        large: "",
+      },
+    },
+    defaultVariants: {
+      size: "default",
+    },
+  }
+);
+
+export const logoImage = cva("object-contain", {
+  variants: {
+    size: {
+      default: "",
+      large: "",
+    },
+  },
+});
+
+const SIZES = {
+  default: { width: 120, height: 37 },
+  large: { width: 160, height: 50 },
+};
+
 export const Logo: React.FC<LogoProps> = ({
   large = false,
   logoOnly = false,
-  className,
   href = "/",
+  className,
 }) => {
-  const logoClasses = twMerge(
-    "flex items-center transition-opacity hover:opacity-80",
-    className,
-  );
-
-  const imageSize = large
-    ? { width: 160, height: 50 }
-    : { width: 120, height: 37 };
+  const sizeKey = large ? "large" : "default";
+  const imageSize = SIZES[sizeKey];
 
   return (
-    <Link href={href} className={logoClasses}>
+    <Link
+      href={href}
+      className={twMerge(
+        logoContainer({ size: sizeKey }),
+        className
+      )}
+    >
       <Image
         src="/icon.svg"
         alt="JoyRoute"
         {...imageSize}
         priority
-        className="object-contain"
+        className={logoImage({ size: sizeKey })}
       />
+      {!logoOnly && null}
     </Link>
   );
 };

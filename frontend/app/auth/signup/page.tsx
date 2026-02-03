@@ -1,253 +1,158 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/Button";
-import { Input } from "@/components/Input";
-import { Logo } from "@/components/Logo";
-import {
-  hasErrors,
-  validateField,
-  validationRules,
-} from "@/helpers/validation";
-import { SignupFormData, SignupFormErrors } from "@/interface/pages/auth";
-import Link from "next/link";
-import React, { useState } from "react";
-import { FaEnvelope, FaEye, FaEyeSlash, FaLock, FaUser } from "react-icons/fa";
+import { Button } from '@/components/Button';
+import { Input } from '@/components/Input';
+import { Logo } from '@/components/Logo';
+import { signupSchema, SignupFormData } from '@/schema/auth.schema';
+import { zodResolver } from '@hookform/resolvers/zod';
+import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { FaEnvelope, FaEye, FaEyeSlash, FaLock, FaUser } from 'react-icons/fa';
+import { useState } from 'react';
 
 export default function SignupPage() {
-  const [formData, setFormData] = useState<SignupFormData>({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-  const [errors, setErrors] = useState<SignupFormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [agreeToTerms, setAgreeToTerms] = useState(false);
 
-  const handleChange =
-    (field: keyof SignupFormData) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setFormData((prev) => ({ ...prev, [field]: value }));
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
+    // defaultValues: {
+    //   agreeToTerms: false,
+    // },
+  });
 
-      // Clear error when user starts typing
-      if (errors[field]) {
-        setErrors((prev) => ({ ...prev, [field]: undefined }));
-      }
-    };
-
-  const handleBlur = (field: keyof SignupFormData) => () => {
-    let error: string | undefined;
-
-    if (field === "confirmPassword") {
-      error = validateField(
-        formData[field],
-        validationRules.confirmPassword(formData.password),
-      );
-    } else {
-      error = validateField(formData[field], validationRules[field]);
-    }
-
-    if (error) {
-      setErrors((prev) => ({ ...prev, [field]: error }));
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validate all fields
-    const newErrors: SignupFormErrors = {};
-    newErrors.name = validateField(formData.name, validationRules.name);
-    newErrors.email = validateField(formData.email, validationRules.email);
-    newErrors.password = validateField(
-      formData.password,
-      validationRules.password,
-    );
-    newErrors.confirmPassword = validateField(
-      formData.confirmPassword,
-      validationRules.confirmPassword(formData.password),
-    );
-
-    // Check terms agreement
-    if (!agreeToTerms) {
-      // You could add a terms error here
-      console.log("Please agree to terms");
-      return;
-    }
-
-    setErrors(newErrors);
-
-    if (hasErrors(newErrors)) {
-      return;
-    }
-
-    // Simulate API call
-    setIsLoading(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Signup successful:", formData);
-      // TODO: Handle successful signup (redirect, show confirmation, etc.)
-    } catch (error) {
-      console.error("Signup failed:", error);
-      setErrors({ email: "This email is already registered" });
-    } finally {
-      setIsLoading(false);
-    }
+  const onSubmit = async (data: SignupFormData) => {
+    await new Promise((r) => setTimeout(r, 1500));
+    console.log('Signup success:', data);
   };
 
   return (
-    <div className="bg-background-secondary flex min-h-screen items-center justify-center px-4 py-12">
+    <div className="bg-background-secondary flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="mb-8 flex justify-center">
           <Logo large />
         </div>
 
-        {/* Card */}
         <div className="bg-background rounded-2xl p-8 shadow-lg">
           <div className="mb-6 text-center">
-            <h1 className="text-foreground text-3xl font-bold">
-              Create Account
-            </h1>
-            <p className="text-foreground-light mt-2">
-              Sign up to get started with JoyRoute
-            </p>
+            <h1 className="text-3xl font-bold">Create Account</h1>
+            <p className="mt-2 text-foreground-light">Sign up to get started</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Name Field */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <Input
-              id="name"
               label="Full Name"
-              type="text"
               placeholder="John Doe"
               leftIcon={<FaUser />}
-              value={formData.name}
-              onChange={handleChange("name")}
-              onBlur={handleBlur("name")}
-              error={errors.name}
+              error={errors.name?.message}
               fullWidth
-              required
+              {...register('name')}
             />
 
-            {/* Email Field */}
             <Input
-              id="email"
-              label="Email Address"
+              label="Email"
               type="email"
               placeholder="john@example.com"
               leftIcon={<FaEnvelope />}
-              value={formData.email}
-              onChange={handleChange("email")}
-              onBlur={handleBlur("email")}
-              error={errors.email}
+              error={errors.email?.message}
               fullWidth
-              required
+              {...register('email')}
             />
 
-            {/* Password Field */}
             <Input
-              id="password"
               label="Password"
-              type={showPassword ? "text" : "password"}
+              type={showPassword ? 'text' : 'password'}
               placeholder="••••••••"
               leftIcon={<FaLock />}
               rightIcon={
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="text-foreground-light hover:text-foreground pointer-events-auto cursor-pointer"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="pointer-events-auto"
+                  aria-label="Toggle password"
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               }
-              value={formData.password}
-              onChange={handleChange("password")}
-              onBlur={handleBlur("password")}
-              error={errors.password}
               helperText="At least 8 characters with letters and numbers"
+              error={errors.password?.message}
               fullWidth
-              required
+              {...register('password')}
             />
 
-            {/* Confirm Password Field */}
             <Input
-              id="confirmPassword"
               label="Confirm Password"
-              type={showConfirmPassword ? "text" : "password"}
+              type={showConfirmPassword ? 'text' : 'password'}
               placeholder="••••••••"
               leftIcon={<FaLock />}
               rightIcon={
                 <button
                   type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="text-foreground-light hover:text-foreground pointer-events-auto cursor-pointer"
-                  aria-label={
-                    showConfirmPassword ? "Hide password" : "Show password"
-                  }
+                  onClick={() => setShowConfirmPassword((v) => !v)}
+                  className="pointer-events-auto"
+                  aria-label="Toggle confirm password"
                 >
                   {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               }
-              value={formData.confirmPassword}
-              onChange={handleChange("confirmPassword")}
-              onBlur={handleBlur("confirmPassword")}
-              error={errors.confirmPassword}
+              error={errors.confirmPassword?.message}
               fullWidth
-              required
+              {...register('confirmPassword')}
             />
 
-            {/* Terms Agreement */}
-            <label className="flex cursor-pointer items-start space-x-2">
+            {/* <label className="flex items-start space-x-2 text-sm">
               <input
                 type="checkbox"
-                checked={agreeToTerms}
-                onChange={(e) => setAgreeToTerms(e.target.checked)}
-                className="border-border text-primary focus:ring-primary/20 mt-1 h-4 w-4 rounded focus:ring-2"
-                required
+                className="mt-1 h-4 w-4 rounded"
+                {...register("agreeToTerms")}
               />
-              <span className="text-foreground-light text-sm">
+              <span className="text-foreground-light">
                 I agree to the{" "}
-                <Link href="/terms" className="text-primary hover:underline">
+                <Link
+                  href="/terms"
+                  className="text-primary hover:underline"
+                >
                   Terms of Service
                 </Link>{" "}
                 and{" "}
-                <Link href="/privacy" className="text-primary hover:underline">
+                <Link
+                  href="/privacy"
+                  className="text-primary hover:underline"
+                >
                   Privacy Policy
                 </Link>
               </span>
-            </label>
+            </label> */}
 
-            {/* Submit Button */}
+            {/* {errors.agreeToTerms && (
+              <p className="text-xs text-red-600">
+                {errors.agreeToTerms.message}
+              </p>
+            )} */}
+
             <Button
               type="submit"
-              variant="primary"
               size="large"
               fullWidth
-              disabled={isLoading || !agreeToTerms}
+              disabled={isSubmitting}
             >
-              {isLoading ? "Creating account..." : "Create Account"}
+              {isSubmitting ? 'Creating account…' : 'Create Account'}
             </Button>
           </form>
 
-          {/* Divider */}
           <div className="my-6 flex items-center">
-            <div className="border-border flex-1 border-t"></div>
-            <span className="text-foreground-light px-4 text-sm">or</span>
-            <div className="border-border flex-1 border-t"></div>
+            <div className="flex-1 border-t" />
+            <span className="px-4 text-sm text-foreground-light">or</span>
+            <div className="flex-1 border-t" />
           </div>
 
-          {/* Sign In Link */}
-          <p className="text-foreground-light text-center text-sm">
-            Already have an account?{" "}
-            <Link
-              href="/auth/login"
-              className="text-primary hover:text-primary-600 font-medium transition-colors"
-            >
+          <p className="text-center text-sm">
+            Already have an account?{' '}
+            <Link href="/auth/login" className="text-primary font-medium">
               Sign in
             </Link>
           </p>

@@ -15,26 +15,37 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "@radix-ui/react-slot": "^1.2.4",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@vitejs/plugin-react": "^5.1.2",
+    "class-variance-authority": "^0.7.1",
     "jsdom": "^27.4.0",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-hook-form": "^7.71.1",
     "react-icons": "^4.12.0",
     "sharp": "^0.34.2",
-    "tailwind-merge": "^3.3.0"
+    "tailwind-merge": "^3.4.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.0.0",
     "@next/eslint-plugin-next": "15.3.3",
     "@storybook/addon-a11y": "^10.2.3",
     "@storybook/addon-docs": "^10.2.3",
-    "@storybook/addon-onboarding": "^10.2.3",
     "@storybook/addon-vitest": "^10.2.3",
     "@storybook/nextjs-vite": "^10.2.3",
     "@tailwindcss/postcss": "^4.1.7",
@@ -54,6 +65,8 @@
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-storybook": "^10.2.3",
     "eslint-plugin-tailwindcss": "^3.18.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "playwright": "^1.58.1",
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",

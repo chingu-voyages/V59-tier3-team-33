@@ -1,4 +1,3 @@
-
 export interface FooterLink {
   label: string;
   href: string;
@@ -10,13 +9,12 @@ export interface FooterSection {
   links: FooterLink[];
 }
 
+export type SocialIcon = "twitter" | "linkedin" | "github";
+
 export interface SocialLink {
   name: string;
   href: string;
-  icon:
-    | "twitter"
-    | "linkedin"
-    | "github"
+  icon: SocialIcon;
 }
 
 export interface FooterProps {
