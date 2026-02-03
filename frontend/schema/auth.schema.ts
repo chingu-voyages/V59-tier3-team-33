@@ -8,11 +8,7 @@ export const loginSchema = z.object({
 
   password: z
     .string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(
-      /^(?=.*[A-Za-z])(?=.*\d).+$/,
-      'Password must contain at least one letter and one number',
-    ),
+    .min(8, 'Password must be at least 8 characters'),
 });
 
 export const signupSchema = z
@@ -33,11 +29,7 @@ export const signupSchema = z
 
     password1: z
       .string()
-      .min(8, 'Password must be at least 8 characters')
-      .regex(
-      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).+$/,
-      'Password must contain letters, numbers, and symbols'
-      ),
+      .min(8, 'Password must be at least 8 characters'),
 
     password2: z.string(),
 

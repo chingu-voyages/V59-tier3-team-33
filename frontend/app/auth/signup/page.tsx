@@ -108,7 +108,7 @@ export default function SignupPage() {
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               }
-              helperText="At least 8 characters with letters and numbers"
+              helperText="At least 8 characters"
               error={errors.password1?.message}
               fullWidth
               {...register('password1')}
