@@ -3,47 +3,24 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
-import { FaBars, FaTimes } from "react-icons/fa";
+import { FaBars, FaTimes, FaUser } from "react-icons/fa";
 import { twMerge } from "tailwind-merge";
 import { Button } from "../Button";
 import { Logo } from "../Logo";
-
-export interface NavigationLink {
-  label: string;
-  href: string;
-}
-
-export interface NavigationProps {
-  /**
-   * Navigation links
-   */
-  links?: NavigationLink[];
-  /**
-   * Sticky navigation bar
-   */
-  sticky?: boolean;
-  /**
-   * Custom className
-   */
-  className?: string;
-}
+import { NavigationProps } from "@/interface/components/nav";
 
 /**
  * Navigation component with responsive design
  */
-export const Navigation: React.FC<NavigationProps> = ({
+export const Navigation: React.FC<NavigationProps>= ({
   links = [
     { label: "Home", href: "/" },
-    { label: "Categories", href: "/categories" },
-    { label: "About", href: "/about" },
+    { label: "My Trips", href: "/trips" }
   ],
-  showCart = true,
-  cartCount = 0,
   showUser = true,
   userName,
   sticky = true,
   className,
-  onCartClick,
   onUserClick,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -90,25 +67,9 @@ export const Navigation: React.FC<NavigationProps> = ({
 
           {/* Desktop Actions */}
           <div className="hidden items-center space-x-2 md:flex">
-            {showCart && (
-              <Button
-                variant="clear"
-                size="medium"
-                onClick={onCartClick}
-                className="relative"
-                aria-label="Shopping cart"
-              >
-                <FaShoppingCart className="text-xl" />
-                {cartCount > 0 && (
-                  <span className="bg-primary absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold text-white">
-                    {cartCount > 9 ? "9+" : cartCount}
-                  </span>
-                )}
-              </Button>
-            )}
             {showUser && (
               <Button
-                variant={userName ? "secondary" : "primary"}
+                variant={"secondary"}
                 size="medium"
                 onClick={onUserClick}
                 icon={<FaUser />}
@@ -121,20 +82,6 @@ export const Navigation: React.FC<NavigationProps> = ({
 
           {/* Mobile Menu Button */}
           <div className="flex items-center space-x-2 md:hidden">
-            {showCart && (
-              <button
-                onClick={onCartClick}
-                className="text-foreground hover:text-primary relative p-2 transition-colors"
-                aria-label="Shopping cart"
-              >
-                <FaShoppingCart className="text-xl" />
-                {cartCount > 0 && (
-                  <span className="bg-primary absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold text-white">
-                    {cartCount > 9 ? "9+" : cartCount}
-                  </span>
-                )}
-              </button>
-            )}
             <button
               onClick={toggleMobileMenu}
               className="text-foreground hover:text-primary p-2 transition-colors"

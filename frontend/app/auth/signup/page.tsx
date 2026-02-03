@@ -8,23 +8,10 @@ import {
   validateField,
   validationRules,
 } from "@/helpers/validation";
+import { SignupFormData, SignupFormErrors } from "@/interface/pages/auth";
 import Link from "next/link";
 import React, { useState } from "react";
 import { FaEnvelope, FaEye, FaEyeSlash, FaLock, FaUser } from "react-icons/fa";
-
-interface SignupFormData {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
-
-interface SignupFormErrors {
-  name?: string;
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
-}
 
 export default function SignupPage() {
   const [formData, setFormData] = useState<SignupFormData>({

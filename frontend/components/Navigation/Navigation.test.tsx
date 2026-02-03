@@ -11,8 +11,7 @@ test("renders navigation with logo", () => {
 test("renders default navigation links", () => {
   render(<Navigation />);
   expect(screen.getByRole("link", { name: /home/i })).toBeDefined();
-  expect(screen.getByRole("link", { name: /categories/i })).toBeDefined();
-  expect(screen.getByRole("link", { name: /about/i })).toBeDefined();
+  expect(screen.getByRole("link", { name: /trips/i })).toBeDefined();
 });
 
 test("renders custom navigation links", () => {

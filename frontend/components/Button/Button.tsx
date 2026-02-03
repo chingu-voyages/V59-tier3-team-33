@@ -1,40 +1,6 @@
+import { ButtonProps } from "@/types/button";
 import React from "react";
 import { twMerge } from "tailwind-merge";
-
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  /**
-   * Button variant
-   */
-  variant?: "primary" | "secondary" | "clear";
-  /**
-   * Button size
-   */
-  size?: "small" | "medium" | "large";
-  /**
-   * Round button style
-   */
-  round?: boolean;
-  /**
-   * Icon element (optional)
-   */
-  icon?: React.ReactNode;
-  /**
-   * Icon only button (no text)
-   */
-  iconOnly?: boolean;
-  /**
-   * Full width button
-   */
-  fullWidth?: boolean;
-  /**
-   * Button content
-   */
-  children?: React.ReactNode;
-  /**
-   * Custom className
-   */
-  className?: string;
-}
 
 /**
  * Button component for user interactions

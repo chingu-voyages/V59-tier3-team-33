@@ -1,36 +1,6 @@
-import React, { forwardRef, InputHTMLAttributes } from "react";
+import { InputProps } from "@/types/input";
+import { forwardRef } from "react";
 import { twMerge } from "tailwind-merge";
-
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  /**
-   * Input label
-   */
-  label?: string;
-  /**
-   * Error message
-   */
-  error?: string;
-  /**
-   * Helper text
-   */
-  helperText?: string;
-  /**
-   * Full width input
-   */
-  fullWidth?: boolean;
-  /**
-   * Input variant
-   */
-  variant?: "outlined" | "filled";
-  /**
-   * Left icon element
-   */
-  leftIcon?: React.ReactNode;
-  /**
-   * Right icon element
-   */
-  rightIcon?: React.ReactNode;
-}
 
 /**
  * Input component with validation support

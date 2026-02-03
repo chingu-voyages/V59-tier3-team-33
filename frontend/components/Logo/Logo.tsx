@@ -1,26 +1,8 @@
+import { LogoProps } from "@/interface/components/logo";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { twMerge } from "tailwind-merge";
-
-export interface LogoProps {
-  /**
-   * Large logo size
-   */
-  large?: boolean;
-  /**
-   * Show only logo without text
-   */
-  logoOnly?: boolean;
-  /**
-   * Custom className for styling
-   */
-  className?: string;
-  /**
-   * Link destination
-   */
-  href?: string;
-}
 
 /**
  * Logo component for branding - uses JoyRoute icon.svg

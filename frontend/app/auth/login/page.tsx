@@ -8,19 +8,10 @@ import {
   validateField,
   validationRules,
 } from "@/helpers/validation";
+import { LoginFormData, LoginFormErrors } from "@/interface/pages/auth";
 import Link from "next/link";
 import React, { useState } from "react";
 import { FaEnvelope, FaEye, FaEyeSlash, FaLock } from "react-icons/fa";
-
-interface LoginFormData {
-  email: string;
-  password: string;
-}
-
-interface LoginFormErrors {
-  email?: string;
-  password?: string;
-}
 
 export default function LoginPage() {
   const [formData, setFormData] = useState<LoginFormData>({

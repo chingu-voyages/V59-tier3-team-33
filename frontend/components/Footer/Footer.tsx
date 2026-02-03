@@ -3,67 +3,18 @@ import React from "react";
 import {
   FaFacebook,
   FaGithub,
-  FaInstagram,
   FaLinkedin,
   FaTwitter,
-  FaYoutube,
 } from "react-icons/fa";
 import { twMerge } from "tailwind-merge";
 import { Logo } from "../Logo";
-
-export interface FooterLink {
-  label: string;
-  href: string;
-  external?: boolean;
-}
-
-export interface FooterSection {
-  title: string;
-  links: FooterLink[];
-}
-
-export interface SocialLink {
-  name: string;
-  href: string;
-  icon:
-    | "facebook"
-    | "instagram"
-    | "twitter"
-    | "linkedin"
-    | "github"
-    | "youtube";
-}
-
-export interface FooterProps {
-  /**
-   * Footer sections
-   */
-  sections?: FooterSection[];
-  /**
-   * Social media links
-   */
-  socialLinks?: SocialLink[];
-  /**
-   * Copyright text
-   */
-  copyrightText?: string;
-  /**
-   * Show app download section
-   */
-  showAppDownload?: boolean;
-  /**
-   * Custom className
-   */
-  className?: string;
-}
+import { FooterProps } from "@/interface/components/footer";
 
 const socialIcons = {
   facebook: FaFacebook,
-  instagram: FaInstagram,
   twitter: FaTwitter,
   linkedin: FaLinkedin,
   github: FaGithub,
-  youtube: FaYoutube,
 };
 
 /**
@@ -75,28 +26,20 @@ export const Footer: React.FC<FooterProps> = ({
       title: "Discover",
       links: [
         { label: "Home", href: "/" },
-        { label: "Categories", href: "/categories" },
-        { label: "About", href: "/about" },
-        { label: "Contact", href: "/contact" },
+        { label: "My Trips", href: "/trips" }
       ],
-    },
-    {
-      title: "Support",
-      links: [
-        { label: "Help Center", href: "/help" },
-        { label: "Terms of Service", href: "/terms" },
-        { label: "Privacy Policy", href: "/privacy" },
-        { label: "FAQ", href: "/faq" },
-      ],
-    },
+    }
   ],
   socialLinks = [
-    { name: "Facebook", href: "https://facebook.com", icon: "facebook" },
-    { name: "Instagram", href: "https://instagram.com", icon: "instagram" },
-    { name: "Twitter", href: "https://twitter.com", icon: "twitter" },
+    { name: "Github", href: "https://github.com", icon: "github" },
+    { name: "Github", href: "https://github.com", icon: "github" },
+    { name: "Github", href: "https://github.com", icon: "github" },
+    { name: "Github", href: "https://github.com", icon: "github" },
+    { name: "Github", href: "https://github.com", icon: "github" },
+    { name: "Github", href: "https://github.com", icon: "github" },
+    { name: "Github", href: "https://github.com", icon: "github" }
   ],
-  copyrightText = "© 2026 JoyRoute. All rights reserved.",
-  showAppDownload = false,
+  showContributor = true,
   className,
 }) => {
   const containerClasses = twMerge(
@@ -151,30 +94,10 @@ export const Footer: React.FC<FooterProps> = ({
 
           {/* Social Media or App Download */}
           <div className="col-span-1">
-            {showAppDownload ? (
+            {showContributor ? (
               <>
                 <h3 className="mb-4 text-lg font-semibold text-white">
-                  Get the App
-                </h3>
-                <div className="space-y-3">
-                  <a
-                    href="#"
-                    className="flex h-10 w-32 items-center justify-center rounded-lg bg-white text-xs font-medium text-gray-900 transition-colors hover:bg-gray-100"
-                  >
-                    App Store
-                  </a>
-                  <a
-                    href="#"
-                    className="flex h-10 w-32 items-center justify-center rounded-lg bg-white text-xs font-medium text-gray-900 transition-colors hover:bg-gray-100"
-                  >
-                    Google Play
-                  </a>
-                </div>
-              </>
-            ) : (
-              <>
-                <h3 className="mb-4 text-lg font-semibold text-white">
-                  Follow Us
+                  Teams
                 </h3>
                 <div className="flex space-x-4">
                   {socialLinks.map((social, index) => {
@@ -188,41 +111,14 @@ export const Footer: React.FC<FooterProps> = ({
                         className="text-gray-400 transition-colors hover:text-white"
                         aria-label={social.name}
                       >
+                        <span>Members:{index}</span>
                         <Icon className="text-2xl" />
                       </a>
                     );
                   })}
                 </div>
               </>
-            )}
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="my-8 border-t border-gray-800"></div>
-
-        {/* Bottom Bar */}
-        <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0">
-          <p className="text-sm text-gray-400">{copyrightText}</p>
-          <div className="flex space-x-6">
-            <Link
-              href="/privacy"
-              className="text-sm text-gray-400 transition-colors hover:text-white"
-            >
-              Privacy
-            </Link>
-            <Link
-              href="/terms"
-              className="text-sm text-gray-400 transition-colors hover:text-white"
-            >
-              Terms
-            </Link>
-            <Link
-              href="/cookies"
-              className="text-sm text-gray-400 transition-colors hover:text-white"
-            >
-              Cookies
-            </Link>
+            ) : null}
           </div>
         </div>
       </div>

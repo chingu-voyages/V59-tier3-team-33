@@ -74,8 +74,7 @@ export const MinimalFooter: Story = {
         title: "Quick Links",
         links: [
           { label: "Home", href: "/" },
-          { label: "About", href: "/about" },
-          { label: "Contact", href: "/contact" },
+          { label: "My Trips", href: "/trips" }
         ],
       },
     ],
@@ -89,12 +88,9 @@ export const MinimalFooter: Story = {
 export const AllSocialLinks: Story = {
   args: {
     socialLinks: [
-      { name: "Facebook", href: "https://facebook.com", icon: "facebook" },
-      { name: "Instagram", href: "https://instagram.com", icon: "instagram" },
       { name: "Twitter", href: "https://twitter.com", icon: "twitter" },
       { name: "LinkedIn", href: "https://linkedin.com", icon: "linkedin" },
-      { name: "GitHub", href: "https://github.com", icon: "github" },
-      { name: "YouTube", href: "https://youtube.com", icon: "youtube" },
+      { name: "GitHub", href: "https://github.com", icon: "github" }
     ],
   },
 };
