@@ -9,9 +9,11 @@ import { useForm } from "react-hook-form";
 import { FaEnvelope, FaEye, FaEyeSlash, FaLock } from "react-icons/fa";
 import { useState } from "react";
 import { LoginFormData, loginSchema } from "@/schema/auth.schema";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
   const {
     register,
@@ -21,10 +23,42 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data: LoginFormData) => {
-    await new Promise((r) => setTimeout(r, 1500));
-    console.log("Login success:", data);
+const onSubmit = async (data: LoginFormData) => {
+    const base = process.env.NEXT_PUBLIC_DJANGO_API_BASE?.replace(/\/$/, "");
+    if (!base) throw new Error("Missing NEXT_PUBLIC_DJANGO_API_BASE");
+
+    const res = await fetch(`${base}/login/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: data.email,
+        password: data.password,
+      }),
+    });
+
+    if (!res.ok) {
+      const msg = await res.text().catch(() => "");
+      throw new Error(msg || `Login failed (${res.status})`);
+    }
+
+    const payload = await res.json();
+    const access = payload?.access ?? payload?.data?.access;
+    const refresh = payload?.refresh ?? payload?.data?.refresh;
+    const key = payload?.key ?? payload?.data?.key;
+
+    if (access) {
+      localStorage.setItem("access_token", access);
+      if (refresh) localStorage.setItem("refresh_token", refresh);
+    } else if (key) {
+      localStorage.setItem("auth_token", key);
+    } else {
+      console.log("Login payload:", payload);
+      throw new Error("Login succeeded but no token was returned.");
+    }
+
+    router.push("/trips");
   };
+
 
   return (
     <div className="bg-background-secondary flex min-h-screen items-center justify-center px-4">

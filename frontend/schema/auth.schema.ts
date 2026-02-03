@@ -17,7 +17,11 @@ export const loginSchema = z.object({
 
 export const signupSchema = z
   .object({
-    name: z
+    first_name: z
+      .string()
+      .min(2, 'Name must be at least 2 characters')
+      .max(50, 'Name must not exceed 50 characters'),
+    last_name: z
       .string()
       .min(2, 'Name must be at least 2 characters')
       .max(50, 'Name must not exceed 50 characters'),
@@ -27,15 +31,15 @@ export const signupSchema = z
       .min(1, 'Email is required')
       .email('Please enter a valid email address'),
 
-    password: z
+    password1: z
       .string()
       .min(8, 'Password must be at least 8 characters')
       .regex(
-        /^(?=.*[A-Za-z])(?=.*\d).+$/,
-        'Password must contain letters and numbers',
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).+$/,
+      'Password must contain letters, numbers, and symbols'
       ),
 
-    confirmPassword: z.string(),
+    password2: z.string(),
 
     // agreeToTerms: z.literal(true, {
     //   errorMap: () => ({
@@ -43,8 +47,8 @@ export const signupSchema = z
     //   }),
     // }),
   })
-  .refine((data) => data.password === data.confirmPassword, {
-    path: ['confirmPassword'],
+  .refine((data) => data.password1 === data.password2, {
+    path: ['password2'],
     message: 'Passwords do not match',
   });
 

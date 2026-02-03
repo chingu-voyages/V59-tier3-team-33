@@ -13,7 +13,8 @@ import { useState } from 'react';
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [apiSuccess, setApiSuccess] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -26,8 +27,30 @@ export default function SignupPage() {
   });
 
   const onSubmit = async (data: SignupFormData) => {
-    await new Promise((r) => setTimeout(r, 1500));
-    console.log('Signup success:', data);
+    setApiError(null);
+    setApiSuccess(null);
+    const base = process.env.NEXT_PUBLIC_DJANGO_API_BASE?.replace(/\/$/, '');
+    if (!base) throw new Error('Missing NEXT_PUBLIC_DJANGO_API_BASE');
+
+    const res = await fetch(`${base}/registration/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        password1: data.password1,
+        password2: data.password2,
+      }),
+    });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    setApiError(text || `Signup failed (${res.status})`);
+    return;
+  }
+
+  setApiSuccess('Account created. You can sign in now.');
   };
 
   return (
@@ -45,14 +68,21 @@ export default function SignupPage() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <Input
-              label="Full Name"
+              label="First Name"
               placeholder="John Doe"
               leftIcon={<FaUser />}
-              error={errors.name?.message}
+              error={errors.first_name?.message}
               fullWidth
-              {...register('name')}
+              {...register('first_name')}
             />
-
+            <Input
+              label="Last Name"
+              placeholder="John Doe"
+              leftIcon={<FaUser />}
+              error={errors.last_name?.message}
+              fullWidth
+              {...register('last_name')}
+            />
             <Input
               label="Email"
               type="email"
@@ -79,9 +109,9 @@ export default function SignupPage() {
                 </button>
               }
               helperText="At least 8 characters with letters and numbers"
-              error={errors.password?.message}
+              error={errors.password1?.message}
               fullWidth
-              {...register('password')}
+              {...register('password1')}
             />
 
             <Input
@@ -99,9 +129,9 @@ export default function SignupPage() {
                   {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               }
-              error={errors.confirmPassword?.message}
+              error={errors.password2?.message}
               fullWidth
-              {...register('confirmPassword')}
+              {...register('password2')}
             />
 
             {/* <label className="flex items-start space-x-2 text-sm">
@@ -142,6 +172,8 @@ export default function SignupPage() {
             >
               {isSubmitting ? 'Creating account…' : 'Create Account'}
             </Button>
+            {apiError && <p className="text-sm text-red-500">{apiError}</p>}
+            {apiSuccess && <p className="text-sm text-green-600">{apiSuccess}</p>}
           </form>
 
           <div className="my-6 flex items-center">
