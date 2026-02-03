@@ -1,7 +1,7 @@
 'use client';
 
 import { use } from 'react';
-import TripSavedPlaceSearch from '@/components/TripSavedPlaceSearch';
+import TripSavedPlaceSearch from '@/components/Trip/TripSavedPlaceSearch';
 
 export default function TripPage({
   params,

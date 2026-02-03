@@ -1,6 +1,6 @@
 'use client';
 
-import TripMap from '@/components/TripMap';
+import TripMap from '@/components/Trip/TripMap';
 import { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 
