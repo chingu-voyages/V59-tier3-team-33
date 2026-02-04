@@ -42,4 +42,4 @@ coding!
 - Margaret Wu: [GitHub](https://github.com/margaretcwu) / [LinkedIn](https://linkedin.com/in/margaretcwu)
 - Oshada Kularathne: [GitHub](https://github.com/devimalka) / [LinkedIn](https://www.linkedin.com/in/oshada-kularathne/)
 - Chanae Pickett
-- Gobinath Varatharajan
+- Gobinath Varatharajan: [GitHub](https://github.com/gobinathvaratharajan) / [LinkedIn](https://www.linkedin.com/in/gobinathvaratharajan/)
