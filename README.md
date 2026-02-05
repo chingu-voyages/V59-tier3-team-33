@@ -41,5 +41,5 @@ coding!
 - Roni Egbu: [GitHub](https://github.com/ronniiii-i) / [LinkedIn](https://linkedin.com/in/princess-roni-egbu)
 - Margaret Wu: [GitHub](https://github.com/margaretcwu) / [LinkedIn](https://linkedin.com/in/margaretcwu)
 - Oshada Kularathne: [GitHub](https://github.com/devimalka) / [LinkedIn](https://www.linkedin.com/in/oshada-kularathne/)
-- Chanae Pickett: [![GitHub](https://img.shields.io/badge/GitHub-chanaelynease-black?style=flat&logo=github)](https://github.com/chanaelynease)
+- Chanae Pickett: [GitHub Profile](https://github.com/chanaelynease)
 - Gobinath Varatharajan: [GitHub](https://github.com/gobinathvaratharajan) / [LinkedIn](https://www.linkedin.com/in/gobinathvaratharajan/)
