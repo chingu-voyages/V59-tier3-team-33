@@ -1,8 +1,14 @@
-from rest_framework import viewsets, permissions
-from .models import Trip, UserTrip, TripDay
+from rest_framework import viewsets, permissions, mixins
+from django.shortcuts import get_object_or_404
+
+from apps.places.models import Place
+from .models import Trip, UserTrip, TripDay, TripSavedPlace
+from .permissions import IsTripMember
 from .serializers import (
     TripDetailSerializer,
     TripSerializer,
+    SavePlaceToTripSerializer,
+    RemoveSavedPlaceFromTripSerializer,
 )
 from django.db import transaction
 from datetime import timedelta
@@ -54,3 +60,27 @@ class TripViewset(viewsets.ModelViewSet):
             
     # TODO: Add an action endpoint to manage users who can collaborate on a trip (Nice-To-Have)
         
+class TripSavedPlaceViewset(
+    viewsets.GenericViewSet,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+):
+    queryset = TripSavedPlace.objects.all()
+    permission_classes = [permissions.IsAuthenticated, IsTripMember]
+    
+    def get_serializer_class(self):
+        if self.action == "destroy":
+            return RemoveSavedPlaceFromTripSerializer
+        return SavePlaceToTripSerializer
+    
+    def get_queryset(self):
+        return super().get_queryset().filter(trip=self.kwargs["trip_pk"])
+
+    def perform_create(self, serializer):
+        trip = get_object_or_404(Trip, pk=self.kwargs["trip_pk"])
+        serializer.save(
+            trip=trip, 
+            saved_by=self.request.user,
+        )
