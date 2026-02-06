@@ -55,9 +55,12 @@ export default function SignupPage() {
 
   return (
     <>
-      <div className="mb-6 text-center">
-        <h1 className="text-3xl font-bold">Create Account</h1>
-        <p className="mt-2 text-foreground-light">Sign up to get started</p>
+      <div className="mb-6 flex flex-col items-center gap-y-3 text-center">
+        <h1 className="text-3xl font-bold">Create your Account</h1>
+        <p className="max-w-80 text-foreground-light">
+          Please fill in your details to create your account and enjoy our
+          services.
+        </p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -130,9 +133,13 @@ export default function SignupPage() {
           {...register('password2')}
         />
 
-        <Button type="submit" size="large" fullWidth disabled={isSubmitting}>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full py-3 cursor-pointer bg-[#F59E0B] hover:bg-[#F7B13B] text-white rounded-lg"
+        >
           {isSubmitting ? 'Creating account…' : 'Create Account'}
-        </Button>
+        </button>
         {apiError && <p className="text-sm text-red-500">{apiError}</p>}
         {apiSuccess && <p className="text-sm text-green-600">{apiSuccess}</p>}
       </form>

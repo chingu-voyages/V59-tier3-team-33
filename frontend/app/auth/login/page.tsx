@@ -61,9 +61,14 @@ export default function LoginPage() {
 
   return (
     <>
-      <div className="mb-6 text-center">
-        <h1 className="text-3xl font-bold">Welcome Back</h1>
-        <p className="mt-2 text-foreground-light">Sign in to continue</p>
+      <div className="mb-6 flex flex-col items-center gap-y-3 text-center">
+        <h1 className="text-3xl font-bold capitalize">
+          log in to your account
+        </h1>
+        <p className="max-w-80 text-foreground-light">
+          Welcome back! Please log in to your account to continue where you left
+          off.
+        </p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -97,9 +102,13 @@ export default function LoginPage() {
           {...register('password')}
         />
 
-        <Button type="submit" size="large" fullWidth disabled={isSubmitting}>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full py-3 cursor-pointer bg-[#F59E0B] hover:bg-[#F7B13B] text-white rounded-lg"
+        >
           {isSubmitting ? 'Signing in…' : 'Sign In'}
-        </Button>
+        </button>
       </form>
 
       <div className="my-6 flex items-center">
