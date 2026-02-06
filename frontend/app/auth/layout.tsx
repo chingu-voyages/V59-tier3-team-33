@@ -6,15 +6,12 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-background-secondary flex min-h-screen items-center justify-center px-4 border border-red-700">
-      <div className="w-full max-w-md">
-        <div className="mb-8 flex justify-center">
+    <div className="h-full bg-background-secondary justify-center px-4 py-16 bg-[url('/auth_background.png')] bg-cover border border-orange-500">
+      <div className="z-10 w-full max-w-lg m-auto flex flex-col gap-y-8">
+        <div className="flex justify-center">
           <Logo large />
         </div>
-
-        <div className="bg-background rounded-2xl p-8 shadow-lg">
-          {children}
-        </div>
+        {children}
       </div>
     </div>
   );

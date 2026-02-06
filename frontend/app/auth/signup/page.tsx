@@ -61,22 +61,24 @@ export default function SignupPage() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        <Input
-          label="First Name"
-          placeholder="John Doe"
-          leftIcon={<FaUser />}
-          error={errors.first_name?.message}
-          fullWidth
-          {...register('first_name')}
-        />
-        <Input
-          label="Last Name"
-          placeholder="John Doe"
-          leftIcon={<FaUser />}
-          error={errors.last_name?.message}
-          fullWidth
-          {...register('last_name')}
-        />
+        <div className="flex items-center gap-x-4">
+          <Input
+            label="First Name"
+            placeholder="John"
+            leftIcon={<FaUser />}
+            error={errors.first_name?.message}
+            fullWidth
+            {...register('first_name')}
+          />
+          <Input
+            label="Last Name"
+            placeholder="Doe"
+            leftIcon={<FaUser />}
+            error={errors.last_name?.message}
+            fullWidth
+            {...register('last_name')}
+          />
+        </div>
         <Input
           label="Email"
           type="email"
@@ -127,36 +129,6 @@ export default function SignupPage() {
           fullWidth
           {...register('password2')}
         />
-
-        {/* <label className="flex items-start space-x-2 text-sm">
-              <input
-                type="checkbox"
-                className="mt-1 h-4 w-4 rounded"
-                {...register("agreeToTerms")}
-              />
-              <span className="text-foreground-light">
-                I agree to the{" "}
-                <Link
-                  href="/terms"
-                  className="text-primary hover:underline"
-                >
-                  Terms of Service
-                </Link>{" "}
-                and{" "}
-                <Link
-                  href="/privacy"
-                  className="text-primary hover:underline"
-                >
-                  Privacy Policy
-                </Link>
-              </span>
-            </label> */}
-
-        {/* {errors.agreeToTerms && (
-              <p className="text-xs text-red-600">
-                {errors.agreeToTerms.message}
-              </p>
-            )} */}
 
         <Button type="submit" size="large" fullWidth disabled={isSubmitting}>
           {isSubmitting ? 'Creating account…' : 'Create Account'}
