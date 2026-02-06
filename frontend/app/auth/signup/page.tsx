@@ -2,8 +2,8 @@
 
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
-import { Logo } from '@/components/Logo';
-import { signupSchema, SignupFormData } from '@/schema/auth.schema';
+import type { SignupFormData } from '@/schema/auth.schema';
+import { signupSchema } from '@/schema/auth.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
@@ -44,97 +44,91 @@ export default function SignupPage() {
       }),
     });
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    setApiError(text || `Signup failed (${res.status})`);
-    return;
-  }
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      setApiError(text || `Signup failed (${res.status})`);
+      return;
+    }
 
-  setApiSuccess('Account created. You can sign in now.');
+    setApiSuccess('Account created. You can sign in now.');
   };
 
   return (
-    <div className="bg-background-secondary flex min-h-screen items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="mb-8 flex justify-center">
-          <Logo large />
-        </div>
+    <>
+      <div className="mb-6 text-center">
+        <h1 className="text-3xl font-bold">Create Account</h1>
+        <p className="mt-2 text-foreground-light">Sign up to get started</p>
+      </div>
 
-        <div className="bg-background rounded-2xl p-8 shadow-lg">
-          <div className="mb-6 text-center">
-            <h1 className="text-3xl font-bold">Create Account</h1>
-            <p className="mt-2 text-foreground-light">Sign up to get started</p>
-          </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <Input
+          label="First Name"
+          placeholder="John Doe"
+          leftIcon={<FaUser />}
+          error={errors.first_name?.message}
+          fullWidth
+          {...register('first_name')}
+        />
+        <Input
+          label="Last Name"
+          placeholder="John Doe"
+          leftIcon={<FaUser />}
+          error={errors.last_name?.message}
+          fullWidth
+          {...register('last_name')}
+        />
+        <Input
+          label="Email"
+          type="email"
+          placeholder="john@example.com"
+          leftIcon={<FaEnvelope />}
+          error={errors.email?.message}
+          fullWidth
+          {...register('email')}
+        />
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            <Input
-              label="First Name"
-              placeholder="John Doe"
-              leftIcon={<FaUser />}
-              error={errors.first_name?.message}
-              fullWidth
-              {...register('first_name')}
-            />
-            <Input
-              label="Last Name"
-              placeholder="John Doe"
-              leftIcon={<FaUser />}
-              error={errors.last_name?.message}
-              fullWidth
-              {...register('last_name')}
-            />
-            <Input
-              label="Email"
-              type="email"
-              placeholder="john@example.com"
-              leftIcon={<FaEnvelope />}
-              error={errors.email?.message}
-              fullWidth
-              {...register('email')}
-            />
+        <Input
+          label="Password"
+          type={showPassword ? 'text' : 'password'}
+          placeholder="••••••••"
+          leftIcon={<FaLock />}
+          rightIcon={
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="pointer-events-auto"
+              aria-label="Toggle password"
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          }
+          helperText="At least 8 characters"
+          error={errors.password1?.message}
+          fullWidth
+          {...register('password1')}
+        />
 
-            <Input
-              label="Password"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="••••••••"
-              leftIcon={<FaLock />}
-              rightIcon={
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="pointer-events-auto"
-                  aria-label="Toggle password"
-                >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
-                </button>
-              }
-              helperText="At least 8 characters"
-              error={errors.password1?.message}
-              fullWidth
-              {...register('password1')}
-            />
+        <Input
+          label="Confirm Password"
+          type={showConfirmPassword ? 'text' : 'password'}
+          placeholder="••••••••"
+          leftIcon={<FaLock />}
+          rightIcon={
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((v) => !v)}
+              className="pointer-events-auto"
+              aria-label="Toggle confirm password"
+            >
+              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          }
+          error={errors.password2?.message}
+          fullWidth
+          {...register('password2')}
+        />
 
-            <Input
-              label="Confirm Password"
-              type={showConfirmPassword ? 'text' : 'password'}
-              placeholder="••••••••"
-              leftIcon={<FaLock />}
-              rightIcon={
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword((v) => !v)}
-                  className="pointer-events-auto"
-                  aria-label="Toggle confirm password"
-                >
-                  {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                </button>
-              }
-              error={errors.password2?.message}
-              fullWidth
-              {...register('password2')}
-            />
-
-            {/* <label className="flex items-start space-x-2 text-sm">
+        {/* <label className="flex items-start space-x-2 text-sm">
               <input
                 type="checkbox"
                 className="mt-1 h-4 w-4 rounded"
@@ -158,38 +152,31 @@ export default function SignupPage() {
               </span>
             </label> */}
 
-            {/* {errors.agreeToTerms && (
+        {/* {errors.agreeToTerms && (
               <p className="text-xs text-red-600">
                 {errors.agreeToTerms.message}
               </p>
             )} */}
 
-            <Button
-              type="submit"
-              size="large"
-              fullWidth
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Creating account…' : 'Create Account'}
-            </Button>
-            {apiError && <p className="text-sm text-red-500">{apiError}</p>}
-            {apiSuccess && <p className="text-sm text-green-600">{apiSuccess}</p>}
-          </form>
+        <Button type="submit" size="large" fullWidth disabled={isSubmitting}>
+          {isSubmitting ? 'Creating account…' : 'Create Account'}
+        </Button>
+        {apiError && <p className="text-sm text-red-500">{apiError}</p>}
+        {apiSuccess && <p className="text-sm text-green-600">{apiSuccess}</p>}
+      </form>
 
-          <div className="my-6 flex items-center">
-            <div className="flex-1 border-t" />
-            <span className="px-4 text-sm text-foreground-light">or</span>
-            <div className="flex-1 border-t" />
-          </div>
-
-          <p className="text-center text-sm">
-            Already have an account?{' '}
-            <Link href="/auth/login" className="text-primary font-medium">
-              Sign in
-            </Link>
-          </p>
-        </div>
+      <div className="my-6 flex items-center">
+        <div className="flex-1 border-t" />
+        <span className="px-4 text-sm text-foreground-light">or</span>
+        <div className="flex-1 border-t" />
       </div>
-    </div>
+
+      <p className="text-center text-sm">
+        Already have an account?{' '}
+        <Link href="/auth/login" className="text-primary font-medium">
+          Sign in
+        </Link>
+      </p>
+    </>
   );
 }
