@@ -1,5 +1,6 @@
+from apps.places.serializers import PlaceSerializer
 from rest_framework import serializers
-from .models import Trip, UserTrip, TripDay
+from .models import Trip, TripSavedPlace, UserTrip, TripDay
 
 class TripSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,6 +22,15 @@ class TripDetailSerializer(TripSerializer):
     def get_total_days(self, obj: Trip):
         return (obj.end_date - obj.start_date).days + 1
 
+class TripSavedPlaceSerializer(serializers.ModelSerializer):
+    # TODO: Wire into viewset/actions when saved-place endpoints are implemented.
+    place = PlaceSerializer()
+    
+    class Meta:
+        model = TripSavedPlace
+        fields = ["id", "trip", "place", "saved_by", "created_at"]
+        read_only_fields = ["id", "created_at"]
+        
 # /trips/{id}/saved-places (favorite places)
 # /trips/{id}/trip-days (for overview)
 # /trips/{id}/trip-days/{day_id} (for day details)

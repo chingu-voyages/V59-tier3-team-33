@@ -35,9 +35,9 @@ export default function RootLayout({
           type="text/css"
         />
       </head>
-      <body className={twMerge("bg-gray-50 dark:bg-gray-900", inter.className)}>
+      <body className={twMerge("bg-gray-50 dark:bg-gray-900 min-h-dvh flex flex-col", inter.className)}>
         <Navigation />
-        <main className="min-h-screen">{children}</main>
+        <main className="grow">{children}</main>
         <Footer />
       </body>
     </html>
