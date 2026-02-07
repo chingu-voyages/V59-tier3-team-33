@@ -18,6 +18,7 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -36,9 +37,14 @@ export default function LoginPage() {
       }),
     });
 
+    const err_data = await res.json().catch(() => null);
+
     if (!res.ok) {
-      const msg = await res.text().catch(() => '');
-      throw new Error(msg || `Login failed (${res.status})`);
+      const msg = 
+      err_data?.message ||
+      'Login failed (${res.status})';
+
+      setError("root", { message: msg })
     }
 
     const payload = await res.json();
@@ -101,7 +107,9 @@ export default function LoginPage() {
           fullWidth
           {...register('password')}
         />
-
+        {errors.root?.message && (
+          <p className="text-sm text-red-600">{errors.root.message}</p>
+        )}
         <button
           type="submit"
           disabled={isSubmitting}

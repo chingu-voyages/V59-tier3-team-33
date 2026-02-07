@@ -18,6 +18,7 @@ export default function SignupPage() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
@@ -44,9 +45,14 @@ export default function SignupPage() {
       }),
     });
 
+    const err_data = await res.json().catch(() => null);
+
     if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      setApiError(text || `Signup failed (${res.status})`);
+      const msg =
+        err_data?.errors || 
+        "Signup Failed";
+
+      setError("root", { message: msg });
       return;
     }
 
@@ -132,7 +138,9 @@ export default function SignupPage() {
           fullWidth
           {...register('password2')}
         />
-
+        {errors.root?.message && (
+          <p className="text-sm text-red-600">{errors.root.message}</p>
+        )}
         <button
           type="submit"
           disabled={isSubmitting}
