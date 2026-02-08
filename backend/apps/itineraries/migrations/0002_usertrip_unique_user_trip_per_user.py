@@ -5,15 +5,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('itineraries', '0001_initial'),
+        ("itineraries", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddConstraint(
-            model_name='usertrip',
-            constraint=models.UniqueConstraint(fields=('user', 'trip'), name='unique_user_trip_per_user'),
+            model_name="usertrip",
+            constraint=models.UniqueConstraint(
+                fields=("user", "trip"), name="unique_user_trip_per_user"
+            ),
         ),
     ]

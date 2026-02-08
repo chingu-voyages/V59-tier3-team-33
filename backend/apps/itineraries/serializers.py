@@ -1,104 +1,73 @@
-from apps.places.serializers import PlaceSerializer
 from rest_framework import serializers
-from .models import (
-  Trip, 
-  UserTrip, 
-  TripDay, 
-  TripSavedPlace
-)
+from .models import Trip, UserTrip, TripDay, TripSavedPlace
 from apps.places.models import Place
+from apps.places.serializers import PlaceSerializer, CreatePlaceSerializer
+from apps.accounts.serializers import UserSimpleSerializer
+
 
 class TripSerializer(serializers.ModelSerializer):
     class Meta:
         model = Trip
         fields = ["id", "name", "start_date", "end_date", "created_at"]
         read_only_fields = ["id", "created_at"]
-        
+
     def validate(self, attrs):
         if attrs["start_date"] > attrs["end_date"]:
             raise serializers.ValidationError("End date must be after start date.")
         return attrs
 
+
 class TripDetailSerializer(TripSerializer):
     total_days = serializers.SerializerMethodField()
-    
+
     class Meta(TripSerializer.Meta):
         fields = TripSerializer.Meta.fields + ["total_days"]
-    
+
     def get_total_days(self, obj: Trip):
         return (obj.end_date - obj.start_date).days + 1
 
+
 class SavePlaceToTripSerializer(serializers.ModelSerializer):
-    
-    # Write-only fields to receive the place data
-    external_id = serializers.CharField(max_length=255, write_only=True)
-    latitude = serializers.DecimalField(max_digits=9, decimal_places=6, write_only=True)
-    longitude = serializers.DecimalField(max_digits=9, decimal_places=6, write_only=True)
-    name = serializers.CharField(max_length=255, write_only=True)
-    address = serializers.CharField(max_length=255, write_only=True)    
-    # Read-only fields to return the nested place data
-    place_details = serializers.SerializerMethodField(read_only=True)
+    # Write-only nested serializer
+    place = CreatePlaceSerializer(write_only=True)
+
+    # Read-only nested serializers
+    place_details = PlaceSerializer(source="place", read_only=True)
+    saved_by = UserSimpleSerializer(read_only=True)
 
     class Meta:
         model = TripSavedPlace
-        fields = ["id", "trip", "external_id", "latitude", "longitude", "name", "address", "place_details"]
-        read_only_fields = ["id", "trip", "place_details"]
-
-    def get_place_details(self, obj):
-        return {
-            "name": obj.place.name,
-            "address": obj.place.address,
-            "latitude": obj.place.latitude,
-            "longitude": obj.place.longitude,
-            "external_id": obj.place.external_id
-        }
+        fields = ["id", "trip", "place", "place_details", "saved_by", "created_at"]
+        read_only_fields = ["id", "trip", "place_details", "saved_by", "created_at"]
 
     def create(self, validated_data):
-        # Extract place-related data
-        external_id = validated_data.pop("external_id")
-        name = validated_data.pop("name")
-        address = validated_data.pop("address")
-        latitude = validated_data.pop("latitude")
-        longitude = validated_data.pop("longitude")
-        place, _ = Place.objects.get_or_create(
-            external_id=external_id,
-            defaults={
-                "name": name,
-                "address": address,
-                "latitude": latitude,
-                "longitude": longitude,
-            }
-        )
+        # get or create the place using CreatePlaceSerializer
+        place_data = validated_data.pop("place")
+        place_serializer = CreatePlaceSerializer(data=place_data)
+        place_serializer.is_valid(raise_exception=True)
+        place = place_serializer.save()
 
         # Create the TripSavedPlace instance
         validated_data["place"] = place
         try:
             return super().create(validated_data)
         except Exception:
-            # If unique constraint fails (trip + place already exists), just return the existing one.
+            # If unique constraint fails (trip + place already exists), return existing
             existing = TripSavedPlace.objects.filter(
-                trip=validated_data.get('trip'),
-                place=place
+                trip=validated_data.get("trip"), place=place
             ).first()
             if existing:
                 return existing
             raise
-        
+
+
 class RemoveSavedPlaceFromTripSerializer(serializers.ModelSerializer):
     class Meta:
         model = TripSavedPlace
         fields = ["id"]
         read_only_fields = ["id"]
 
-class TripSavedPlaceSerializer(serializers.ModelSerializer):
-    # TODO: Wire into viewset/actions when saved-place endpoints are implemented.
-    place = PlaceSerializer()
-    
-    class Meta:
-        model = TripSavedPlace
-        fields = ["id", "trip", "place", "saved_by", "created_at"]
-        read_only_fields = ["id", "created_at"]
-        
+
 # /trips/{id}/saved-places (favorite places)
 # /trips/{id}/trip-days (for overview)
 # /trips/{id}/trip-days/{day_id} (for day details)

@@ -20,7 +20,7 @@ class StandardResponseRenderer(JSONRenderer):
             return super().render(data, accepted_media_type, renderer_context)
 
         formatted_data: dict = {"status": True, "message": "OK", "data": data}
-        
+
         if status_code >= 400:
             message = "An error occurred"
             if isinstance(data, dict):
@@ -33,13 +33,13 @@ class StandardResponseRenderer(JSONRenderer):
                     message = _first_str(data.get("non_field_errors"), message)
 
             formatted_data = {"status": False, "message": message, "errors": data}
-            
-        if isinstance(data, dict) and 'results' in data:
+
+        if isinstance(data, dict) and "results" in data:
             formatted_data["data"] = data.get("results")
             formatted_data["meta"] = {
                 "count": data.get("count"),
                 "next": data.get("next"),
                 "previous": data.get("previous"),
             }
-            
+
         return super().render(formatted_data, accepted_media_type, renderer_context)

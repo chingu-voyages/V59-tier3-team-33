@@ -35,6 +35,7 @@ class UserTrip(BaseModel):
     trip = models.ForeignKey(
         "Trip", on_delete=models.CASCADE, null=True, related_name="user_trips"
     )
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -69,7 +70,11 @@ class TripSavedPlace(BaseModel):
         "places.Place", on_delete=models.CASCADE, related_name="trip_saved_places"
     )
     saved_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_places", null=True, blank=True
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="saved_places",
+        null=True,
+        blank=True,
     )
 
     class Meta:

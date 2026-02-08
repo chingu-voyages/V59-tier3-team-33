@@ -12,13 +12,10 @@ from allauth.account.signals import user_signed_up
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
+
 @receiver(user_signed_up)
-def send_welcome_email(sender, request, user, **kwargs):    
-    #TODO: use Celery + Redis for production
+def send_welcome_email(sender, request, user, **kwargs):
+    # TODO: use Celery + Redis for production
     logger.info(f"Starting welcome email thread for user: {user.email}")
-    
-    threading.Thread(
-        target=send_welcome_mail, 
-        args=(user,),
-        daemon=True
-    ).start()
+
+    threading.Thread(target=send_welcome_mail, args=(user,), daemon=True).start()
