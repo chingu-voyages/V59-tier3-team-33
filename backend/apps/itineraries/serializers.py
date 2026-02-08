@@ -64,8 +64,19 @@ class SavePlaceToTripSerializer(serializers.ModelSerializer):
             }
         )
 
+        # Create the TripSavedPlace instance
         validated_data["place"] = place
-        return super().create(validated_data)
+        try:
+            return super().create(validated_data)
+        except Exception:
+            # If unique constraint fails (trip + place already exists), just return the existing one.
+            existing = TripSavedPlace.objects.filter(
+                trip=validated_data.get('trip'),
+                place=place
+            ).first()
+            if existing:
+                return existing
+            raise
         
 class RemoveSavedPlaceFromTripSerializer(serializers.ModelSerializer):
     class Meta:
