@@ -2,6 +2,19 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+### Environment Variables
+
+Create a `frontend/.env` file with:
+
+```bash
+NEXT_PUBLIC_DJANGO_API_BASE=http://localhost:8000/api
+NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_public_token
+```
+
+Notes:
+- `NEXT_PUBLIC_DJANGO_API_BASE` must include `/api` because the Django app is mounted at `/api/`.
+- `NEXT_PUBLIC_MAPBOX_TOKEN` is required for the place search UI.
+
 First, run the development server:
 
 ```bash
