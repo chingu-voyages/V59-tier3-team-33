@@ -6,11 +6,11 @@ import { api } from '@/lib/api';
 import { formatDateRange } from '@/lib/date-utils';
 import {
   FaSearch,
-  FaFilter,
   FaEllipsisV,
   FaRegCalendarAlt,
   FaMapMarkerAlt,
   FaPlus,
+  FaSlidersH,
 } from 'react-icons/fa';
 import Link from 'next/link';
 
@@ -54,10 +54,10 @@ export default function TripsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-400 py-8">
+    <div className="min-h-screen bg-surface-400 py-8 bg-[url('/auth_background.png')] bg-cover">
       <div className="container mx-auto px-4 max-w-5xl">
         {/* Title */}
-        <h1 className="text-4xl font-bold text-neutral-400 mb-8 text-center sm:text-left">
+        <h1 className="text-4xl font-semibold text-neutral-400 mb-8 text-left md:text-center">
           My Trips
         </h1>
 
@@ -75,14 +75,13 @@ export default function TripsPage() {
           </div>
 
           <button className="flex items-center justify-center gap-2 px-6 py-3 bg-white border border-surface-500 rounded-xl hover:bg-surface-400 transition-colors shadow-sm">
-            <FaFilter className="text-neutral-100" />
-            <span className="text-neutral-200 font-medium">Sort & Filter</span>
+            <FaSlidersH className="text-neutral-100" />
           </button>
         </div>
 
         {/* Trips List */}
         {trips.length === 0 ? (
-          <div className="my-4 text-center py-16 bg-white rounded-2xl shadow-sm border border-surface-500">
+          <div className="my-4 text-center py-16">
             <div className="w-20 h-20 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-4">
               <FaMapMarkerAlt className="text-3xl text-primary-400" />
             </div>
@@ -92,7 +91,7 @@ export default function TripsPage() {
             <p className="text-neutral-100 mb-6">
               Start planning your next adventure!
             </p>
-            <button className="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-600 transition-colors font-medium">
+            <button className="px-6 py-2.5 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium">
               Create Your First Trip
             </button>
           </div>
@@ -110,7 +109,7 @@ export default function TripsPage() {
                 key={trip.id}
                 className="group relative bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200"
               >
-                {/* Menu Icon (Absolute positioned top right) */}
+                {/* Menu Icon */}
                 <button className="absolute top-4 right-4 p-2 text-neutral-100 hover:text-neutral-200 rounded-full hover:bg-surface-400 transition-colors z-10">
                   <FaEllipsisV className="text-sm" />
                 </button>

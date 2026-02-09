@@ -1,20 +1,10 @@
 'use client';
 
-import { useAuthStore } from '@/store/authStore';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 import Link from 'next/link';
+import { useAuthStore } from '@/store/authStore';
 
 export default function Home() {
-  const { isAuthenticated, isLoading, user } = useAuthStore();
-  const router = useRouter();
-
-  useEffect(() => {
-    // Redirect authenticated users to trips
-    if (!isLoading && isAuthenticated) {
-      router.push('/trips');
-    }
-  }, [isAuthenticated, isLoading, router]);
+  const { isAuthenticated, isLoading } = useAuthStore();
 
   if (isLoading) {
     return (
@@ -31,20 +21,31 @@ export default function Home() {
         <p className="text-xl text-foreground-light">
           Plan your perfect journey with ease
         </p>
-        
+
         <div className="flex gap-4 justify-center mt-8">
-          <Link
-            href="/auth/login"
-            className="px-6 py-3 bg-[#F59E0B] hover:bg-[#F7B13B] text-white rounded-lg font-medium"
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/auth/signup"
-            className="px-6 py-3 border border-[#F59E0B] text-[#F59E0B] hover:bg-[#F59E0B] hover:text-white rounded-lg font-medium"
-          >
-            Sign Up
-          </Link>
+          {isAuthenticated ? (
+            <Link
+              href="/trips"
+              className="px-6 py-3 bg-primary-400 hover:bg-primary-500 text-surface-50 rounded-lg font-medium"
+            >
+              My Trips
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/auth/login"
+                className="px-6 py-3 bg-secondary-400 hover:bg-secondary-300 text-surface-50 rounded-lg font-medium"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/auth/signup"
+                className="px-6 py-3 border border-secondary-400 text-secondary-400 hover:bg-secondary-400 hover:text-surface-50 rounded-lg font-medium transition-colors"
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </div>
