@@ -42,9 +42,9 @@ export default function SignupPage() {
         { requiresAuth: false }
       );
 
-      setApiSuccess('Account created successfully! Redirecting to login...');
+      setApiSuccess('Account created! Please check your email to verify your account.');
       
-      setTimeout(() => router.push('/auth/login'), 2000);
+      setTimeout(() => router.push('/auth/login'), 3000);
     } catch (error: any) {
       setError('root', {
         message: error.message || 'Signup failed. Please try again.',
