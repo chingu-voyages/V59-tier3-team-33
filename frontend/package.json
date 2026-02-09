@@ -32,6 +32,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@vitejs/plugin-react": "^5.1.2",
     "class-variance-authority": "^0.7.1",
+    "js-cookie": "^3.0.5",
     "jsdom": "^27.4.0",
     "mapbox-gl": "^3.18.1",
     "next": "16.1.6",
@@ -41,7 +42,8 @@
     "react-icons": "^4.12.0",
     "sharp": "^0.34.2",
     "tailwind-merge": "^3.4.0",
-    "zod": "^4.3.6"
+    "zod": "^4.3.6",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.0.0",
@@ -51,6 +53,7 @@
     "@storybook/addon-vitest": "^10.2.3",
     "@storybook/nextjs-vite": "^10.2.3",
     "@tailwindcss/postcss": "^4.1.7",
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "25.2.0",
     "@types/react": "19.1.6",
     "@types/react-dom": "19.1.6",

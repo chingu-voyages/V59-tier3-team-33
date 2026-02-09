@@ -32,12 +32,6 @@ export const signupSchema = z
       .min(8, 'Password must be at least 8 characters'),
 
     password2: z.string(),
-
-    // agreeToTerms: z.literal(true, {
-    //   errorMap: () => ({
-    //     message: "You must agree to the terms",
-    //   }),
-    // }),
   })
   .refine((data) => data.password1 === data.password2, {
     path: ['password2'],

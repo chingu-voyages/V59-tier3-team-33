@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import type { SignupFormData } from '@/schema/auth.schema';
 import { signupSchema } from '@/schema/auth.schema';
@@ -9,12 +8,15 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { FaEnvelope, FaEye, FaEyeSlash, FaLock, FaUser } from 'react-icons/fa';
 import { useState } from 'react';
+import { api } from '@/lib/api';
+import { useRouter } from 'next/navigation';
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [apiError, setApiError] = useState<string | null>(null);
   const [apiSuccess, setApiSuccess] = useState<string | null>(null);
+  const router = useRouter();
+  
   const {
     register,
     handleSubmit,
@@ -22,41 +24,32 @@ export default function SignupPage() {
     formState: { errors, isSubmitting },
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
-    // defaultValues: {
-    //   agreeToTerms: false,
-    // },
   });
 
   const onSubmit = async (data: SignupFormData) => {
-    setApiError(null);
     setApiSuccess(null);
-    const base = process.env.NEXT_PUBLIC_DJANGO_API_BASE?.replace(/\/$/, '');
-    if (!base) throw new Error('Missing NEXT_PUBLIC_DJANGO_API_BASE');
+    
+    try {
+      await api.post(
+        '/registration/',
+        {
+          first_name: data.first_name,
+          last_name: data.last_name,
+          email: data.email,
+          password1: data.password1,
+          password2: data.password2,
+        },
+        { requiresAuth: false }
+      );
 
-    const res = await fetch(`${base}/registration/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        first_name: data.first_name,
-        last_name: data.last_name,
-        email: data.email,
-        password1: data.password1,
-        password2: data.password2,
-      }),
-    });
-
-    const err_data = await res.json().catch(() => null);
-
-    if (!res.ok) {
-      const msg =
-        err_data?.errors || 
-        "Signup Failed";
-
-      setError("root", { message: msg });
-      return;
+      setApiSuccess('Account created successfully! Redirecting to login...');
+      
+      setTimeout(() => router.push('/auth/login'), 2000);
+    } catch (error: any) {
+      setError('root', {
+        message: error.message || 'Signup failed. Please try again.',
+      });
     }
-
-    setApiSuccess('Account created. You can sign in now.');
   };
 
   return (
@@ -141,6 +134,9 @@ export default function SignupPage() {
         {errors.root?.message && (
           <p className="text-sm text-red-600">{errors.root.message}</p>
         )}
+        {apiSuccess && (
+          <p className="text-sm text-green-600">{apiSuccess}</p>
+        )}
         <button
           type="submit"
           disabled={isSubmitting}
@@ -148,8 +144,6 @@ export default function SignupPage() {
         >
           {isSubmitting ? 'Creating account…' : 'Create Account'}
         </button>
-        {apiError && <p className="text-sm text-red-500">{apiError}</p>}
-        {apiSuccess && <p className="text-sm text-green-600">{apiSuccess}</p>}
       </form>
 
       <div className="my-6 flex items-center">

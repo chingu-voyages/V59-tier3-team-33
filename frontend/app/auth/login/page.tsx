@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
@@ -9,11 +8,16 @@ import { FaEnvelope, FaEye, FaEyeSlash, FaLock } from 'react-icons/fa';
 import { useState } from 'react';
 import type { LoginFormData } from '@/schema/auth.schema';
 import { loginSchema } from '@/schema/auth.schema';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useAuthStore } from '@/store/authStore';
+import { api } from '@/lib/api';
+import type { LoginResponse, User } from '@/types/auth';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const setAuth = useAuthStore((state) => state.setAuth);
 
   const {
     register,
@@ -25,44 +29,37 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    const base = process.env.NEXT_PUBLIC_DJANGO_API_BASE?.replace(/\/$/, '');
-    if (!base) throw new Error('Missing NEXT_PUBLIC_DJANGO_API_BASE');
+    try {
+      const response = await api.post<LoginResponse>(
+        '/login/',
+        { email: data.email, password: data.password },
+        { requiresAuth: false }
+      );
 
-    const res = await fetch(`${base}/login/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: data.email,
-        password: data.password,
-      }),
-    });
+      // Handle wrapped response: { status, message, data: { access, user } }
+      let accessToken: string | undefined;
+      let user: User | undefined;
 
-    const err_data = await res.json().catch(() => null);
+      if (response.data) {
+        accessToken = response.data.access;
+        user = response.data.user;
+      } else {
+        accessToken = response.access || response.key;
+        user = response.user;
+      }
+      
+      if (!accessToken) throw new Error('No access token received from server');
+      if (!user) throw new Error('No user data received from server');
 
-    if (!res.ok) {
-      const msg = 
-      err_data?.message ||
-      'Login failed (${res.status})';
+      setAuth(user, accessToken);
 
-      setError("root", { message: msg })
+      const redirect = searchParams.get('redirect') || '/trips';
+      router.push(redirect);
+    } catch (error: any) {
+      setError('root', {
+        message: error.message || 'Login failed. Please try again.',
+      });
     }
-
-    const payload = await res.json();
-    const access = payload?.access ?? payload?.data?.access;
-    const refresh = payload?.refresh ?? payload?.data?.refresh;
-    const key = payload?.key ?? payload?.data?.key;
-
-    if (access) {
-      localStorage.setItem('access_token', access);
-      if (refresh) localStorage.setItem('refresh_token', refresh);
-    } else if (key) {
-      localStorage.setItem('auth_token', key);
-    } else {
-      console.log('Login payload:', payload);
-      throw new Error('Login succeeded but no token was returned.');
-    }
-
-    router.push('/trips');
   };
 
   return (

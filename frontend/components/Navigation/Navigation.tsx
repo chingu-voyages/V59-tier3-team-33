@@ -2,14 +2,15 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
-import { FaBars, FaTimes, FaUser } from "react-icons/fa";
+import { FaBars, FaTimes, FaUser, FaSignOutAlt } from "react-icons/fa";
 import { twMerge } from "tailwind-merge";
 import { Button } from "../Button";
 import { Logo } from "../Logo";
 import { NavigationProps } from "./navigation.types";
 import { cva } from "class-variance-authority";
+import { useAuth } from "@/hooks/useAuth";
 
 export const navContainer = cva(
   "z-50 w-full border-b bg-background shadow-sm transition-all",
@@ -32,8 +33,7 @@ export const navLink = cva(
     variants: {
       active: {
         true: "bg-gray-100 text-primary",
-        false:
-          "text-foreground-light hover:bg-gray-50 hover:text-primary",
+        false: "text-foreground-light hover:bg-gray-50 hover:text-primary",
       },
     },
   }
@@ -52,8 +52,25 @@ export const Navigation: React.FC<NavigationProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const isActive = (href: string) => pathname === href;
+
+  const handleAuthAction = () => {
+    if (isAuthenticated) {
+      onUserClick?.();
+    } else {
+      router.push('/auth/login');
+    }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/');
+  };
+
+  const displayName = userName || (user ? `${user.first_name} ${user.last_name}` : "Login");
 
   return (
     <nav className={twMerge(navContainer({ sticky }), className)}>
@@ -67,9 +84,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               <Link
                 key={link.href}
                 href={link.href}
-                className={navLink({
-                  active: isActive(link.href),
-                })}
+                className={navLink({ active: isActive(link.href) })}
               >
                 {link.label}
               </Link>
@@ -78,14 +93,23 @@ export const Navigation: React.FC<NavigationProps> = ({
 
           {/* Desktop user */}
           {showUser && (
-            <div className="hidden md:flex">
+            <div className="hidden md:flex items-center gap-2">
               <Button
                 variant="secondary"
                 icon={<FaUser />}
-                onClick={onUserClick}
+                onClick={handleAuthAction}
               >
-                {userName || "Login"}
+                {displayName}
               </Button>
+              {isAuthenticated && (
+                <Button
+                  variant="secondary"
+                  icon={<FaSignOutAlt />}
+                  onClick={handleLogout}
+                >
+                  Logout
+                </Button>
+              )}
             </div>
           )}
 
@@ -112,25 +136,37 @@ export const Navigation: React.FC<NavigationProps> = ({
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={navLink({
-                    active: isActive(link.href),
-                  })}
+                  className={navLink({ active: isActive(link.href) })}
                 >
                   {link.label}
                 </Link>
               ))}
 
               {showUser && (
-                <button
-                  onClick={() => {
-                    onUserClick?.();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="flex items-center rounded-lg px-4 py-3 text-sm text-foreground-light hover:bg-gray-50 hover:text-primary"
-                >
-                  <FaUser className="mr-2" />
-                  {userName || "Login"}
-                </button>
+                <>
+                  <button
+                    onClick={() => {
+                      handleAuthAction();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="flex items-center rounded-lg px-4 py-3 text-sm text-foreground-light hover:bg-gray-50 hover:text-primary"
+                  >
+                    <FaUser className="mr-2" />
+                    {displayName}
+                  </button>
+                  {isAuthenticated && (
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="flex items-center rounded-lg px-4 py-3 text-sm text-foreground-light hover:bg-gray-50 hover:text-primary"
+                    >
+                      <FaSignOutAlt className="mr-2" />
+                      Logout
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>
