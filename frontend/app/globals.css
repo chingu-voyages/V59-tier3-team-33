@@ -1,26 +1,107 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  /* --- PALETTES --- */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Primary (Teal) - Column 1 */
+  --color-primary: #2bb0a6;
+  --color-primary-50: #d4efed;
+  --color-primary-100: #aadfdb;
+  --color-primary-200: #7fcfc9;
+  --color-primary-300: #55bfb7;
+  --color-primary-400: #2bb0a6;
+  --color-primary-500: #228c84;
+  --color-primary-600: #196963;
+  --color-primary-700: #114642;
+  --color-primary-800: #082321;
+  --color-primary-900: #020408; /* Universal Black */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Secondary (Yellow/Orange) - Column 2 */
+  --color-secondary: #f59e0b;
+  --color-secondary-50: #fdebce;
+  --color-secondary-100: #fbd89d;
+  --color-secondary-200: #f9c46c;
+  --color-secondary-300: #f7b13b;
+  --color-secondary-400: #f59e0b;
+  --color-secondary-500: #c47e08;
+  --color-secondary-600: #935e06;
+  --color-secondary-700: #613f04;
+  --color-secondary-800: #301f02;
+  --color-secondary-900: #020408;
+
+  /* Neutral (Dark Blue/Grey) - Column 3 */
+  /* Used for text and UI boundaries */
+  --color-neutral: #0f172a;
+  --color-neutral-50: #cfd0d4;
+  --color-neutral-100: #9fa2a9;
+  --color-neutral-200: #6f737f;
+  --color-neutral-300: #3f4554;
+  --color-neutral-400: #0f172a;
+  --color-neutral-500: #0c1221;
+  --color-neutral-600: #090d19;
+  --color-neutral-700: #050910;
+  --color-neutral-800: #020408;
+
+  /* Surface (White/Grey) - Column 4 */
+  /* Used for backgrounds, cards, and subtle borders */
+  --color-surface: #f8fafc;
+  --color-surface-50: #fdfefe;
+  --color-surface-100: #fcfdfd;
+  --color-surface-200: #fafcfd;
+  --color-surface-300: #f9fbfc;
+  --color-surface-400: #f8fafc;
+  --color-surface-500: #c6c8c9;
+  --color-surface-600: #949697;
+  --color-surface-700: #636364;
+  --color-surface-800: #313132;
+  
+  /* Danger (Red) - Column 5 */
+  /* Used for errors and destructive actions */
+  --color-danger: #b91c21;
+  --color-danger-50: #f1d1d2;
+  --color-danger-100: #e3a4a6;
+  --color-danger-200: #d57679;
+  --color-danger-300: #c7494d;
+  --color-danger-400: #b91c21;
+  --color-danger-500: #94161a;
+  --color-danger-600: #6f1013;
+  --color-danger-700: #490b0d;
+  --color-danger-800: #240506;
+
+  /* --- SEMANTIC ALIASES --- */
+  
+  /* Backgrounds mapped to Surface palette */
+  --color-background: var(--color-surface-50);
+  --color-background-secondary: var(--color-surface-400);
+
+  /* Foreground/Text mapped to Neutral palette */
+  --color-foreground: var(--color-neutral-400);
+  --color-foreground-light: var(--color-neutral-200);
+  --color-foreground-lighter: var(--color-neutral-100);
+
+  /* Font families */
+  --font-sans: Inter, system-ui, sans-serif;
+  
+  /* Spacing */
+  --spacing-xxs: 0.25rem;
+  --spacing-xs: 0.5rem;
+  --spacing-s: 1rem;
+  --spacing-m: 1.25rem;
+  --spacing-l: 2rem;
+  --spacing-xl: 3.25rem;
+  --spacing-xxl: 5.25rem;
+
+  /* Border radius */
+  --radius-xs: 4px;
+  --radius-s: 8px;
+  --radius-m: 16px;
+  --radius-l: 24px;
+  --radius-xl: 32px;
+  --radius-xxl: 40px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
 }

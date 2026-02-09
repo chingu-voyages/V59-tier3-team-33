@@ -1,22 +1,16 @@
-// components/Footer/Footer.tsx
-import Link from "next/link";
 import React from "react";
-import {
-  FaGithub,
-  FaLinkedin,
-  FaTwitter,
-} from "react-icons/fa";
+import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { twMerge } from "tailwind-merge";
 import { Logo } from "../Logo";
 import { cva } from "class-variance-authority";
 import { FooterProps } from "./footer.types";
 
 export const footerContainer = cva(
-  "w-full bg-neutral-900 text-white",
+  "w-full bg-primary-700 text-white",
   {
     variants: {
       padding: {
-        default: "py-12 md:py-16",
+        default: "py-12 md:py-8",
         compact: "py-8",
       },
     },
@@ -26,101 +20,83 @@ export const footerContainer = cva(
   }
 );
 
-export const footerHeading =
-  "mb-4 text-lg font-semibold text-white";
+export const footerHeading = "mb-4 text-lg font-semibold text-white flex gap-2 items-center";
 
-export const footerLink =
-  "text-sm text-gray-400 transition-colors hover:text-white";
+export const footerDescription = "text-sm leading-relaxed text-surface-100";
 
-export const footerDescription =
-  "text-sm leading-relaxed text-gray-400";
+const teamMembers = [
+  {
+    name: "Chris",
+    github: "https://github.com/chalrees876",
+  },
+  {
+    name: "Samantha",
+    github: "https://github.com/samanthakgraham",
+  },
+  {
+    name: "Direwen",
+    github: "https://github.com/Direwen",
+  },
+  {
+    name: "Bastien Winant",
+    github: "https://github.com/BastienWinant",
+  },
+  {
+    name: "Roni Egbu",
+    github: "https://github.com/ronniiii-i",
+  },
+  {
+    name: "Margaret Wu",
+    github: "https://github.com/margaretcwu",
+  },
+  {
+    name: "Oshada Kularathne",
+    github: "https://github.com/devimalka",
+  },
+  {
+    name: "Chanae Pickett",
+    github: "https://github.com/chanaelynease",
+  },
+  {
+    name: "Gobinath Varatharajan",
+    github: "https://github.com/gobinathvaratharajan",
+  },
+];
 
-
-const socialIcons = {
-  twitter: FaTwitter,
-  linkedin: FaLinkedin,
-  github: FaGithub,
-};
-
-export const Footer: React.FC<FooterProps> = ({
-  sections = [
-    {
-      title: "Discover",
-      links: [
-        { label: "Home", href: "/" },
-        { label: "My Trips", href: "/trips" },
-      ],
-    },
-  ],
-  socialLinks = [],
-  showContributor = true,
-  className,
-}) => {
+export const Footer: React.FC<FooterProps> = ({ className }) => {
   return (
     <footer className={twMerge(footerContainer(), className)}>
       <div className="container mx-auto px-4 sm:px-8 lg:px-16">
-        <div className="grid grid-cols-1 gap-8 pb-8 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Logo */}
+        <div className="grid grid-cols-1 gap-8 pb-8 lg:grid-cols-3">
+          {/* Logo & Description */}
           <div>
-            <Logo large logoOnly className="mb-4" />
+            <Logo large logoOnly variant="alt" className="mb-4" />
             <p className={footerDescription}>
               Turn your destinations into the most efficient routes.
             </p>
           </div>
 
-          {/* Sections */}
-          {sections.map((section) => (
-            <div key={section.title}>
-              <h3 className={footerHeading}>{section.title}</h3>
-              <ul className="space-y-3">
-                {section.links.map((link) => (
-                  <li key={link.label}>
-                    {link.external ? (
-                      <a
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={footerLink}
-                      >
-                        {link.label}
-                      </a>
-                    ) : (
-                      <Link href={link.href} className={footerLink}>
-                        {link.label}
-                      </Link>
-                    )}
-                  </li>
-                ))}
-              </ul>
+          {/* Team Section */}
+          <div className="lg:col-span-2">
+            
+            <h3 className={footerHeading}>
+              <FaGithub className="text-base" />Team
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {teamMembers.map((member, index) => (
+                <a
+                  key={index}
+                  href={member.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-sm text-surface-100 hover:text-white transition-colors"
+                  aria-label={`${member.name}'s GitHub`}
+                >
+                  {member.name}
+                </a>
+              ))}
             </div>
-          ))}
-
-          {/* Contributors */}
-          {showContributor && socialLinks.length > 0 && (
-            <div>
-              <h3 className={footerHeading}>Team</h3>
-              <div className="flex flex-wrap gap-4">
-                {socialLinks.map((social, index) => {
-                  const Icon = socialIcons[social.icon];
-                  return (
-                    <a
-                      key={index}
-                      href={social.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={social.name}
-                      className="flex items-center gap-2 text-gray-400 hover:text-white"
-                    >
-                      <Icon className="text-xl" />
-                      <span className="text-sm">
-                        Member {index + 1}
-                      </span>
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </footer>

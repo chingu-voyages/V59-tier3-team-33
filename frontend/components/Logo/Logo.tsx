@@ -40,9 +40,11 @@ export const Logo: React.FC<LogoProps> = ({
   logoOnly = false,
   href = "/",
   className,
+  variant = 'default',
 }) => {
   const sizeKey = large ? "large" : "default";
   const imageSize = SIZES[sizeKey];
+  const logoSrc = variant === 'alt' ? '/icon_alt.svg' : '/icon.svg';
 
   return (
     <Link
@@ -53,7 +55,7 @@ export const Logo: React.FC<LogoProps> = ({
       )}
     >
       <Image
-        src="/icon.svg"
+        src={logoSrc}
         alt="JoyRoute"
         {...imageSize}
         priority
