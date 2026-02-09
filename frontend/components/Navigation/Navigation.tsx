@@ -1,19 +1,25 @@
-// components/Navigation/Navigation.tsx
 "use client";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { FaBars, FaTimes, FaUser, FaSignOutAlt } from "react-icons/fa";
+import { ChevronDown } from "lucide-react";
 import { twMerge } from "tailwind-merge";
-import { Button } from "../Button";
 import { Logo } from "../Logo";
 import { NavigationProps } from "./navigation.types";
 import { cva } from "class-variance-authority";
 import { useAuth } from "@/hooks/useAuth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const navContainer = cva(
-  "z-50 w-full border-b bg-background shadow-sm transition-all",
+  "z-50 w-full bg-white shadow",
   {
     variants: {
       sticky: {
@@ -28,12 +34,12 @@ export const navContainer = cva(
 );
 
 export const navLink = cva(
-  "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+  "px-4 py-2 text-sm font-medium transition-colors rounded-lg",
   {
     variants: {
       active: {
-        true: "bg-gray-100 text-primary",
-        false: "text-foreground-light hover:bg-gray-50 hover:text-primary",
+        true: "bg-primary-50 text-primary",
+        false: "text-neutral-200 hover:bg-surface-400 hover:text-primary",
       },
     },
   }
@@ -44,11 +50,8 @@ export const Navigation: React.FC<NavigationProps> = ({
     { label: "Home", href: "/" },
     { label: "My Trips", href: "/trips" },
   ],
-  showUser = true,
-  userName,
   sticky = true,
   className,
-  onUserClick,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
@@ -57,67 +60,76 @@ export const Navigation: React.FC<NavigationProps> = ({
 
   const isActive = (href: string) => pathname === href;
 
-  const handleAuthAction = () => {
-    if (isAuthenticated) {
-      onUserClick?.();
-    } else {
-      router.push('/auth/login');
-    }
-  };
-
   const handleLogout = async () => {
     await logout();
     router.push('/');
   };
 
-  const displayName = userName || (user ? `${user.first_name} ${user.last_name}` : "Login");
-
   return (
     <nav className={twMerge(navContainer({ sticky }), className)}>
       <div className="container mx-auto px-4 sm:px-8 lg:px-16">
-        <div className="flex h-14 items-center justify-between md:h-18">
+        <div className="flex h-16 items-center justify-between">
+          {/* Logo */}
           <Logo />
 
-          {/* Desktop links */}
-          <div className="hidden items-center space-x-1 md:flex">
-            {links.map((link) => (
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-6">
+            {/* Nav Links */}
+            <div className="flex items-center gap-2">
+              {links.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={navLink({ active: isActive(link.href) })}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+
+            {/* User Dropdown */}
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-neutral-200 hover:bg-surface-400 rounded-lg transition-colors outline-none">
+                  <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">
+                    <FaUser className="text-sm" />
+                  </div>
+                  <span>{user?.first_name || 'User'}</span>
+                  <ChevronDown className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem
+                    onClick={() => router.push('/profile')}
+                    className="cursor-pointer"
+                  >
+                    <FaUser className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="cursor-pointer text-danger-400 focus:text-danger-400"
+                  >
+                    <FaSignOutAlt className="mr-2 h-4 w-4" />
+                    <span>Logout</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
               <Link
-                key={link.href}
-                href={link.href}
-                className={navLink({ active: isActive(link.href) })}
+                href="/auth/login"
+                className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-600 rounded-lg transition-colors"
               >
-                {link.label}
+                Login
               </Link>
-            ))}
+            )}
           </div>
 
-          {/* Desktop user */}
-          {showUser && (
-            <div className="hidden md:flex items-center gap-2">
-              <Button
-                variant="secondary"
-                icon={<FaUser />}
-                onClick={handleAuthAction}
-              >
-                {displayName}
-              </Button>
-              {isAuthenticated && (
-                <Button
-                  variant="secondary"
-                  icon={<FaSignOutAlt />}
-                  onClick={handleLogout}
-                >
-                  Logout
-                </Button>
-              )}
-            </div>
-          )}
-
-          {/* Mobile toggle */}
+          {/* Mobile Menu Toggle */}
           <button
-            onClick={() => setMobileMenuOpen((v) => !v)}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
-            className="p-2 text-foreground md:hidden"
+            className="p-2 text-neutral-200 md:hidden"
           >
             {mobileMenuOpen ? (
               <FaTimes className="text-2xl" />
@@ -127,9 +139,9 @@ export const Navigation: React.FC<NavigationProps> = ({
           </button>
         </div>
 
-        {/* Mobile menu */}
+        {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="border-t py-4 md:hidden">
+          <div className="border-t border-surface-500 py-4 md:hidden">
             <div className="flex flex-col space-y-2">
               {links.map((link) => (
                 <Link
@@ -142,30 +154,40 @@ export const Navigation: React.FC<NavigationProps> = ({
                 </Link>
               ))}
 
-              {showUser && (
+              {isAuthenticated ? (
                 <>
+                  <div className="border-t border-surface-500 my-2" />
                   <button
                     onClick={() => {
-                      handleAuthAction();
                       setMobileMenuOpen(false);
+                      router.push('/profile');
                     }}
-                    className="flex items-center rounded-lg px-4 py-3 text-sm text-foreground-light hover:bg-gray-50 hover:text-primary"
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-neutral-200 hover:bg-surface-400 rounded-lg transition-colors"
                   >
-                    <FaUser className="mr-2" />
-                    {displayName}
+                    <FaUser />
+                    <span>Profile</span>
                   </button>
-                  {isAuthenticated && (
-                    <button
-                      onClick={() => {
-                        handleLogout();
-                        setMobileMenuOpen(false);
-                      }}
-                      className="flex items-center rounded-lg px-4 py-3 text-sm text-foreground-light hover:bg-gray-50 hover:text-primary"
-                    >
-                      <FaSignOutAlt className="mr-2" />
-                      Logout
-                    </button>
-                  )}
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-danger-400 hover:bg-danger-50 rounded-lg transition-colors"
+                  >
+                    <FaSignOutAlt />
+                    <span>Logout</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="border-t border-surface-500 my-2" />
+                  <Link
+                    href="/auth/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="px-4 py-3 text-sm font-medium text-white bg-primary hover:bg-primary-600 rounded-lg transition-colors text-center"
+                  >
+                    Login
+                  </Link>
                 </>
               )}
             </div>

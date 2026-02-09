@@ -132,10 +132,10 @@ export default function SignupPage() {
           {...register('password2')}
         />
         {errors.root?.message && (
-          <p className="text-sm text-red-600">{errors.root.message}</p>
+          <p className="text-sm text-danger-400">{errors.root.message}</p>
         )}
         {apiSuccess && (
-          <p className="text-sm text-green-600">{apiSuccess}</p>
+          <p className="text-sm text-primary">{apiSuccess}</p>
         )}
         <button
           type="submit"

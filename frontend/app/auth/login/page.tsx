@@ -105,7 +105,7 @@ export default function LoginPage() {
           {...register('password')}
         />
         {errors.root?.message && (
-          <p className="text-sm text-red-600">{errors.root.message}</p>
+          <p className="text-sm text-danger-400">{errors.root.message}</p>
         )}
         <button
           type="submit"

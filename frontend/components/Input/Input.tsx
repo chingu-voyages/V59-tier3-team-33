@@ -25,7 +25,7 @@ export const inputWrapperStyles = cva("relative flex items-center", {
 
 export const inputStyles = cva(
   [
-    "px-4 py-3 rounded-lg font-normal transition-all outline-none",
+    "px-4 py-3 rounded-2xl font-normal transition-all outline-none",
     "focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed",
   ],
   {
@@ -36,9 +36,9 @@ export const inputStyles = cva(
       },
       state: {
         normal:
-          "border-border focus:border-primary focus:ring-primary/20 text-foreground",
+          "border focus:border-primary focus:ring-primary/20 text-foreground",
         error:
-          "border-red-500 focus:ring-red-200 text-red-900",
+          "border-danger-400 focus:ring-danger-50 text-danger-400",
       },
       leftIcon: {
         true: "pl-12",
@@ -60,7 +60,7 @@ export const inputStyles = cva(
 export const labelStyles = cva("text-sm font-medium", {
   variants: {
     error: {
-      true: "text-red-600",
+      true: "text-danger-400",
       false: "text-foreground",
     },
   },
@@ -69,7 +69,7 @@ export const labelStyles = cva("text-sm font-medium", {
 export const helperTextStyles = cva("text-xs", {
   variants: {
     error: {
-      true: "text-red-600",
+      true: "text-danger-400",
       false: "text-foreground-light",
     },
   },
@@ -107,7 +107,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           >
             {label}
             {required && (
-              <span className="ml-1 text-red-500">*</span>
+              <span className="ml-1 text-danger-400">*</span>
             )}
           </label>
         )}

@@ -22,7 +22,7 @@ export const footerContainer = cva(
 
 export const footerHeading = "mb-4 text-lg font-semibold text-white flex gap-2 items-center";
 
-export const footerDescription = "text-sm leading-relaxed text-gray-200";
+export const footerDescription = "text-sm leading-relaxed text-surface-100";
 
 const teamMembers = [
   {
@@ -89,7 +89,7 @@ export const Footer: React.FC<FooterProps> = ({ className }) => {
                   href={member.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-sm text-gray-200 hover:text-white transition-colors"
+                  className="flex items-center gap-1 text-sm text-surface-100 hover:text-white transition-colors"
                   aria-label={`${member.name}'s GitHub`}
                 >
                   {member.name}
