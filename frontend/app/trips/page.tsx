@@ -97,7 +97,7 @@ export default function TripsPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            <button className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-secondary rounded-xl hover:bg-secondary-300 transition-colors shadow-sm my-4">
+            <button className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-secondary-300 rounded-xl hover:bg-secondary-400 transition-colors shadow-sm my-4">
               <FaPlus className="text-surface-100" />
               <span className="text-surface-100 font-medium">
                 Create New Plan
