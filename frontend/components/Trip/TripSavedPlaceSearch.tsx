@@ -33,6 +33,13 @@ type Suggestion = {
   category?: string | null;
 };
 
+type RetrieveDetailsArgs = {
+  mapboxId: string;
+  token: string;
+  sessionToken: string;
+  signal?: AbortSignal;
+};
+
 function createSessionToken() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
@@ -61,6 +68,42 @@ function mapRetrieveToPlace(payload: any): TripPlace | null {
     image_url: metadata?.primary_photo ?? null,
     category,
   };
+}
+
+async function retrieveDetails({
+  mapboxId,
+  token,
+  sessionToken,
+  signal,
+}: RetrieveDetailsArgs): Promise<TripPlace> {
+  const params = new URLSearchParams({
+    access_token: token,
+    session_token: sessionToken,
+    language: 'en',
+  });
+
+  const url = `https://api.mapbox.com/search/searchbox/v1/retrieve/${encodeURIComponent(
+    mapboxId,
+  )}?${params.toString()}`;
+
+  const res = await fetch(url, { signal });
+  const json = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    const msg =
+      json?.message ||
+      json?.error ||
+      json?.detail ||
+      `Retrieve failed (${res.status})`;
+    throw new Error(msg);
+  }
+
+  const place = mapRetrieveToPlace(json);
+  if (!place) {
+    throw new Error('Retrieve returned no usable place details');
+  }
+
+  return place;
 }
 
 export default function TripSavedPlaceSearch(props: TripSavedPlaceSearchProps) {
@@ -142,27 +185,22 @@ export default function TripSavedPlaceSearch(props: TripSavedPlaceSearchProps) {
     try {
       setLoading(true);
 
-      const params = new URLSearchParams({
-        access_token: token,
-        session_token: sessionTokenRef.current,
+      const place = await retrieveDetails({
+        mapboxId: suggestion.mapbox_id,
+        token,
+        sessionToken: sessionTokenRef.current,
       });
-
-      const url = `https://api.mapbox.com/search/searchbox/v1/retrieve/${encodeURIComponent(
-        suggestion.mapbox_id,
-      )}?${params.toString()}`;
-
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`Retrieve failed (${res.status})`);
-
-      const json = await res.json();
-      const place = mapRetrieveToPlace(json);
-      if (!place) return;
 
       props.onSelectPlace(place);
       props.onQueryChange(place.name);
       setSuggestions([]);
       setOpen(false);
+
+      // Start a fresh session after a successful selection
       sessionTokenRef.current = createSessionToken();
+    } catch {
+      setSuggestions([]);
+      setOpen(false);
     } finally {
       setLoading(false);
     }
