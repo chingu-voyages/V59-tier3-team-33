@@ -40,6 +40,8 @@ type RetrieveDetailsArgs = {
   signal?: AbortSignal;
 };
 
+const DEFAULT_RICH_METADATA_PROVIDER = 'foursquare';
+
 function createSessionToken() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
@@ -54,7 +56,6 @@ function mapRetrieveToPlace(payload: any): TripPlace | null {
 
   const [lng, lat] = coords;
   const props = feature?.properties ?? {};
-  const metadata = props?.metadata ?? {};
   const category = Array.isArray(props?.poi_category)
     ? props.poi_category[0]
     : props?.poi_category || null;
@@ -65,7 +66,6 @@ function mapRetrieveToPlace(payload: any): TripPlace | null {
     full_address: props?.full_address ?? props?.place_formatted ?? null,
     latitude: Number(lat),
     longitude: Number(lng),
-    image_url: metadata?.primary_photo ?? null,
     category,
   };
 }
@@ -140,14 +140,21 @@ export default function TripSavedPlaceSearch(props: TripSavedPlaceSearchProps) {
           language: 'en',
           limit: '8',
           types: 'poi,category',
+          rich_metadata_provider: DEFAULT_RICH_METADATA_PROVIDER,
           access_token: token,
           session_token: sessionTokenRef.current,
         });
 
         if (proximityParam) params.set('proximity', proximityParam);
 
-        const url = `https://api.mapbox.com/search/searchbox/v1/suggest?${params.toString()}`;
-        const res = await fetch(url, { signal: controller.signal });
+        let url = `https://api.mapbox.com/search/searchbox/v1/suggest?${params.toString()}`;
+        let res = await fetch(url, { signal: controller.signal });
+
+        if (!res.ok && params.has('rich_metadata_provider')) {
+          params.delete('rich_metadata_provider');
+          url = `https://api.mapbox.com/search/searchbox/v1/suggest?${params.toString()}`;
+          res = await fetch(url, { signal: controller.signal });
+        }
 
         if (!res.ok) throw new Error(`Suggest failed (${res.status})`);
         const json = await res.json();
@@ -292,18 +299,6 @@ export default function TripSavedPlaceSearch(props: TripSavedPlaceSearchProps) {
                 ) : null}
               </div>
             </div>
-
-            {props.selectedPlace.image_url ? (
-              <img
-                src={props.selectedPlace.image_url}
-                alt={props.selectedPlace.name}
-                className="h-36 w-full rounded-xl object-cover"
-              />
-            ) : (
-              <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-surface-500 bg-surface-100 text-xs text-neutral-100">
-                No image available for this POI
-              </div>
-            )}
 
             <button
               type="button"

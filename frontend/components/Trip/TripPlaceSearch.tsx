@@ -41,7 +41,6 @@ async function retrieveDetails({
 
   const [lng, lat] = coords;
   const props = feature?.properties ?? {};
-  const metadata = props?.metadata ?? {};
   const category = Array.isArray(props?.poi_category)
     ? props.poi_category[0]
     : props?.poi_category ?? null;
@@ -52,7 +51,6 @@ async function retrieveDetails({
     full_address: props?.full_address ?? props?.place_formatted ?? null,
     latitude: Number(lat),
     longitude: Number(lng),
-    image_url: metadata?.primary_photo ?? null,
     category,
   };
 }

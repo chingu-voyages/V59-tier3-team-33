@@ -4,7 +4,6 @@ export type TripPlace = {
   full_address?: string | null;
   latitude: number;
   longitude: number;
-  image_url?: string | null;
   category?: string | null;
 };
 
