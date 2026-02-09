@@ -18,23 +18,20 @@ export function SidebarShell({ children }: SidebarShellProps) {
 
   return (
     <>
-      {/* Desktop: Fixed floating panel on the right */}
-      <div className="hidden md:block fixed top-20 right-0 bottom-4 w-[400px] h-screen bg-surface-50 rounded-2xl shadow-2xl border border-surface-500 overflow-hidden z-20">
+      <aside className="hidden h-screen w-[390px] shrink-0 border-l border-surface-500 bg-surface-50 shadow-xl md:flex md:flex-col">
         <div className="h-full overflow-y-auto">{children}</div>
-      </div>
+      </aside>
 
-      {/* Mobile: Toggle button */}
       <button
         onClick={() => setOpen(true)}
-        className="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-primary-400 text-surface-50 rounded-full shadow-lg flex items-center justify-center z-20 hover:bg-primary-500 transition-colors"
+        className="fixed right-6 bottom-6 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-primary-400 text-surface-50 shadow-lg transition-colors hover:bg-primary-500 md:hidden"
         aria-label="Open trip details"
       >
         <FaChevronUp className="text-xl" />
       </button>
 
-      {/* Mobile: Full-height drawer */}
       <Drawer open={open} onOpenChange={setOpen}>
-        <DrawerContent className="md:hidden h-[90vh]">
+        <DrawerContent className="h-[90vh] md:hidden">
           <DrawerHeader className="border-b border-surface-500">
             <DrawerTitle className="text-neutral-400">Trip Details</DrawerTitle>
           </DrawerHeader>

@@ -5,10 +5,13 @@ export type TripPlace = {
   latitude: number;
   longitude: number;
   image_url?: string | null;
+  category?: string | null;
 };
 
 export type MapViewport = {
   lng: number;
   lat: number;
   zoom: number;
+  bearing: number;
+  pitch: number;
 };

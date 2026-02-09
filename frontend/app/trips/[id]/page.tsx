@@ -8,6 +8,28 @@ import TripMap from '@/components/Trip/TripMap';
 import TripSavedPlaceSearch from '@/components/Trip/TripSavedPlaceSearch';
 import type { MapViewport, TripPlace } from '@/components/Trip/types';
 
+const toRad = (deg: number) => (deg * Math.PI) / 180;
+const toDeg = (rad: number) => (rad * 180) / Math.PI;
+const normalizeBearing = (value: number) => ((value % 360) + 360) % 360;
+
+function bearingBetweenPoints(
+  fromLng: number,
+  fromLat: number,
+  toLng: number,
+  toLat: number,
+) {
+  const phi1 = toRad(fromLat);
+  const phi2 = toRad(toLat);
+  const deltaLambda = toRad(toLng - fromLng);
+
+  const y = Math.sin(deltaLambda) * Math.cos(phi2);
+  const x =
+    Math.cos(phi1) * Math.sin(phi2) -
+    Math.sin(phi1) * Math.cos(phi2) * Math.cos(deltaLambda);
+
+  return normalizeBearing(toDeg(Math.atan2(y, x)));
+}
+
 export default function TripDetailPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
@@ -17,6 +39,8 @@ export default function TripDetailPage() {
     lng: -73.9857,
     lat: 40.7484,
     zoom: 10,
+    bearing: 0,
+    pitch: 0,
   });
 
   const [query, setQuery] = useState('');
@@ -34,7 +58,9 @@ export default function TripDetailPage() {
       ...prev,
       lng: place.longitude,
       lat: place.latitude,
-      zoom: Math.max(prev.zoom, 13),
+      zoom: Math.max(prev.zoom, 14),
+      pitch: 45,
+      bearing: bearingBetweenPoints(prev.lng, prev.lat, place.longitude, place.latitude),
     }));
   };
 
@@ -46,7 +72,7 @@ export default function TripDetailPage() {
     setSaveSuccess(null);
 
     try {
-      // TODO: replace with real endpoint when available
+      // TODO: wire backend endpoint
       // await api.post(`/trips/${tripId}/saved-places/`, { place: selectedPlace });
 
       setSavedPlaces((prev) => {
@@ -63,48 +89,55 @@ export default function TripDetailPage() {
   };
 
   return (
-    <div className="relative h-screen w-full overflow-hidden">
-      <TripMap
-        viewport={viewport}
-        onViewportChange={setViewport}
-        savedPlaces={savedPlaces}
-        selectedPlace={selectedPlace}
-        activePlaceId={activePlaceId}
-        onSelectPlace={focusPlace}
+    <div className="relative h-screen w-full overflow-hidden bg-surface-400 md:flex">
+      <div className="relative h-full w-full md:flex-1">
+        <TripMap
+        markerPlace={
+            selectedPlace
+            ? { latitude: selectedPlace.latitude, longitude: selectedPlace.longitude }
+            : null
+        }
         className="h-full w-full"
-      />
+        />
 
-      <div className="absolute top-0 left-0 right-0 z-10 p-4 md:left-1/4">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-surface-500 bg-surface-50 shadow-lg transition-colors hover:bg-surface-100"
-            aria-label="Go back"
-          >
-            <FaArrowLeft className="text-lg text-neutral-400" />
-          </button>
 
-          <TripSavedPlaceSearch
-            mode="search-bar"
-            query={query}
-            onQueryChange={setQuery}
-            onSelectPlace={focusPlace}
-            proximity={{ lng: viewport.lng, lat: viewport.lat }}
-            placeholder="Search POIs..."
-          />
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-[5] h-24 bg-gradient-to-b from-black/20 to-transparent" />
+
+        <div className="absolute top-0 left-0 right-0 z-10 p-4">
+          <div className="mx-auto flex max-w-3xl items-center gap-3">
+            <button
+              onClick={() => router.back()}
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-surface-500 bg-surface-50 shadow-lg transition-colors hover:bg-surface-100"
+              aria-label="Go back"
+            >
+              <FaArrowLeft className="text-lg text-neutral-400" />
+            </button>
+
+            <TripSavedPlaceSearch
+              mode="search-bar"
+              query={query}
+              onQueryChange={setQuery}
+              onSelectPlace={focusPlace}
+              proximity={{ lng: viewport.lng, lat: viewport.lat }}
+              placeholder="Search cafes, museums, landmarks..."
+            />
+          </div>
         </div>
       </div>
 
       <SidebarShell>
         <div className="p-6">
-          <p className="mb-1 text-xs text-neutral-100">Trip ID</p>
-          <p className="mb-6 text-sm font-medium text-neutral-300">{tripId ?? 'Unknown'}</p>
+          <p className="mb-1 text-xs text-neutral-100">Trip</p>
+          <p className="mb-6 text-sm font-medium text-neutral-300">
+            ID: {tripId ?? 'Unknown'}
+          </p>
 
           <TripSavedPlaceSearch
-            mode="sidebar"
+            mode="panel"
             selectedPlace={selectedPlace}
             savedPlaces={savedPlaces}
             onSaveSelected={handleSaveSelected}
+            onPickSavedPlace={focusPlace}
             isSaving={isSaving}
             error={saveError}
             success={saveSuccess}
