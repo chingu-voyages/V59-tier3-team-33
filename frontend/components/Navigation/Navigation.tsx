@@ -94,7 +94,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                   <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">
                     <FaUser className="text-sm" />
                   </div>
-                  <span>{user?.first_name || 'User'}</span>
+                  <span className="capitalize">{user?.first_name || 'User'}</span>
                   <ChevronDown className="h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">

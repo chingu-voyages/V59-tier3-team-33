@@ -70,7 +70,7 @@ export const Footer: React.FC<FooterProps> = ({ className }) => {
         <div className="grid grid-cols-1 gap-8 pb-8 lg:grid-cols-3">
           {/* Logo & Description */}
           <div>
-            <Logo large logoOnly className="mb-4" />
+            <Logo large logoOnly variant="alt" className="mb-4" />
             <p className={footerDescription}>
               Turn your destinations into the most efficient routes.
             </p>

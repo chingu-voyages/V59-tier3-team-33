@@ -3,4 +3,5 @@ export interface LogoProps {
   logoOnly?: boolean;
   href?: string;
   className?: string;
+  variant?: 'default' | 'alt';
 }
