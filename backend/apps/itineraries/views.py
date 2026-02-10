@@ -1,7 +1,7 @@
 from rest_framework import viewsets, permissions, mixins
 from django.shortcuts import get_object_or_404
 
-from apps.places.models import Place
+from .models import Event
 from .models import Trip, UserTrip, TripDay, TripSavedPlace
 from .permissions import IsTripMember
 from .serializers import (
@@ -9,6 +9,7 @@ from .serializers import (
     TripSerializer,
     SavePlaceToTripSerializer,
     RemoveSavedPlaceFromTripSerializer,
+    EventSerializer
 )
 from django.db import transaction
 from datetime import timedelta
@@ -90,3 +91,33 @@ class TripSavedPlaceViewset(
             trip=trip,
             saved_by=self.request.user,
         )
+
+class TripEventViewset(viewsets.ModelViewSet):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+    permission_classes = [permissions.IsAuthenticated, IsTripMember]
+
+    def get_queryset(self):
+        return super().get_queryset().filter(trip_day__trip=self.kwargs["trip_pk"])
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["trip_pk"] = self.kwargs["trip_pk"]
+        return context
+    
+    def perform_create(self, serializer):
+        with transaction.atomic():
+            instance = serializer.save()
+            instance.trip_day.normalize_position()
+    
+    def perform_update(self, serializer):
+        with transaction.atomic():
+            instance = serializer.save()
+            instance.trip_day.normalize_position()
+    
+    def perform_destroy(self, instance):
+        with transaction.atomic():
+            trip_day = instance.trip_day
+            instance.delete()
+            trip_day.normalize_position()
+

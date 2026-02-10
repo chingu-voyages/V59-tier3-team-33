@@ -53,6 +53,16 @@ class TripDay(BaseModel):
 
     def __str__(self):
         return f"{self.trip.name} - {self.date}"
+    
+    def normalize_position(self):
+        events = self.events.all().order_by(
+            models.F("position").asc(nulls_last=True),
+            "position"
+        )
+        for index, event in enumerate(events, start=1):
+            if event.position != index:
+                event.position = index
+                event.save(update_fields=["position"])
 
     class Meta:
         constraints = [
@@ -115,11 +125,9 @@ class Lodging(BaseModel):
 # TODO: make tests to make sure constraints are behaving as expected
 # TODO: consider adding constraint to prevent overlapping events in the same trip day
 class Event(BaseModel):
-    name = models.CharField(max_length=255)
     type = models.CharField(
         max_length=20, choices=EventType.choices, default=EventType.OTHER
     )
-    location_text = models.CharField(max_length=255, blank=True, null=True)
     start_time = models.TimeField(blank=True, null=True)
     duration = models.PositiveIntegerField(blank=True, null=True)  # duration in minutes
 
@@ -144,7 +152,7 @@ class Event(BaseModel):
             start_datetime = datetime.combine(datetime.today(), self.start_time)
             return start_datetime + timedelta(minutes=self.duration)
         return None
-
+    
     class Meta:
         constraints = [
             models.UniqueConstraint(
