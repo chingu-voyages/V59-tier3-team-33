@@ -74,13 +74,10 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.BrowsableAPIRenderer",
     ),
     "DEFAULT_THROTTLE_CLASSES": [
-        'rest_framework.throttling.AnonRateThrottle', # Limits guests
-        'rest_framework.throttling.UserRateThrottle' # Limits authenticated requests
+        "rest_framework.throttling.AnonRateThrottle",  # Limits guests
+        "rest_framework.throttling.UserRateThrottle",  # Limits authenticated requests
     ],
-    "DEFAULT_THROTTLE_RATES": {
-        'anon': '10/minute',
-        'user': '100/minute'
-    },
+    "DEFAULT_THROTTLE_RATES": {"anon": "10/minute", "user": "100/minute"},
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
@@ -188,7 +185,7 @@ REST_AUTH = {
     "JWT_AUTH_SAMESITE": "Lax",
     "REGISTER_SERIALIZER": "apps.accounts.serializers.CustomRegisterSerializer",
     "LOGIN_SERIALIZER": "apps.accounts.serializers.CustomLoginSerializer",
-    "PASSWORD_RESET_SERIALIZER": "apps.accounts.serializers.CustomPasswordResetSerializer"
+    "PASSWORD_RESET_SERIALIZER": "apps.accounts.serializers.CustomPasswordResetSerializer",
 }
 
 SIMPLE_JWT = {
