@@ -24,13 +24,20 @@ class CustomRegisterSerializer(RegisterSerializer):
 
 class CustomLoginSerializer(LoginSerializer):
     username = None
-    
+
+
 # Custom URL generator for password reset emails
 def custom_url_generator(request, user, temp_key):
     return f"{settings.FRONTEND_URL}/{settings.FRONTEND_PASSWORD_RESET_PATH_NAME}/{user_pk_to_url_str(user)}/{temp_key}/"
 
+
 class CustomPasswordResetSerializer(PasswordResetSerializer):
     def get_email_options(self):
-        return {
-            'url_generator': custom_url_generator
-        }
+        return {"url_generator": custom_url_generator}
+
+
+class UserSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "email", "first_name", "last_name"]
+        read_only_fields = ["id", "email", "first_name", "last_name"]
