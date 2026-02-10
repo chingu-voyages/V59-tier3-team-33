@@ -166,11 +166,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "accounts.User"
 
 # Console email backend for development
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # SMTP email backend
-# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "sandbox.smtp.mailtrap.io"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
@@ -180,6 +180,9 @@ REST_AUTH = {
     "USE_JWT": True,
     "JWT_AUTH_COOKIE": "my-app-auth",
     "JWT_AUTH_REFRESH_COOKIE": "my-refresh-token",
+    "JWT_AUTH_HTTPONLY": True,  # Make refresh token httpOnly
+    "JWT_AUTH_SECURE": False,  # Set to True in production with HTTPS
+    "JWT_AUTH_SAMESITE": "Lax",
     "REGISTER_SERIALIZER": "apps.accounts.serializers.CustomRegisterSerializer",
     "LOGIN_SERIALIZER": "apps.accounts.serializers.CustomLoginSerializer",
     "PASSWORD_RESET_SERIALIZER": "apps.accounts.serializers.CustomPasswordResetSerializer",
@@ -223,6 +226,32 @@ if FRONTEND_URL:
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^http://localhost:\d{4}$",
 ]
+
+# CRITICAL: Allow credentials (cookies) to be sent with requests
+CORS_ALLOW_CREDENTIALS = True
+
+# Allow these headers in requests
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+# CSRF Settings for cookie-based auth
+CSRF_TRUSTED_ORIGINS = [FRONTEND_URL] if FRONTEND_URL else []
+CSRF_COOKIE_HTTPONLY = False  # Allow JS to read CSRF token
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
+
+# Session cookie settings
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
 
 # FRONTEND CONFIG
 FRONTEND_EMAIL_VERIFICATION_PATH_NAME = os.environ.get(

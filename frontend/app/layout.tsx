@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-
 import { twMerge } from "tailwind-merge";
-
 import { Footer } from "@/components/Footer";
 import { Navigation } from "@/components/Navigation";
-
+import { AuthInitializer } from "@/components/AuthInitializer";
 import "./globals.css";
 
 const inter = Inter({
@@ -25,17 +23,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        {/* for charts only */}
-        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet"
-          type="text/css"
-        />
-      </head>
-      <body className={twMerge("bg-gray-50 dark:bg-gray-900 min-h-dvh flex flex-col", inter.className)}>
+    <html lang="en">
+      <body className={twMerge("bg-gray-50 min-h-dvh flex flex-col", inter.className)}>
+        <AuthInitializer />
         <Navigation />
         <main className="grow">{children}</main>
         <Footer />
