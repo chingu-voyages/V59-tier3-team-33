@@ -2,12 +2,24 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { FaArrowLeft, FaSearch } from 'react-icons/fa';
+import dynamic from 'next/dynamic';
+import { FaArrowLeft } from 'react-icons/fa';
 import { SidebarShell } from '@/components/SidebarShell';
-import { Map } from '@/components/Map';
 import { TripSidebar } from '@/components/TripSidebar';
+import { MapSearch } from '@/components/Map/MapSearch';
 import { useTripStore } from '@/store/tripStore';
 import { api } from '@/lib/api';
+import type { NominatimResult } from '@/services/nominatim';
+
+// Dynamically import Map component (client-side only)
+const Map = dynamic(() => import('@/components/Map').then((mod) => mod.Map), {
+    ssr: false,
+    loading: () => (
+        <div className="absolute inset-0 bg-surface-600 flex items-center justify-center">
+            <div className="text-neutral-300">Loading map...</div>
+        </div>
+    ),
+});
 
 export default function TripDetailPage() {
     const router = useRouter();
@@ -17,6 +29,12 @@ export default function TripDetailPage() {
     const { setTrip, setFavorites, clearTrip } = useTripStore();
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [selectedLocation, setSelectedLocation] = useState<NominatimResult | null>(null);
+
+    const handleLocationSelect = (result: NominatimResult) => {
+        console.log('Location selected:', result);
+        setSelectedLocation(result);
+    };
 
     useEffect(() => {
         const fetchTripData = async () => {
@@ -24,18 +42,30 @@ export default function TripDetailPage() {
                 setIsLoading(true);
                 setError(null);
 
-                // Fetch trip details
+                // Fetch full trip details with trip_days
                 const tripData = await api.get(`/trips/${tripId}/`);
+
+                if (!tripData || !tripData.id) {
+                    throw new Error('Invalid trip data received');
+                }
+
                 setTrip(tripData);
 
                 // Fetch saved places (favorites)
-                const savedPlacesData = await api.get(`/trips/${tripId}/saved-places/`);
-                setFavorites(savedPlacesData);
+                try {
+                    const savedPlacesData = await api.get(`/trips/${tripId}/saved-places/`);
+                    setFavorites(savedPlacesData);
+                } catch (favError) {
+                    console.error('Failed to fetch saved places:', favError);
+                    // Don't fail the whole page if favorites fail
+                    setFavorites([]);
+                }
 
                 setIsLoading(false);
             } catch (err: any) {
                 console.error('Failed to fetch trip data:', err);
-                setError(err.message || 'Failed to load trip');
+                const errorMessage = err.response?.data?.message || err.message || 'Failed to load trip';
+                setError(errorMessage);
                 setIsLoading(false);
 
                 // Redirect to trips page after a short delay
@@ -90,10 +120,14 @@ export default function TripDetailPage() {
     return (
         <div className="relative h-screen w-full overflow-hidden">
             {/* Base Layer: Map */}
-            <Map className="absolute inset-0" />
+            <Map
+                className="absolute inset-0"
+                selectedLocation={selectedLocation}
+                onLocationSelect={handleLocationSelect}
+            />
 
             {/* Floating Navigation Layer */}
-            <div className="absolute top-0 left-0 md:left-1/4 right-0 z-10 p-4">
+            <div className="absolute top-0 left-0 md:left-1/4 right-0 p-4" style={{ zIndex: 1000 }}>
                 <div className="flex items-center gap-3">
                     {/* Back Button */}
                     <button
@@ -105,13 +139,8 @@ export default function TripDetailPage() {
                     </button>
 
                     {/* Search Bar */}
-                    <div className="flex-1 max-w-md relative">
-                        <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-200" />
-                        <input
-                            type="text"
-                            placeholder="Search places..."
-                            className="w-full pl-12 pr-4 py-3 bg-surface-50 border border-surface-500 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent shadow-lg"
-                        />
+                    <div className="flex-1 max-w-md">
+                        <MapSearch onLocationSelect={handleLocationSelect} />
                     </div>
                 </div>
             </div>

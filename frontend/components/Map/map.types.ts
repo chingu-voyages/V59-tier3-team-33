@@ -1,16 +1,17 @@
-import mapboxgl from 'mapbox-gl';
+import type { LatLngExpression } from 'leaflet';
 
 export interface MapProps {
-  initialCenter?: [number, number]; // [lng, lat]
+  initialCenter?: LatLngExpression; // [lat, lng]
   initialZoom?: number;
   className?: string;
+  showSearch?: boolean; // Control whether to show the search bar
+  onLocationSelect?: (result: NominatimResult) => void; // Callback for location selection
+  selectedLocation?: NominatimResult | null; // Controlled selected location
 }
 
-export type MapInstance = mapboxgl.Map;
-
 export interface Coordinates {
-  lng: number;
   lat: number;
+  lng: number;
 }
 
 export interface MapBounds {
@@ -18,4 +19,23 @@ export interface MapBounds {
   south: number;
   east: number;
   west: number;
+}
+
+export interface NominatimResult {
+  place_id: number;
+  licence: string;
+  osm_type: string;
+  osm_id: number;
+  lat: string;
+  lon: string;
+  display_name: string;
+  address?: {
+    city?: string;
+    state?: string;
+    country?: string;
+    country_code?: string;
+  };
+  boundingbox: [string, string, string, string];
+  type: string;
+  importance: number;
 }

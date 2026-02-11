@@ -21,6 +21,11 @@ class CreatePlaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Place
         fields = ["external_id", "name", "address", "latitude", "longitude"]
+        extra_kwargs = {
+            "external_id": {
+                "validators": []  # Disable the default UniqueValidator
+            }
+        }
 
     def create(self, validated_data):
         # Get or create place based on external_id

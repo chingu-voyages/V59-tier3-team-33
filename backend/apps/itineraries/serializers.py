@@ -1,3 +1,4 @@
+from django.core import validators
 from django.db import models
 from rest_framework import serializers
 from datetime import datetime, timedelta
@@ -19,16 +20,6 @@ class TripSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class TripDetailSerializer(TripSerializer):
-    total_days = serializers.SerializerMethodField()
-
-    class Meta(TripSerializer.Meta):
-        fields = TripSerializer.Meta.fields + ["total_days"]
-
-    def get_total_days(self, obj: Trip):
-        return (obj.end_date - obj.start_date).days + 1
-
-
 class SavePlaceToTripSerializer(serializers.ModelSerializer):
     # Write-only nested serializer
     place = CreatePlaceSerializer(write_only=True)
@@ -41,26 +32,24 @@ class SavePlaceToTripSerializer(serializers.ModelSerializer):
         model = TripSavedPlace
         fields = ["id", "trip", "place", "place_details", "saved_by", "created_at"]
         read_only_fields = ["id", "trip", "place_details", "saved_by", "created_at"]
-
+        validators = []
+        
     def create(self, validated_data):
         # get or create the place using CreatePlaceSerializer
         place_data = validated_data.pop("place")
-        place_serializer = CreatePlaceSerializer(data=place_data)
-        place_serializer.is_valid(raise_exception=True)
-        place = place_serializer.save()
-
-        # Create the TripSavedPlace instance
-        validated_data["place"] = place
-        try:
-            return super().create(validated_data)
-        except Exception:
-            # If unique constraint fails (trip + place already exists), return existing
-            existing = TripSavedPlace.objects.filter(
-                trip=validated_data.get("trip"), place=place
-            ).first()
-            if existing:
-                return existing
-            raise
+        
+        place, _ = Place.objects.get_or_create(
+             external_id=place_data['external_id'],
+             defaults=place_data
+        )
+        
+        # Get or create TripSavedPlace
+        instance, _ = TripSavedPlace.objects.get_or_create(
+            trip=validated_data.get("trip"),
+            place=place,
+            defaults=validated_data
+        )
+        return instance
 
 
 class RemoveSavedPlaceFromTripSerializer(serializers.ModelSerializer):
@@ -95,6 +84,7 @@ class EventSerializer(serializers.ModelSerializer):
             "type",
         ]
         read_only_fields = ["id", "trip_day", "place_details", "position"]
+        validators = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -124,16 +114,15 @@ class EventSerializer(serializers.ModelSerializer):
         trip_day = validated_data.pop("trip_day")
         place_data = validated_data.pop("place")
         
-        # Handle Place
-        place_serializer = CreatePlaceSerializer(data=place_data)
-        place_serializer.is_valid(raise_exception=True)
-        place = place_serializer.save()
-        
-        # Create Event
+        place, _ = Place.objects.get_or_create(
+             external_id=place_data['external_id'],
+             defaults=place_data
+        )
+
         return Event.objects.create(
             trip_day=trip_day, 
             place=place,
-            position=9999 #Temporary position to ensure it's at the end
+            position=9999, 
             **validated_data
         )
         
@@ -144,9 +133,29 @@ class EventSerializer(serializers.ModelSerializer):
         
         if 'place' in validated_data:
             place_data = validated_data.pop('place')
-            place_serializer = CreatePlaceSerializer(data=place_data)
-            place_serializer.is_valid(raise_exception=True)
-            place = place_serializer.save()
+            place, _ = Place.objects.get_or_create(
+                external_id=place_data['external_id'],
+                defaults=place_data
+            )
             instance.place = place
             
         return super().update(instance, validated_data)
+    
+class TripDaySerializer(serializers.ModelSerializer):
+    
+    events = EventSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = TripDay
+        fields = ["id", "trip", "date", "events"]
+        read_only_fields = ["id", "trip", "date", "events"]
+
+class TripDetailSerializer(TripSerializer):
+    total_days = serializers.SerializerMethodField()
+    trip_days = TripDaySerializer(many=True, read_only=True)
+
+    class Meta(TripSerializer.Meta):
+        fields = TripSerializer.Meta.fields + ["total_days", "trip_days"]
+
+    def get_total_days(self, obj: Trip):
+        return (obj.end_date - obj.start_date).days + 1

@@ -9,6 +9,7 @@ interface OverviewTabProps {
 
 export function OverviewTab({ trip, favoritesCount }: OverviewTabProps) {
     const dateRange = formatDateRange(trip.start_date, trip.end_date);
+    const totalEvents = trip.trip_days?.reduce((sum, day) => sum + day.events.length, 0) || 0;
 
     return (
         <div className="p-6 space-y-6">
@@ -57,10 +58,14 @@ export function OverviewTab({ trip, favoritesCount }: OverviewTabProps) {
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
                 <div className="bg-primary-50 rounded-xl p-4 text-center">
                     <p className="text-2xl font-bold text-primary-400">{trip.total_days}</p>
                     <p className="text-sm text-neutral-300">Days</p>
+                </div>
+                <div className="bg-secondary-50 rounded-xl p-4 text-center">
+                    <p className="text-2xl font-bold text-secondary-400">{totalEvents}</p>
+                    <p className="text-sm text-neutral-300">Events</p>
                 </div>
                 <div className="bg-danger-50 rounded-xl p-4 text-center">
                     <p className="text-2xl font-bold text-danger-400">{favoritesCount}</p>

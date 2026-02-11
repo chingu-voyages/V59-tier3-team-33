@@ -17,15 +17,20 @@ export function generateTabs(startDate: string, endDate: string, totalDays: numb
     const currentDate = new Date(start);
     currentDate.setDate(start.getDate() + i);
     
-    const dateStr = currentDate.toLocaleDateString('en-US', {
+    // Format for display (e.g., "Feb 1")
+    const displayDate = currentDate.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
     });
     
+    // Format for matching with API (YYYY-MM-DD)
+    const apiDate = currentDate.toISOString().split('T')[0];
+    
     tabs.push({
       id: `day-${i + 1}` as `day-${number}`,
       label: `Day ${i + 1}`,
-      date: dateStr,
+      date: apiDate, // Use API format for matching
+      displayDate, // Add display format for UI
     });
   }
 
