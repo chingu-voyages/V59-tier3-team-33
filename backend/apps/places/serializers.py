@@ -9,7 +9,6 @@ class PlaceSerializer(serializers.ModelSerializer):
             "id",
             "external_id",
             "name",
-            "description",
             "address",
             "latitude",
             "longitude",

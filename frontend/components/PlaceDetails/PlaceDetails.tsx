@@ -8,20 +8,39 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion';
-import type { NominatimResult } from '@/services/nominatim';
+import type { PlaceContext } from '@/types/trip';
 
 interface PlaceDetailsProps {
-    place: NominatimResult;
+    context: PlaceContext;
+    tripId: string;
     onClose: () => void;
+    onToggleFavorite: (favoriteId?: string) => Promise<void>;
 }
 
-export function PlaceDetails({ place, onClose }: PlaceDetailsProps) {
-    const [isFavorite, setIsFavorite] = useState(false);
+export function PlaceDetails({ context, tripId, onClose, onToggleFavorite }: PlaceDetailsProps) {
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const { place, isFavorite, isInItinerary, source } = context;
 
-    const handleToggleFavorite = () => {
-        setIsFavorite(!isFavorite);
-        // TODO: Implement save/remove from favorites
-        console.log('Toggle favorite:', place);
+    const handleToggleFavorite = async () => {
+        console.log('PlaceDetails: handleToggleFavorite called');
+        console.log('PlaceDetails: context:', context);
+        console.log('PlaceDetails: isFavorite:', isFavorite);
+        console.log('PlaceDetails: favoriteId:', context.favoriteId);
+
+        setIsProcessing(true);
+        setError(null);
+        try {
+            await onToggleFavorite(context.favoriteId);
+            console.log('PlaceDetails: onToggleFavorite completed successfully');
+        } catch (error) {
+            console.error('PlaceDetails: Failed to toggle favorite:', error);
+            setError(isFavorite ? 'Failed to remove from favorites' : 'Failed to add to favorites');
+            // Clear error after 3 seconds
+            setTimeout(() => setError(null), 3000);
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     const handleAddPlace = () => {
@@ -34,20 +53,26 @@ export function PlaceDetails({ place, onClose }: PlaceDetailsProps) {
             {/* Header with Title, Favorite, and Close */}
             <div className="flex items-center justify-between p-4 border-b border-surface-500">
                 <h2 className="text-2xl font-bold text-neutral-400 flex-1 truncate pr-2">
-                    {place.display_name.split(',')[0]}
+                    {place.name}
                 </h2>
                 <div className="flex items-center gap-2">
-                    <button
-                        onClick={handleToggleFavorite}
-                        className="p-2 hover:bg-surface-200 rounded-lg transition-colors"
-                        aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-                    >
-                        {isFavorite ? (
-                            <FaHeart className="text-primary-400 text-xl" />
-                        ) : (
-                            <FaRegHeart className="text-neutral-300 text-xl" />
-                        )}
-                    </button>
+                    {/* Only show favorite button if not from event (events are already in itinerary) */}
+                    {source !== 'event' && (
+                        <button
+                            onClick={handleToggleFavorite}
+                            disabled={isProcessing}
+                            className="p-2 hover:bg-surface-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed relative"
+                            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                        >
+                            {isProcessing ? (
+                                <div className="w-5 h-5 border-2 border-primary-400 border-t-transparent rounded-full animate-spin" />
+                            ) : isFavorite ? (
+                                <FaHeart className="text-primary-400 text-xl" />
+                            ) : (
+                                <FaRegHeart className="text-neutral-300 text-xl" />
+                            )}
+                        </button>
+                    )}
                     <button
                         onClick={onClose}
                         className="p-2 hover:bg-surface-200 rounded-lg transition-colors"
@@ -60,22 +85,27 @@ export function PlaceDetails({ place, onClose }: PlaceDetailsProps) {
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto">
+                {/* Error Message */}
+                {error && (
+                    <div className="mx-4 mt-4 p-3 bg-danger-100 border border-danger-300 rounded-lg">
+                        <p className="text-sm text-danger-600">{error}</p>
+                    </div>
+                )}
+
                 {/* Meta Info */}
                 <div className="p-4 space-y-2">
-                    {/* Rating & Category */}
-                    <div className="flex items-center gap-3 text-sm">
-                        <div className="flex items-center gap-1">
-                            <FaStar className="text-secondary-400" />
-                            <span className="font-semibold text-neutral-400">
-                                {place.importance.toFixed(1)}
+                    {/* Status badges */}
+                    <div className="flex items-center gap-2 text-sm">
+                        {isFavorite && (
+                            <span className="px-2 py-1 bg-primary-100 text-primary-400 rounded-full text-xs font-medium">
+                                Saved
                             </span>
-                            <span className="text-neutral-200">
-                                ({place.place_id})
+                        )}
+                        {isInItinerary && (
+                            <span className="px-2 py-1 bg-secondary-100 text-secondary-400 rounded-full text-xs font-medium">
+                                In Itinerary
                             </span>
-                        </div>
-                        <span className="text-neutral-300 capitalize">
-                            {place.type.replace('_', ' ')}
-                        </span>
+                        )}
                     </div>
 
                     {/* Hours Placeholder */}
@@ -91,16 +121,18 @@ export function PlaceDetails({ place, onClose }: PlaceDetailsProps) {
                     </div>
                 </div>
 
-                {/* Add Place Button */}
-                <div className="px-4 pb-4">
-                    <button
-                        onClick={handleAddPlace}
-                        className="w-full flex items-center justify-center gap-1 px-4 py-2 bg-secondary-400 text-neutral rounded-xl hover:bg-secondary-500 transition-colors"
-                    >
-                        <span className="text-xl">+</span>
-                        <span>Add Place</span>
-                    </button>
-                </div>
+                {/* Add Place Button - only show if not already in itinerary */}
+                {!isInItinerary && (
+                    <div className="px-4 pb-4">
+                        <button
+                            onClick={handleAddPlace}
+                            className="w-full flex items-center justify-center gap-1 px-4 py-2 bg-secondary-400 text-neutral rounded-xl hover:bg-secondary-500 transition-colors"
+                        >
+                            <span className="text-xl">+</span>
+                            <span>Add Place</span>
+                        </button>
+                    </div>
+                )}
 
                 {/* Image Placeholder */}
                 <div className="px-4 pb-4">
@@ -160,35 +192,19 @@ export function PlaceDetails({ place, onClose }: PlaceDetailsProps) {
                                 <div className="pt-2 pb-4 space-y-3 text-sm">
                                     <div>
                                         <p className="text-neutral-200 font-medium">Address</p>
-                                        <p className="text-neutral-400 mt-1">{place.display_name}</p>
+                                        <p className="text-neutral-400 mt-1">{place.address}</p>
                                     </div>
                                     <div>
                                         <p className="text-neutral-200 font-medium">Coordinates</p>
                                         <p className="text-neutral-400 font-mono text-xs mt-1">
-                                            {parseFloat(place.lat).toFixed(6)}, {parseFloat(place.lon).toFixed(6)}
+                                            {parseFloat(place.latitude).toFixed(6)}, {parseFloat(place.longitude).toFixed(6)}
                                         </p>
                                     </div>
-                                    {place.address && (
-                                        <>
-                                            {place.address.city && (
-                                                <div>
-                                                    <p className="text-neutral-200 font-medium">City</p>
-                                                    <p className="text-neutral-400 mt-1">{place.address.city}</p>
-                                                </div>
-                                            )}
-                                            {place.address.state && (
-                                                <div>
-                                                    <p className="text-neutral-200 font-medium">State</p>
-                                                    <p className="text-neutral-400 mt-1">{place.address.state}</p>
-                                                </div>
-                                            )}
-                                            {place.address.country && (
-                                                <div>
-                                                    <p className="text-neutral-200 font-medium">Country</p>
-                                                    <p className="text-neutral-400 mt-1">{place.address.country}</p>
-                                                </div>
-                                            )}
-                                        </>
+                                    {place.description && (
+                                        <div>
+                                            <p className="text-neutral-200 font-medium">Description</p>
+                                            <p className="text-neutral-400 mt-1">{place.description}</p>
+                                        </div>
                                     )}
                                 </div>
                             </AccordionContent>

@@ -47,8 +47,6 @@ class UserTrip(BaseModel):
 # TODO: make tests to make sure constraints are behaving as expected
 class TripDay(BaseModel):
     date = models.DateField()
-    name = models.CharField(max_length=255, blank=True, null=True)
-
     trip = models.ForeignKey("Trip", on_delete=models.CASCADE, related_name="trip_days")
 
     def __str__(self):

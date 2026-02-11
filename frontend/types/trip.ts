@@ -58,3 +58,20 @@ export interface Tab {
   date?: string; // API format (YYYY-MM-DD)
   displayDate?: string; // Display format (e.g., "Feb 1")
 }
+
+// Place context for tracking where a place was selected from
+export type PlaceSource = 'search' | 'favorite' | 'event';
+
+export interface PlaceContext {
+  place: Place;  // Normalized place data
+  source: PlaceSource;
+  
+  // Metadata
+  favoriteId?: string;  // If it's a saved place
+  eventId?: string;     // If it's an event
+  tripDayId?: string;   // Which day it belongs to
+  
+  // Computed flags
+  isFavorite: boolean;
+  isInItinerary: boolean;
+}

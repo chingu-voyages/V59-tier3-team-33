@@ -8,7 +8,7 @@ import { OverviewTab } from './OverviewTab';
 import { DayTab } from './DayTab';
 
 export function TripSidebar() {
-    const { trip, favorites, activeTab, setActiveTab } = useTripStore();
+    const { trip, favoriteIds, activeTab, setActiveTab } = useTripStore();
 
     // Generate tabs from trip dates
     const tabs = useMemo(() => {
@@ -50,10 +50,10 @@ export function TripSidebar() {
 
             {/* Tab Content */}
             <div className="flex-1 overflow-y-auto">
-                {activeTab === 'favorites' && <FavoritesTab favorites={favorites} />}
+                {activeTab === 'favorites' && <FavoritesTab />}
 
                 {activeTab === 'overview' && (
-                    <OverviewTab trip={trip} favoritesCount={favorites.length} />
+                    <OverviewTab trip={trip} favoritesCount={favoriteIds.length} />
                 )}
 
                 {activeTab.startsWith('day-') && (

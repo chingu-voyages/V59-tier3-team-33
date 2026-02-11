@@ -59,7 +59,18 @@ export async function apiFetch<T = any>(
           throw new Error(`API Error: ${retryResponse.status}`);
         }
         
-        const retryData = await retryResponse.json();
+        // Handle empty responses (like DELETE 204 No Content)
+        const retryContentType = retryResponse.headers.get('content-type');
+        if (!retryContentType || !retryContentType.includes('application/json')) {
+          return {} as T;
+        }
+
+        const retryText = await retryResponse.text();
+        if (!retryText || retryText.trim() === '') {
+          return {} as T;
+        }
+
+        const retryData = JSON.parse(retryText);
         return unwrapResponse<T>(retryData);
       } else {
         // Refresh failed, redirect to login
@@ -76,7 +87,20 @@ export async function apiFetch<T = any>(
       throw new Error(errorMessage);
     }
 
-    const data = await response.json();
+    // Handle empty responses (like DELETE 204 No Content)
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      // Return empty object for non-JSON responses
+      return {} as T;
+    }
+
+    const text = await response.text();
+    if (!text || text.trim() === '') {
+      // Return empty object for empty responses
+      return {} as T;
+    }
+
+    const data = JSON.parse(text);
     return unwrapResponse<T>(data);
   } catch (error) {
     console.error('API Fetch Error:', error);

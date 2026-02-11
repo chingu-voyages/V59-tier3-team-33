@@ -22,29 +22,71 @@ const Map = dynamic(() => import('@/components/Map').then((mod) => mod.Map), {
     ),
 });
 
-type SidebarView = 'trip' | 'place';
-
 export default function TripDetailPage() {
     const router = useRouter();
     const params = useParams();
     const tripId = params.id as string;
 
-    const { setTrip, setFavorites, clearTrip } = useTripStore();
+    const {
+        setTrip,
+        setFavorites,
+        clearTrip,
+        selectedPlace,
+        selectPlaceFromSearch,
+        clearSelectedPlace,
+        addFavorite,
+        removeFavorite,
+    } = useTripStore();
+
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedLocation, setSelectedLocation] = useState<NominatimResult | null>(null);
-    const [sidebarView, setSidebarView] = useState<SidebarView>('trip');
 
     const handleLocationSelect = (result: NominatimResult) => {
         console.log('Location selected:', result);
         setSelectedLocation(result);
-        setSidebarView('place'); // Switch to place details view
+        selectPlaceFromSearch(result);
     };
 
     const handleClosePlaceDetails = () => {
-        setSidebarView('trip');
-        setSelectedLocation(null); // Clear marker
+        clearSelectedPlace();
+        setSelectedLocation(null);
     };
+
+    const handleToggleFavorite = async (favoriteId?: string) => {
+        console.log('handleToggleFavorite called with favoriteId:', favoriteId);
+        console.log('selectedPlace:', selectedPlace);
+        console.log('selectedLocation:', selectedLocation);
+
+        if (favoriteId) {
+            // Remove from favorites
+            console.log('Removing favorite:', favoriteId);
+            await removeFavorite(tripId, favoriteId);
+        } else {
+            // Add to favorites - need selectedLocation for this
+            if (!selectedLocation) {
+                console.error('Cannot add favorite: selectedLocation is null');
+                return;
+            }
+            console.log('Adding favorite:', selectedLocation);
+            await addFavorite(tripId, selectedLocation);
+        }
+    };
+
+    // Convert selectedPlace to map location format
+    const mapLocation = selectedPlace ? {
+        place_id: parseInt(selectedPlace.place.external_id.replace('nominatim_', '')) || 0,
+        licence: '',
+        osm_type: 'node',
+        osm_id: 0,
+        lat: selectedPlace.place.latitude,
+        lon: selectedPlace.place.longitude,
+        display_name: selectedPlace.place.address,
+        address: {},
+        boundingbox: ['0', '0', '0', '0'] as [string, string, string, string],
+        type: 'place',
+        importance: 0.5,
+    } as NominatimResult : selectedLocation;
 
     useEffect(() => {
         const fetchTripData = async () => {
@@ -132,7 +174,7 @@ export default function TripDetailPage() {
             {/* Base Layer: Map */}
             <Map
                 className="absolute inset-0"
-                selectedLocation={selectedLocation}
+                selectedLocation={mapLocation}
                 onLocationSelect={handleLocationSelect}
             />
 
@@ -157,10 +199,12 @@ export default function TripDetailPage() {
 
             {/* Sidebar Shell (Desktop: Fixed Panel, Mobile: Bottom Drawer) */}
             <SidebarShell>
-                {sidebarView === 'place' && selectedLocation ? (
+                {selectedPlace ? (
                     <PlaceDetails
-                        place={selectedLocation}
+                        context={selectedPlace}
+                        tripId={tripId}
                         onClose={handleClosePlaceDetails}
+                        onToggleFavorite={handleToggleFavorite}
                     />
                 ) : (
                     <TripSidebar />
