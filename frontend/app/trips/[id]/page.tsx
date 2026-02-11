@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import { FaArrowLeft } from 'react-icons/fa';
 import { SidebarShell } from '@/components/SidebarShell';
 import { TripSidebar } from '@/components/TripSidebar';
+import { PlaceDetails } from '@/components/PlaceDetails';
 import { MapSearch } from '@/components/Map/MapSearch';
 import { useTripStore } from '@/store/tripStore';
 import { api } from '@/lib/api';
@@ -21,6 +22,8 @@ const Map = dynamic(() => import('@/components/Map').then((mod) => mod.Map), {
     ),
 });
 
+type SidebarView = 'trip' | 'place';
+
 export default function TripDetailPage() {
     const router = useRouter();
     const params = useParams();
@@ -30,10 +33,17 @@ export default function TripDetailPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedLocation, setSelectedLocation] = useState<NominatimResult | null>(null);
+    const [sidebarView, setSidebarView] = useState<SidebarView>('trip');
 
     const handleLocationSelect = (result: NominatimResult) => {
         console.log('Location selected:', result);
         setSelectedLocation(result);
+        setSidebarView('place'); // Switch to place details view
+    };
+
+    const handleClosePlaceDetails = () => {
+        setSidebarView('trip');
+        setSelectedLocation(null); // Clear marker
     };
 
     useEffect(() => {
@@ -147,7 +157,14 @@ export default function TripDetailPage() {
 
             {/* Sidebar Shell (Desktop: Fixed Panel, Mobile: Bottom Drawer) */}
             <SidebarShell>
-                <TripSidebar />
+                {sidebarView === 'place' && selectedLocation ? (
+                    <PlaceDetails
+                        place={selectedLocation}
+                        onClose={handleClosePlaceDetails}
+                    />
+                ) : (
+                    <TripSidebar />
+                )}
             </SidebarShell>
         </div>
     );
