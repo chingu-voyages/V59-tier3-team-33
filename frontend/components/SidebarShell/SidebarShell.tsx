@@ -18,15 +18,15 @@ export function SidebarShell({ children }: SidebarShellProps) {
 
   return (
     <>
-      {/* Desktop: Fixed floating panel on the right */}
-      <div className="hidden md:block fixed top-20 right-0 bottom-4 w-[400px] h-screen bg-surface-50 rounded-2xl shadow-2xl border border-surface-500 overflow-hidden z-20">
+      {/* Desktop: Fixed floating panel on the right - bottom 70% */}
+      <div className="hidden md:block fixed bottom-0 right-0 h-[90vh] w-[400px] max-w-[90vw] bg-surface-50 rounded-t-4xl shadow-2xl border border-surface-500 overflow-hidden z-40">
         <div className="h-full overflow-y-auto">{children}</div>
       </div>
 
       {/* Mobile: Toggle button */}
       <button
         onClick={() => setOpen(true)}
-        className="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-primary-400 text-surface-50 rounded-full shadow-lg flex items-center justify-center z-20 hover:bg-primary-500 transition-colors"
+        className="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-primary-400 text-surface-50 rounded-full shadow-lg flex items-center justify-center z-40 hover:bg-primary-500 transition-colors"
         aria-label="Open trip details"
       >
         <FaChevronUp className="text-xl" />

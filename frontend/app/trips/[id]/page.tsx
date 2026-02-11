@@ -118,7 +118,7 @@ export default function TripDetailPage() {
     }
 
     return (
-        <div className="relative h-screen w-full overflow-hidden">
+        <div className="fixed inset-0 w-full h-screen overflow-hidden">
             {/* Base Layer: Map */}
             <Map
                 className="absolute inset-0"
@@ -126,8 +126,8 @@ export default function TripDetailPage() {
                 onLocationSelect={handleLocationSelect}
             />
 
-            {/* Floating Navigation Layer */}
-            <div className="absolute top-0 left-0 md:left-1/4 right-0 p-4" style={{ zIndex: 1000 }}>
+            {/* Floating Navigation Layer - positioned below navbar */}
+            <div className="absolute top-20 left-0 md:left-1/4 right-0 px-4 z-30">
                 <div className="flex items-center gap-3">
                     {/* Back Button */}
                     <button

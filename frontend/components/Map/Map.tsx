@@ -155,7 +155,7 @@ export function Map({
             <MapContainer
                 center={initialCenter}
                 zoom={initialZoom}
-                minZoom={2} // Prevent zooming out too far (stops repetition)
+                minZoom={4} // Prevent zooming out too far (stops repetition)
                 maxZoom={19}
                 maxBounds={maxBounds} // Restrict panning to world bounds
                 maxBoundsViscosity={1.0} // Make bounds "hard" (can't pan beyond)
