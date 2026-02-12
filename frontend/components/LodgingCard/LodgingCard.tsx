@@ -18,9 +18,9 @@ export function LodgingCard({ lodging, onClick }: LodgingCardProps) {
     return (
         <div
             onClick={onClick}
-            className="p-4 bg-primary-50 border border-primary-200 rounded-xl hover:shadow-lg transition-shadow cursor-pointer"
+            className="p-4 bg-primary-50 border border-primary-200 rounded-xl hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
         >
-            <div className="flex gap-3">
+            <div className="flex gap-3 min-w-0">
                 <div className="shrink-0 w-10 h-10 bg-primary-400 rounded-lg flex items-center justify-center">
                     <FaHotel className="text-white" />
                 </div>

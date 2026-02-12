@@ -26,7 +26,7 @@ export interface Event {
   duration: number;
   notes: string | null;
   position: number;
-  type: 'ACTIVITY' | 'TRANSPORT' | 'MEAL' | 'OTHER';
+  type: 'FLIGHT' | 'TRAIN' | 'BUS' | 'MEAL' | 'ACTIVITY' | 'OTHER';
 }
 
 export interface Lodging {

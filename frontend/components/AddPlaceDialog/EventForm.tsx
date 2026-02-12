@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FaRobot, FaClock } from 'react-icons/fa';
+import { FaRobot } from 'react-icons/fa';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -21,9 +21,7 @@ interface EventFormProps {
 
 export interface EventFormData {
     date: string; // YYYY-MM-DD
-    start_time: string;
-    duration: number;
-    type: 'ACTIVITY' | 'TRANSPORT' | 'MEAL' | 'OTHER';
+    type: 'FLIGHT' | 'TRAIN' | 'BUS' | 'MEAL' | 'ACTIVITY' | 'OTHER';
     notes: string;
 }
 
@@ -37,8 +35,6 @@ export function EventForm({
 }: EventFormProps) {
     const [selectedDate, setSelectedDate] = useState<Date | undefined>();
     const [formData, setFormData] = useState({
-        start_time: '09:00',
-        duration: 60,
         type: 'ACTIVITY' as EventFormData['type'],
         notes: '',
     });
@@ -56,7 +52,7 @@ export function EventForm({
         });
     };
 
-    const isValid = selectedDate && formData.start_time && formData.duration > 0;
+    const isValid = selectedDate;
 
     // Find which day number this date corresponds to
     const getDayNumber = (date: Date) => {
@@ -124,39 +120,6 @@ export function EventForm({
                 </p>
             </div>
 
-            {/* Start Time */}
-            <div>
-                <label className="block text-sm font-medium text-neutral-400 mb-2">
-                    Start Time <span className="text-danger-400">*</span>
-                </label>
-                <div className="relative">
-                    <FaClock className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-300" />
-                    <input
-                        type="time"
-                        value={formData.start_time}
-                        onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
-                        className="w-full pl-10 pr-3 py-2 bg-surface-100 border border-surface-500 rounded-lg text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-400"
-                        required
-                    />
-                </div>
-            </div>
-
-            {/* Duration */}
-            <div>
-                <label className="block text-sm font-medium text-neutral-400 mb-2">
-                    Duration (minutes) <span className="text-danger-400">*</span>
-                </label>
-                <input
-                    type="number"
-                    min="1"
-                    value={formData.duration}
-                    onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 bg-surface-100 border border-surface-500 rounded-lg text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-400"
-                    placeholder="60"
-                    required
-                />
-            </div>
-
             {/* Type */}
             <div>
                 <label className="block text-sm font-medium text-neutral-400 mb-2">
@@ -169,8 +132,10 @@ export function EventForm({
                     required
                 >
                     <option value="ACTIVITY">Activity</option>
-                    <option value="MEAL">Dining</option>
-                    <option value="TRANSPORT">Transport</option>
+                    <option value="MEAL">Meal</option>
+                    <option value="FLIGHT">Flight</option>
+                    <option value="TRAIN">Train</option>
+                    <option value="BUS">Bus</option>
                     <option value="OTHER">Other</option>
                 </select>
             </div>

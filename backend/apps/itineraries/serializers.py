@@ -71,7 +71,7 @@ class EventSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Event
-        fields = ["id", "trip_day_pk", "trip_day", "place", "place_details", "start_time", "duration", "notes", "position", "type",]
+        fields = ["id", "trip_day_pk", "trip_day", "place", "place_details", "notes", "position", "type"]
         read_only_fields = ["id", "trip_day", "place_details", "position"]
         validators = []
 
@@ -83,49 +83,6 @@ class EventSerializer(serializers.ModelSerializer):
                 trip__id=self.context["trip_pk"]
             )
 
-    def validate(self, attrs):
-        # Validate start_time and duration logic
-        start_time = attrs.get("start_time")
-        duration = attrs.get("duration")
-        trip_day = attrs.get("trip_day")
-
-        if start_time and duration:
-            dummy_date = datetime.today().date()
-            start_datetime = datetime.combine(dummy_date, start_time)
-            end_datetime = start_datetime + timedelta(minutes=duration)
-
-            if end_datetime.date() > dummy_date:
-                raise serializers.ValidationError({"duration": "Event duration extends past midnight."})
-            
-            # Check for overlapping events
-            if trip_day and hasattr(trip_day, 'pk'):
-                end_time = (datetime.combine(dummy_date, start_time) + timedelta(minutes=duration)).time()
-                
-                overlapping_events = Event.objects.filter(
-                    trip_day=trip_day,
-                    start_time__lt=end_time,
-                    start_time__isnull=False
-                ).exclude(
-                    start_time=start_time
-                ).annotate(
-                    event_end_time=models.ExpressionWrapper(
-                        models.F('start_time') + models.ExpressionWrapper(
-                            models.F('duration') * timedelta(minutes=1),
-                            output_field=models.TimeField()
-                        ),
-                        output_field=models.TimeField()
-                    )
-                ).filter(
-                    event_end_time__gt=start_time
-                )
-                
-                if overlapping_events.exists():
-                    raise serializers.ValidationError({
-                        "start_time": "Event time conflicts with existing events."
-                    })
-
-        return attrs
-        
     def create(self, validated_data):
  
         trip_day = validated_data.pop("trip_day")

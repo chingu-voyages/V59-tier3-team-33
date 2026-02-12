@@ -44,13 +44,19 @@ export function AddPlaceDialog({
 
         setIsSubmitting(true);
 
-        // TODO: API call will go here
-        // Simulate API call
-        setTimeout(() => {
-            setIsSubmitting(false);
+        try {
+            // Call store method to add event
+            const { addEvent } = await import('@/store/tripStore').then(m => m.useTripStore.getState());
+            await addEvent(tripId, data, place);
+
             onOpenChange(false);
             onSuccess?.();
-        }, 1000);
+        } catch (error) {
+            console.error('Failed to add event:', error);
+            // Keep dialog open on error
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleAccommodationSubmit = async (data: AccommodationFormData) => {

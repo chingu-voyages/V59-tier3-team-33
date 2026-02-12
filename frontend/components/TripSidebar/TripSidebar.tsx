@@ -49,7 +49,7 @@ export function TripSidebar() {
             <TabPills tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
             {/* Tab Content */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden">
                 {activeTab === 'favorites' && <FavoritesTab />}
 
                 {activeTab === 'overview' && (

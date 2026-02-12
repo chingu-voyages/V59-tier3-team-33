@@ -55,8 +55,8 @@ export function PlaceDetails({ context, tripId, onClose, onToggleFavorite }: Pla
     };
 
     const handleAddSuccess = () => {
-        console.log('Place added successfully, should refetch trip data');
-        // TODO: Refetch trip data
+        console.log('Place added successfully, returning to trip sidebar');
+        onClose(); // Close PlaceDetails and return to TripSidebar
     };
 
     return (
@@ -95,7 +95,7 @@ export function PlaceDetails({ context, tripId, onClose, onToggleFavorite }: Pla
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden">
                 {/* Error Message */}
                 {error && (
                     <div className="mx-4 mt-4 p-3 bg-danger-100 border border-danger-300 rounded-lg">

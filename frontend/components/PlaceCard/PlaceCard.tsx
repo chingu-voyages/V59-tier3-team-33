@@ -36,9 +36,9 @@ export function PlaceCard({ data, type, onClick }: PlaceCardProps) {
     return (
         <div
             onClick={onClick}
-            className="p-4 bg-surface-100 rounded-xl shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+            className="p-4 bg-surface-100 rounded-xl shadow-md hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
         >
-            <div className="flex gap-3 items-center">
+            <div className="flex gap-3 items-center min-w-0">
                 <div className="shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
                     <FaMapMarkerAlt className="text-primary-400" />
                 </div>
@@ -54,10 +54,12 @@ export function PlaceCard({ data, type, onClick }: PlaceCardProps) {
                     {/* Show event details if it's an event */}
                     {event && (
                         <div className="flex items-center gap-2 mt-2 flex-wrap">
-                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-secondary-100 text-secondary-600 rounded-full text-xs font-medium">
-                                <FaClock />
-                                {formatTime(event.start_time)}
-                            </span>
+                            {event.start_time && (
+                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-secondary-100 text-secondary-600 rounded-full text-xs font-medium">
+                                    <FaClock />
+                                    {formatTime(event.start_time)}
+                                </span>
+                            )}
                             {event.duration > 0 && (
                                 <span className="inline-flex items-center px-2 py-1 bg-secondary-100 text-secondary-600 rounded-full text-xs font-medium">
                                     {event.duration} min

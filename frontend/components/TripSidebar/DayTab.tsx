@@ -89,7 +89,7 @@ export function DayTab({ dayNumber, date }: DayTabProps) {
                 </div>
             )}
 
-            {/* Events Section */}
+            {/* Events Section with Timeline */}
             {events.length > 0 && (
                 <div className="space-y-3">
                     {lodgings.length > 0 && (
@@ -98,22 +98,44 @@ export function DayTab({ dayNumber, date }: DayTabProps) {
                             <span>Events</span>
                         </div>
                     )}
-                    {events.map((event, index) => (
-                        <div key={event.id} className="relative">
-                            {/* Position Number */}
-                            <div className="absolute -left-2 top-4 w-8 h-8 bg-surface-200 rounded-full flex items-center justify-center z-10">
-                                <span className="text-sm font-bold text-neutral-400">{index + 1}</span>
-                            </div>
 
-                            <div className="ml-6">
-                                <PlaceCard
-                                    data={event}
-                                    type="event"
-                                    onClick={() => selectPlaceFromEvent(event.id)}
-                                />
-                            </div>
+                    <div className="relative">
+                        {/* Vertical Timeline Line */}
+                        {events.length > 1 && (
+                            <div
+                                className="absolute left-4 top-12 bottom-12 w-0.5 bg-secondary-200"
+                                style={{
+                                    top: '3rem',
+                                    bottom: '3rem'
+                                }}
+                            />
+                        )}
+
+                        {/* Events */}
+                        <div className="space-y-4">
+                            {events.map((event, index) => (
+                                <div key={event.id} className="relative flex gap-3">
+                                    {/* Timeline Dot */}
+                                    <div className="shrink-0 flex flex-col items-center">
+                                        <div className="w-8 h-8 bg-secondary-400 rounded-full flex items-center justify-center z-10 shadow-md">
+                                            <span className="text-xs font-bold text-white">
+                                                {index + 1}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Event Card */}
+                                    <div className="flex-1 pt-0.5">
+                                        <PlaceCard
+                                            data={event}
+                                            type="event"
+                                            onClick={() => selectPlaceFromEvent(event.id)}
+                                        />
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    </div>
                 </div>
             )}
         </div>

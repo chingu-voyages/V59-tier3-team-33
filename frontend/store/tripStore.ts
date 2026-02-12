@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { Trip, SavedPlace, TabId, TripDay, Event, Lodging, PlaceContext, Place } from '@/types/trip';
 import type { NominatimResult } from '@/services/nominatim';
 import { api } from '@/lib/api';
-import type { AccommodationFormData } from '@/components/AddPlaceDialog';
+import type { AccommodationFormData, EventFormData } from '@/components/AddPlaceDialog';
 
 interface TripState {
   // Raw data
@@ -45,6 +45,7 @@ interface TripState {
   addFavorite: (tripId: string, placeOrNominatim: NominatimResult | Place) => Promise<void>;
   removeFavorite: (tripId: string, favoriteId: string) => Promise<void>;
   addLodging: (tripId: string, data: AccommodationFormData, place: Place) => Promise<void>;
+  addEvent: (tripId: string, data: EventFormData, place: Place) => Promise<void>;
   
   // Utility
   clearTrip: () => void;
@@ -447,6 +448,43 @@ export const useTripStore = create<TripState>((set, get) => ({
       
     } catch (error) {
       console.error('Failed to add lodging:', error);
+      throw error;
+    }
+  },
+  
+  addEvent: async (tripId: string, data: EventFormData, place: Place) => {
+    const state = get();
+    
+    try {
+      // Find trip_day_pk by matching the date
+      const tripDay = Object.values(state.tripDaysById).find(
+        day => day.date === data.date
+      );
+      
+      if (!tripDay) {
+        throw new Error(`No trip day found for date: ${data.date}`);
+      }
+      
+      // Call API
+      await api.post(`/trips/${tripId}/events/`, {
+        trip_day_pk: tripDay.id,
+        place: {
+          external_id: place.external_id,
+          name: place.name,
+          address: place.address,
+          latitude: parseFloat(place.latitude),
+          longitude: parseFloat(place.longitude),
+        },
+        notes: data.notes || null,
+        type: data.type,
+      });
+      
+      // Refetch entire trip to get updated trip_days with new event
+      const tripData = await api.get(`/trips/${tripId}/`);
+      get().setTrip(tripData);
+      
+    } catch (error) {
+      console.error('Failed to add event:', error);
       throw error;
     }
   },
