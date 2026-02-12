@@ -95,24 +95,19 @@ class TripSavedPlace(BaseModel):
 
 # TODO: make tests to make sure constraints are behaving as expected
 class Lodging(BaseModel):
-    name = models.CharField(max_length=255)
     arrival_date = models.DateField()
     departure_date = models.DateField()
-    location_text = models.CharField(max_length=255, null=True, blank=True)
-
     trip = models.ForeignKey("Trip", on_delete=models.CASCADE, related_name="lodgings")
     place = models.ForeignKey(
         "places.Place", on_delete=models.SET_NULL, null=True, blank=True
     )
 
     def __str__(self):
-        return f"{self.name} ({self.arrival_date} to {self.departure_date})"
+        place_name = self.place.name if self.place else "Unknown Place"
+        return f"{place_name} ({self.arrival_date} to {self.departure_date})"
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(
-                fields=["name", "trip"], name="unique_lodging_per_trip"
-            ),
             models.CheckConstraint(
                 condition=models.Q(arrival_date__lte=models.F("departure_date")),
                 name="arrival_date_before_departure_date",

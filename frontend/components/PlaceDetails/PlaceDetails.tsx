@@ -1,13 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { FaMapMarkerAlt, FaTimes, FaHeart, FaRegHeart, FaStar, FaClock, FaCalendar, FaRobot } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaTimes, FaHeart, FaRegHeart, FaClock, FaCalendar, FaRobot } from 'react-icons/fa';
 import {
     Accordion,
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion';
+import { AddPlaceDialog } from '@/components/AddPlaceDialog';
+import { useTripStore } from '@/store/tripStore';
 import type { PlaceContext } from '@/types/trip';
 
 interface PlaceDetailsProps {
@@ -20,7 +22,12 @@ interface PlaceDetailsProps {
 export function PlaceDetails({ context, tripId, onClose, onToggleFavorite }: PlaceDetailsProps) {
     const [isProcessing, setIsProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const { place, isFavorite, isInItinerary, source } = context;
+    const [showAddDialog, setShowAddDialog] = useState(false);
+    const { place, isFavorite, isInItinerary, isLodging, source } = context;
+
+    // Get trip data from store for the dialog
+    const { trip, tripDaysById, tripDayIds } = useTripStore();
+    const tripDays = tripDayIds.map(id => tripDaysById[id]);
 
     const handleToggleFavorite = async () => {
         console.log('PlaceDetails: handleToggleFavorite called');
@@ -44,8 +51,12 @@ export function PlaceDetails({ context, tripId, onClose, onToggleFavorite }: Pla
     };
 
     const handleAddPlace = () => {
-        // TODO: Implement add place to itinerary
-        console.log('Add place to itinerary:', place);
+        setShowAddDialog(true);
+    };
+
+    const handleAddSuccess = () => {
+        console.log('Place added successfully, should refetch trip data');
+        // TODO: Refetch trip data
     };
 
     return (
@@ -95,7 +106,7 @@ export function PlaceDetails({ context, tripId, onClose, onToggleFavorite }: Pla
                 {/* Meta Info */}
                 <div className="p-4 space-y-2">
                     {/* Status badges */}
-                    <div className="flex items-center gap-2 text-sm">
+                    <div className="flex items-center gap-2 text-sm flex-wrap">
                         {isFavorite && (
                             <span className="px-2 py-1 bg-primary-100 text-primary-400 rounded-full text-xs font-medium">
                                 Saved
@@ -104,6 +115,11 @@ export function PlaceDetails({ context, tripId, onClose, onToggleFavorite }: Pla
                         {isInItinerary && (
                             <span className="px-2 py-1 bg-secondary-100 text-secondary-400 rounded-full text-xs font-medium">
                                 In Itinerary
+                            </span>
+                        )}
+                        {isLodging && (
+                            <span className="px-2 py-1 bg-primary-100 text-primary-600 rounded-full text-xs font-medium">
+                                Accommodation
                             </span>
                         )}
                     </div>
@@ -121,8 +137,8 @@ export function PlaceDetails({ context, tripId, onClose, onToggleFavorite }: Pla
                     </div>
                 </div>
 
-                {/* Add Place Button - only show if not already in itinerary */}
-                {!isInItinerary && (
+                {/* Add Place Button - only show if not already in itinerary or lodging */}
+                {!isInItinerary && source !== 'lodging' && (
                     <div className="px-4 pb-4">
                         <button
                             onClick={handleAddPlace}
@@ -212,6 +228,20 @@ export function PlaceDetails({ context, tripId, onClose, onToggleFavorite }: Pla
                     </Accordion>
                 </div>
             </div>
+
+            {/* Add Place Dialog */}
+            {trip && (
+                <AddPlaceDialog
+                    open={showAddDialog}
+                    onOpenChange={setShowAddDialog}
+                    place={place}
+                    tripId={tripId}
+                    tripDays={tripDays}
+                    tripStartDate={trip.start_date}
+                    tripEndDate={trip.end_date}
+                    onSuccess={handleAddSuccess}
+                />
+            )}
         </div>
     );
 }

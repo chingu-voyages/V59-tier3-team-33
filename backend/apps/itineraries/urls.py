@@ -18,5 +18,11 @@ trips_router.register(
     basename="trip-events"
 )
 
+trips_router.register(
+    r"lodgings",
+    views.TripLodgingViewset,
+    basename="trip-lodgings"
+)
+
 
 urlpatterns = router.urls + trips_router.urls

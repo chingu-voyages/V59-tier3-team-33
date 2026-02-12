@@ -1,8 +1,9 @@
 'use client';
 
-import { FaCalendarDay } from 'react-icons/fa';
+import { FaCalendarDay, FaHotel } from 'react-icons/fa';
 import { useTripStore } from '@/store/tripStore';
 import { PlaceCard } from '@/components/PlaceCard';
+import { LodgingCard } from '@/components/LodgingCard';
 
 interface DayTabProps {
     dayNumber: number;
@@ -10,12 +11,24 @@ interface DayTabProps {
 }
 
 export function DayTab({ dayNumber, date }: DayTabProps) {
-    const { tripDaysById, eventsByDayId, eventsById, selectPlaceFromEvent } = useTripStore();
+    const {
+        tripDaysById,
+        eventsByDayId,
+        eventsById,
+        lodgingsByDayId,
+        lodgingsById,
+        selectPlaceFromEvent,
+        selectPlaceFromLodging,
+    } = useTripStore();
 
     // Find the trip day for this date
     const tripDay = Object.values(tripDaysById).find((day) => day.date === date);
     const eventIds = tripDay ? eventsByDayId[tripDay.id] || [] : [];
     const events = eventIds.map(id => eventsById[id]).sort((a, b) => a.position - b.position);
+
+    // Get lodgings for this day
+    const lodgingIds = tripDay ? lodgingsByDayId[tripDay.id] || [] : [];
+    const lodgings = lodgingIds.map(id => lodgingsById[id]);
 
     // Format date for display
     const displayDate = new Date(date).toLocaleDateString('en-US', {
@@ -24,7 +37,9 @@ export function DayTab({ dayNumber, date }: DayTabProps) {
         day: 'numeric',
     });
 
-    if (events.length === 0) {
+    const hasContent = events.length > 0 || lodgings.length > 0;
+
+    if (!hasContent) {
         return (
             <div className="flex flex-col items-center justify-center p-8 text-center">
                 <div className="w-16 h-16 bg-secondary-50 rounded-full flex items-center justify-center mb-4">
@@ -34,16 +49,16 @@ export function DayTab({ dayNumber, date }: DayTabProps) {
                     Day {dayNumber}
                 </h3>
                 <p className="text-neutral-200 text-sm mb-4">{displayDate}</p>
-                <p className="text-neutral-300 font-medium mb-1">No events scheduled</p>
+                <p className="text-neutral-300 font-medium mb-1">No plans yet</p>
                 <p className="text-neutral-200 text-sm">
-                    Search and assign places to this day
+                    Search and add places to this day
                 </p>
             </div>
         );
     }
 
     return (
-        <div className="p-4 space-y-3">
+        <div className="p-4 space-y-4">
             {/* Day Header */}
             <div className="mb-4">
                 <h3 className="text-lg font-semibold text-neutral-400">
@@ -51,19 +66,56 @@ export function DayTab({ dayNumber, date }: DayTabProps) {
                 </h3>
                 <p className="text-sm text-neutral-200">{displayDate}</p>
                 <p className="text-xs text-neutral-300 mt-1">
-                    {events.length} {events.length === 1 ? 'event' : 'events'}
+                    {lodgings.length > 0 && `${lodgings.length} ${lodgings.length === 1 ? 'lodging' : 'lodgings'}`}
+                    {lodgings.length > 0 && events.length > 0 && ' • '}
+                    {events.length > 0 && `${events.length} ${events.length === 1 ? 'event' : 'events'}`}
                 </p>
             </div>
 
-            {/* Events List */}
-            {events.map((event, index) => (
-                <PlaceCard
-                    key={event.id}
-                    data={event}
-                    type="event"
-                    onClick={() => selectPlaceFromEvent(event.id)}
-                />
-            ))}
+            {/* Lodgings Section */}
+            {lodgings.length > 0 && (
+                <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm font-medium text-neutral-400">
+                        <FaHotel />
+                        <span>Accommodation</span>
+                    </div>
+                    {lodgings.map((lodging) => (
+                        <LodgingCard
+                            key={lodging.id}
+                            lodging={lodging}
+                            onClick={() => selectPlaceFromLodging(lodging.id)}
+                        />
+                    ))}
+                </div>
+            )}
+
+            {/* Events Section */}
+            {events.length > 0 && (
+                <div className="space-y-3">
+                    {lodgings.length > 0 && (
+                        <div className="flex items-center gap-2 text-sm font-medium text-neutral-400 mt-4">
+                            <FaCalendarDay />
+                            <span>Events</span>
+                        </div>
+                    )}
+                    {events.map((event, index) => (
+                        <div key={event.id} className="relative">
+                            {/* Position Number */}
+                            <div className="absolute -left-2 top-4 w-8 h-8 bg-surface-200 rounded-full flex items-center justify-center z-10">
+                                <span className="text-sm font-bold text-neutral-400">{index + 1}</span>
+                            </div>
+
+                            <div className="ml-6">
+                                <PlaceCard
+                                    data={event}
+                                    type="event"
+                                    onClick={() => selectPlaceFromEvent(event.id)}
+                                />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

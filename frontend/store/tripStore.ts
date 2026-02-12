@@ -1,7 +1,8 @@
 import { create } from 'zustand';
-import { Trip, SavedPlace, TabId, TripDay, Event, PlaceContext, Place } from '@/types/trip';
+import { Trip, SavedPlace, TabId, TripDay, Event, Lodging, PlaceContext, Place } from '@/types/trip';
 import type { NominatimResult } from '@/services/nominatim';
 import { api } from '@/lib/api';
+import type { AccommodationFormData } from '@/components/AddPlaceDialog';
 
 interface TripState {
   // Raw data
@@ -14,10 +15,14 @@ interface TripState {
   tripDayIds: string[];
   eventsById: Record<string, Event>;
   eventsByDayId: Record<string, string[]>;
+  lodgingsById: Record<string, Lodging>;
+  lodgingIds: string[];
+  lodgingsByDayId: Record<string, string[]>; // Lodgings active on each day
   
   // Reverse lookups
   placeIdToFavoriteId: Record<string, string>;
   placeIdToEventIds: Record<string, string[]>;
+  placeIdToLodgingId: Record<string, string>;
   
   // UI state
   activeTab: TabId;
@@ -26,17 +31,20 @@ interface TripState {
   // Actions
   setTrip: (trip: Trip) => void;
   setFavorites: (favorites: SavedPlace[]) => void;
+  setLodgings: (lodgings: Lodging[]) => void;
   setActiveTab: (tab: TabId) => void;
   
   // Place selection
   selectPlaceFromSearch: (place: NominatimResult) => void;
   selectPlaceFromFavorite: (favoriteId: string) => void;
   selectPlaceFromEvent: (eventId: string) => void;
+  selectPlaceFromLodging: (lodgingId: string) => void;
   clearSelectedPlace: () => void;
   
   // CRUD operations
-  addFavorite: (tripId: string, place: NominatimResult) => Promise<void>;
+  addFavorite: (tripId: string, placeOrNominatim: NominatimResult | Place) => Promise<void>;
   removeFavorite: (tripId: string, favoriteId: string) => Promise<void>;
+  addLodging: (tripId: string, data: AccommodationFormData, place: Place) => Promise<void>;
   
   // Utility
   clearTrip: () => void;
@@ -55,7 +63,7 @@ function nominatimToPlace(nominatim: NominatimResult): Omit<Place, 'id'> {
 }
 
 // Helper to normalize trip data
-function normalizeTripData(trip: Trip, favorites: SavedPlace[]) {
+function normalizeTripData(trip: Trip, favorites: SavedPlace[], lodgings: Lodging[]) {
   const favoritesById: Record<string, SavedPlace> = {};
   const favoriteIds: string[] = [];
   const placeIdToFavoriteId: Record<string, string> = {};
@@ -89,6 +97,37 @@ function normalizeTripData(trip: Trip, favorites: SavedPlace[]) {
     });
   });
   
+  // Normalize lodgings
+  const lodgingsById: Record<string, Lodging> = {};
+  const lodgingIds: string[] = [];
+  const lodgingsByDayId: Record<string, string[]> = {};
+  const placeIdToLodgingId: Record<string, string> = {};
+  
+  // Initialize lodgingsByDayId for all days
+  tripDayIds.forEach(dayId => {
+    lodgingsByDayId[dayId] = [];
+  });
+  
+  lodgings.forEach(lodging => {
+    lodgingsById[lodging.id] = lodging;
+    lodgingIds.push(lodging.id);
+    placeIdToLodgingId[lodging.place_details.id] = lodging.id;
+    
+    // Find which days this lodging is active on
+    const arrivalDate = new Date(lodging.arrival_date);
+    const departureDate = new Date(lodging.departure_date);
+    
+    tripDayIds.forEach(dayId => {
+      const day = tripDaysById[dayId];
+      const dayDate = new Date(day.date);
+      
+      // Check if this day falls within the lodging date range (inclusive)
+      if (dayDate >= arrivalDate && dayDate <= departureDate) {
+        lodgingsByDayId[dayId].push(lodging.id);
+      }
+    });
+  });
+  
   return {
     favoritesById,
     favoriteIds,
@@ -98,6 +137,10 @@ function normalizeTripData(trip: Trip, favorites: SavedPlace[]) {
     eventsByDayId,
     placeIdToFavoriteId,
     placeIdToEventIds,
+    lodgingsById,
+    lodgingIds,
+    lodgingsByDayId,
+    placeIdToLodgingId,
   };
 }
 
@@ -110,15 +153,19 @@ export const useTripStore = create<TripState>((set, get) => ({
   tripDayIds: [],
   eventsById: {},
   eventsByDayId: {},
+  lodgingsById: {},
+  lodgingIds: [],
+  lodgingsByDayId: {},
   placeIdToFavoriteId: {},
   placeIdToEventIds: {},
+  placeIdToLodgingId: {},
   activeTab: 'favorites',
   selectedPlace: null,
   
   // Actions
   setTrip: (trip) => {
     const state = get();
-    const normalized = normalizeTripData(trip, Object.values(state.favoritesById));
+    const normalized = normalizeTripData(trip, Object.values(state.favoritesById), Object.values(state.lodgingsById));
     set({ 
       trip,
       ...normalized,
@@ -132,11 +179,27 @@ export const useTripStore = create<TripState>((set, get) => ({
       return;
     }
     
-    const normalized = normalizeTripData(state.trip, favorites);
+    const normalized = normalizeTripData(state.trip, favorites, Object.values(state.lodgingsById));
     set({
       favoritesById: normalized.favoritesById,
       favoriteIds: normalized.favoriteIds,
       placeIdToFavoriteId: normalized.placeIdToFavoriteId,
+    });
+  },
+  
+  setLodgings: (lodgings) => {
+    const state = get();
+    if (!state.trip) {
+      set({ lodgingsById: {}, lodgingIds: [], lodgingsByDayId: {} });
+      return;
+    }
+    
+    const normalized = normalizeTripData(state.trip, Object.values(state.favoritesById), lodgings);
+    set({
+      lodgingsById: normalized.lodgingsById,
+      lodgingIds: normalized.lodgingIds,
+      lodgingsByDayId: normalized.lodgingsByDayId,
+      placeIdToLodgingId: normalized.placeIdToLodgingId,
     });
   },
   
@@ -158,6 +221,9 @@ export const useTripStore = create<TripState>((set, get) => ({
     const isInItinerary = existingFavorite 
       ? !!state.placeIdToEventIds[existingFavorite.place_details.id]
       : false;
+    const isLodging = existingFavorite
+      ? !!state.placeIdToLodgingId[existingFavorite.place_details.id]
+      : false;
     
     set({
       selectedPlace: {
@@ -166,6 +232,7 @@ export const useTripStore = create<TripState>((set, get) => ({
         favoriteId: existingFavorite?.id,
         isFavorite,
         isInItinerary,
+        isLodging,
       },
     });
   },
@@ -180,6 +247,7 @@ export const useTripStore = create<TripState>((set, get) => ({
     }
     
     const isInItinerary = !!state.placeIdToEventIds[favorite.place_details.id];
+    const isLodging = !!state.placeIdToLodgingId[favorite.place_details.id];
     
     set({
       selectedPlace: {
@@ -188,6 +256,7 @@ export const useTripStore = create<TripState>((set, get) => ({
         favoriteId: favorite.id,
         isFavorite: true,
         isInItinerary,
+        isLodging,
       },
     });
   },
@@ -202,6 +271,7 @@ export const useTripStore = create<TripState>((set, get) => ({
     }
     
     const favoriteId = state.placeIdToFavoriteId[event.place_details.id];
+    const lodgingId = state.placeIdToLodgingId[event.place_details.id];
     
     set({
       selectedPlace: {
@@ -212,6 +282,31 @@ export const useTripStore = create<TripState>((set, get) => ({
         tripDayId: event.trip_day,
         isFavorite: !!favoriteId,
         isInItinerary: true,
+        isLodging: !!lodgingId,
+      },
+    });
+  },
+  
+  selectPlaceFromLodging: (lodgingId: string) => {
+    const state = get();
+    const lodging = state.lodgingsById[lodgingId];
+    
+    if (!lodging) {
+      console.error('Lodging not found:', lodgingId);
+      return;
+    }
+    
+    const favoriteId = state.placeIdToFavoriteId[lodging.place_details.id];
+    
+    set({
+      selectedPlace: {
+        place: lodging.place_details,
+        source: 'lodging',
+        favoriteId,
+        lodgingId: lodging.id,
+        isFavorite: !!favoriteId,
+        isInItinerary: false,
+        isLodging: true,
       },
     });
   },
@@ -219,9 +314,25 @@ export const useTripStore = create<TripState>((set, get) => ({
   clearSelectedPlace: () => set({ selectedPlace: null }),
   
   // CRUD operations
-  addFavorite: async (tripId: string, nominatim: NominatimResult) => {
+  addFavorite: async (tripId: string, placeOrNominatim: NominatimResult | Place) => {
     const state = get();
-    const placeData = nominatimToPlace(nominatim);
+    
+    // Convert to place data format
+    let placeData: Omit<Place, 'id'>;
+    if ('place_id' in placeOrNominatim) {
+      // It's a NominatimResult
+      placeData = nominatimToPlace(placeOrNominatim);
+    } else {
+      // It's already a Place
+      placeData = {
+        external_id: placeOrNominatim.external_id,
+        name: placeOrNominatim.name,
+        address: placeOrNominatim.address,
+        latitude: placeOrNominatim.latitude,
+        longitude: placeOrNominatim.longitude,
+        description: placeOrNominatim.description,
+      };
+    }
     
     try {
       // Call API
@@ -315,6 +426,31 @@ export const useTripStore = create<TripState>((set, get) => ({
     }
   },
   
+  addLodging: async (tripId: string, data: AccommodationFormData, place: Place) => {
+    try {
+      // Call API
+      await api.post(`/trips/${tripId}/lodgings/`, {
+        place: {
+          external_id: place.external_id,
+          name: place.name,
+          address: place.address,
+          latitude: parseFloat(place.latitude),
+          longitude: parseFloat(place.longitude),
+        },
+        arrival_date: data.arrival_date,
+        departure_date: data.departure_date,
+      });
+      
+      // Refetch lodgings
+      const lodgingsData = await api.get(`/trips/${tripId}/lodgings/`);
+      get().setLodgings(lodgingsData);
+      
+    } catch (error) {
+      console.error('Failed to add lodging:', error);
+      throw error;
+    }
+  },
+  
   clearTrip: () =>
     set({
       trip: null,
@@ -324,8 +460,12 @@ export const useTripStore = create<TripState>((set, get) => ({
       tripDayIds: [],
       eventsById: {},
       eventsByDayId: {},
+      lodgingsById: {},
+      lodgingIds: [],
+      lodgingsByDayId: {},
       placeIdToFavoriteId: {},
       placeIdToEventIds: {},
+      placeIdToLodgingId: {},
       activeTab: 'favorites',
       selectedPlace: null,
     }),

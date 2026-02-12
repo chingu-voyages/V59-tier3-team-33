@@ -30,6 +30,7 @@ export default function TripDetailPage() {
     const {
         setTrip,
         setFavorites,
+        setLodgings,
         clearTrip,
         selectedPlace,
         selectPlaceFromSearch,
@@ -63,13 +64,17 @@ export default function TripDetailPage() {
             console.log('Removing favorite:', favoriteId);
             await removeFavorite(tripId, favoriteId);
         } else {
-            // Add to favorites - need selectedLocation for this
-            if (!selectedLocation) {
-                console.error('Cannot add favorite: selectedLocation is null');
+            // Add to favorites
+            // Use selectedLocation if available (from search), otherwise use selectedPlace.place
+            const placeToFavorite = selectedLocation || selectedPlace?.place;
+
+            if (!placeToFavorite) {
+                console.error('Cannot add favorite: no place data available');
                 return;
             }
-            console.log('Adding favorite:', selectedLocation);
-            await addFavorite(tripId, selectedLocation);
+
+            console.log('Adding favorite:', placeToFavorite);
+            await addFavorite(tripId, placeToFavorite);
         }
     };
 
@@ -113,6 +118,16 @@ export default function TripDetailPage() {
                     setFavorites([]);
                 }
 
+                // Fetch lodgings
+                try {
+                    const lodgingsData = await api.get(`/trips/${tripId}/lodgings/`);
+                    setLodgings(lodgingsData);
+                } catch (lodgingError) {
+                    console.error('Failed to fetch lodgings:', lodgingError);
+                    // Don't fail the whole page if lodgings fail
+                    setLodgings([]);
+                }
+
                 setIsLoading(false);
             } catch (err: any) {
                 console.error('Failed to fetch trip data:', err);
@@ -135,7 +150,7 @@ export default function TripDetailPage() {
         return () => {
             clearTrip();
         };
-    }, [tripId, setTrip, setFavorites, clearTrip, router]);
+    }, [tripId, setTrip, setFavorites, setLodgings, clearTrip, router]);
 
     // Loading state
     if (isLoading) {

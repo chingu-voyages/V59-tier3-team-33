@@ -29,6 +29,14 @@ export interface Event {
   type: 'ACTIVITY' | 'TRANSPORT' | 'MEAL' | 'OTHER';
 }
 
+export interface Lodging {
+  id: string;
+  trip: string;
+  arrival_date: string; // YYYY-MM-DD
+  departure_date: string; // YYYY-MM-DD
+  place_details: Place;
+}
+
 export interface TripDay {
   id: string;
   trip: string;
@@ -60,7 +68,7 @@ export interface Tab {
 }
 
 // Place context for tracking where a place was selected from
-export type PlaceSource = 'search' | 'favorite' | 'event';
+export type PlaceSource = 'search' | 'favorite' | 'event' | 'lodging';
 
 export interface PlaceContext {
   place: Place;  // Normalized place data
@@ -69,9 +77,11 @@ export interface PlaceContext {
   // Metadata
   favoriteId?: string;  // If it's a saved place
   eventId?: string;     // If it's an event
+  lodgingId?: string;   // If it's a lodging
   tripDayId?: string;   // Which day it belongs to
   
   // Computed flags
   isFavorite: boolean;
   isInItinerary: boolean;
+  isLodging: boolean;
 }

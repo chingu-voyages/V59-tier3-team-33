@@ -1,7 +1,7 @@
 from rest_framework import viewsets, permissions, mixins
 from django.shortcuts import get_object_or_404
 
-from .models import Event
+from .models import Event, Lodging
 from .models import Trip, UserTrip, TripDay, TripSavedPlace
 from .permissions import IsTripMember
 from .serializers import (
@@ -9,7 +9,9 @@ from .serializers import (
     TripSerializer,
     SavePlaceToTripSerializer,
     RemoveSavedPlaceFromTripSerializer,
-    EventSerializer
+    EventSerializer,
+    LodgingSerializer,
+    UpdateLodgingSerializer,
 )
 from django.db import transaction
 from datetime import timedelta
@@ -121,3 +123,21 @@ class TripEventViewset(viewsets.ModelViewSet):
             instance.delete()
             trip_day.normalize_position()
 
+
+class TripLodgingViewset(viewsets.ModelViewSet):
+    queryset = Lodging.objects.all()
+    serializer_class = LodgingSerializer
+    permission_classes = [permissions.IsAuthenticated, IsTripMember]
+
+    def get_queryset(self):
+        return super().get_queryset().filter(trip=self.kwargs["trip_pk"])
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["trip_pk"] = self.kwargs["trip_pk"]
+        return context
+    
+    def get_serializer_class(self):
+        if self.action in ["update"]:
+            return UpdateLodgingSerializer
+        return LodgingSerializer
