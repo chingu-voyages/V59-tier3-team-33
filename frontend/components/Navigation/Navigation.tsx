@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export const navContainer = cva(
-  "z-50 w-full bg-white shadow",
+  "z-50 w-full bg-white/80 shadow",
   {
     variants: {
       sticky: {

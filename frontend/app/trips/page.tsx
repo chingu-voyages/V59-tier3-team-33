@@ -11,8 +11,27 @@ import {
   FaMapMarkerAlt,
   FaPlus,
   FaSlidersH,
+  FaEdit,
+  FaTrash,
 } from 'react-icons/fa';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 type Trip = {
   id: string;
@@ -23,10 +42,14 @@ type Trip = {
 };
 
 export default function TripsPage() {
+  const router = useRouter();
   const { isLoading: authLoading } = useAuth();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [tripToDelete, setTripToDelete] = useState<Trip | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchTrips = async () => {
@@ -44,6 +67,37 @@ export default function TripsPage() {
       fetchTrips();
     }
   }, [authLoading]);
+
+  const handleDeleteClick = (trip: Trip, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setTripToDelete(trip);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!tripToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await api.delete(`/trips/${tripToDelete.id}/`);
+      // Remove from local state
+      setTrips(trips.filter(t => t.id !== tripToDelete.id));
+      setDeleteDialogOpen(false);
+      setTripToDelete(null);
+    } catch (error) {
+      console.error('Failed to delete trip:', error);
+      alert('Failed to delete trip. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    alert('Edit feature coming soon!');
+  };
 
   if (authLoading || loading) {
     return (
@@ -91,13 +145,19 @@ export default function TripsPage() {
             <p className="text-neutral-100 mb-6">
               Start planning your next adventure!
             </p>
-            <button className="px-6 py-2.5 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium">
+            <button
+              onClick={() => router.push('/trips/create')}
+              className="px-6 py-2.5 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium"
+            >
               Create Your First Trip
             </button>
           </div>
         ) : (
           <div className="space-y-4">
-            <button className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-secondary-300 rounded-xl hover:bg-secondary-400 transition-colors shadow-sm my-4">
+            <button
+              onClick={() => router.push('/trips/create')}
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-secondary-300 rounded-xl hover:bg-secondary-400 transition-colors shadow-sm my-4"
+            >
               <FaPlus className="text-surface-100" />
               <span className="text-surface-100 font-medium">
                 Create New Plan
@@ -109,10 +169,33 @@ export default function TripsPage() {
                 key={trip.id}
                 className="group relative bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200"
               >
-                {/* Menu Icon */}
-                <button className="absolute top-4 right-4 p-2 text-neutral-100 hover:text-neutral-200 rounded-full hover:bg-surface-400 transition-colors z-10">
-                  <FaEllipsisV className="text-sm" />
-                </button>
+                {/* Menu Dropdown */}
+                <div className="absolute top-4 right-4 z-10">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        className="p-2 text-neutral-100 hover:text-neutral-200 rounded-full hover:bg-surface-400 transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <FaEllipsisV className="text-sm" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem onClick={handleEditClick}>
+                        <FaEdit className="mr-2 h-4 w-4" />
+                        <span>Edit</span>
+                        <span className="ml-auto text-xs text-neutral-300">Soon</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={(e) => handleDeleteClick(trip, e as any)}
+                        className="text-danger-600 focus:text-danger-600"
+                      >
+                        <FaTrash className="mr-2 h-4 w-4" />
+                        <span>Delete</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
 
                 <Link
                   href={`/trips/${trip.id}`}
@@ -143,6 +226,28 @@ export default function TripsPage() {
             ))}
           </div>
         )}
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Trip</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete "{tripToDelete?.name}"? This action cannot be undone and will permanently delete all events, accommodations, and saved places associated with this trip.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+                className="bg-danger-600 hover:bg-danger-700 focus:ring-danger-600"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

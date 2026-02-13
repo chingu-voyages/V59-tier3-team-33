@@ -1,5 +1,8 @@
+from django.core import validators
+from django.db import models, transaction
 from rest_framework import serializers
-from .models import Trip, UserTrip, TripDay, TripSavedPlace
+from datetime import datetime, timedelta
+from .models import Trip, UserTrip, TripDay, TripSavedPlace, Event, Lodging
 from apps.places.models import Place
 from apps.places.serializers import PlaceSerializer, CreatePlaceSerializer
 from apps.accounts.serializers import UserSimpleSerializer
@@ -17,16 +20,6 @@ class TripSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class TripDetailSerializer(TripSerializer):
-    total_days = serializers.SerializerMethodField()
-
-    class Meta(TripSerializer.Meta):
-        fields = TripSerializer.Meta.fields + ["total_days"]
-
-    def get_total_days(self, obj: Trip):
-        return (obj.end_date - obj.start_date).days + 1
-
-
 class SavePlaceToTripSerializer(serializers.ModelSerializer):
     # Write-only nested serializer
     place = CreatePlaceSerializer(write_only=True)
@@ -39,26 +32,24 @@ class SavePlaceToTripSerializer(serializers.ModelSerializer):
         model = TripSavedPlace
         fields = ["id", "trip", "place", "place_details", "saved_by", "created_at"]
         read_only_fields = ["id", "trip", "place_details", "saved_by", "created_at"]
-
+        validators = []
+        
     def create(self, validated_data):
         # get or create the place using CreatePlaceSerializer
         place_data = validated_data.pop("place")
-        place_serializer = CreatePlaceSerializer(data=place_data)
-        place_serializer.is_valid(raise_exception=True)
-        place = place_serializer.save()
-
-        # Create the TripSavedPlace instance
-        validated_data["place"] = place
-        try:
-            return super().create(validated_data)
-        except Exception:
-            # If unique constraint fails (trip + place already exists), return existing
-            existing = TripSavedPlace.objects.filter(
-                trip=validated_data.get("trip"), place=place
-            ).first()
-            if existing:
-                return existing
-            raise
+        
+        place, _ = Place.objects.get_or_create(
+             external_id=place_data['external_id'],
+             defaults=place_data
+        )
+        
+        # Get or create TripSavedPlace
+        instance, _ = TripSavedPlace.objects.get_or_create(
+            trip=validated_data.get("trip"),
+            place=place,
+            defaults=validated_data
+        )
+        return instance
 
 
 class RemoveSavedPlaceFromTripSerializer(serializers.ModelSerializer):
@@ -68,8 +59,140 @@ class RemoveSavedPlaceFromTripSerializer(serializers.ModelSerializer):
         read_only_fields = ["id"]
 
 
-# /trips/{id}/saved-places (favorite places)
-# /trips/{id}/trip-days (for overview)
-# /trips/{id}/trip-days/{day_id} (for day details)
-# /trips/{id}/trip-days/{day_id}/events (for events of the specific day)
-# /trips/{id}/trip-days/{day_id}/events/{event_id} (for event details)
+class EventSerializer(serializers.ModelSerializer):
+    trip_day_pk = serializers.PrimaryKeyRelatedField(
+        queryset=TripDay.objects.all(),
+        write_only=True,
+        source="trip_day"
+    )
+    
+    place = CreatePlaceSerializer(write_only=True)
+    place_details = PlaceSerializer(source="place", read_only=True)
+    
+    class Meta:
+        model = Event
+        fields = ["id", "trip_day_pk", "trip_day", "place", "place_details", "notes", "position", "type"]
+        read_only_fields = ["id", "trip_day", "place_details", "position"]
+        validators = []
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filter the queryset dynamically to ensure the user can only select days belonging to the current Trip
+        if "trip_pk" in self.context:
+            self.fields["trip_day_pk"].queryset = TripDay.objects.filter(
+                trip__id=self.context["trip_pk"]
+            )
+
+    def create(self, validated_data):
+ 
+        trip_day = validated_data.pop("trip_day")
+        place_data = validated_data.pop("place")
+        
+        place, _ = Place.objects.get_or_create(
+             external_id=place_data['external_id'],
+             defaults=place_data
+        )
+
+        return Event.objects.create(
+            trip_day=trip_day, 
+            place=place,
+            position=9999, 
+            **validated_data
+        )
+        
+    def update(self, instance, validated_data):
+        # ignore/pop trip_day as it's not allowed to change the day of the event
+        if 'trip_day' in validated_data:
+            validated_data.pop('trip_day')
+        
+        if 'place' in validated_data:
+            place_data = validated_data.pop('place')
+            place, _ = Place.objects.get_or_create(
+                external_id=place_data['external_id'],
+                defaults=place_data
+            )
+            instance.place = place
+            
+        return super().update(instance, validated_data)
+    
+class TripDaySerializer(serializers.ModelSerializer):
+    
+    events = EventSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = TripDay
+        fields = ["id", "trip", "date", "events"]
+        read_only_fields = ["id", "trip", "date", "events"]
+
+class TripDetailSerializer(TripSerializer):
+    total_days = serializers.SerializerMethodField()
+    trip_days = TripDaySerializer(many=True, read_only=True)
+
+    class Meta(TripSerializer.Meta):
+        fields = TripSerializer.Meta.fields + ["total_days", "trip_days"]
+
+    def get_total_days(self, obj: Trip):
+        return (obj.end_date - obj.start_date).days + 1
+
+  
+class UpdateLodgingSerializer(serializers.ModelSerializer):
+    
+    place_details = PlaceSerializer(source="place", read_only=True)
+    
+    class Meta:
+        model = Lodging
+        fields = ["id", "trip", "arrival_date", "departure_date", "place_details"]
+        read_only_fields = ["id", "trip", "place_details"]
+        
+    def validate(self, attrs):
+        # Validate arrival_date and departure_date
+        arrival_date = attrs.get("arrival_date")
+        departure_date = attrs.get("departure_date")
+        # Ensure date range is within the trip
+        trip = Trip.objects.get(id=self.context["trip_pk"])
+        if arrival_date and departure_date:
+            if arrival_date >= departure_date:
+                raise serializers.ValidationError({"departure_date": "Departure date must be after arrival date."})
+            if arrival_date < trip.start_date or departure_date > trip.end_date:
+                raise serializers.ValidationError({"date_range": "Lodging dates must be within the trip duration."})
+        return attrs
+    
+class LodgingSerializer(UpdateLodgingSerializer):
+    place = CreatePlaceSerializer(write_only=True)
+    
+    class Meta(UpdateLodgingSerializer.Meta):
+        fields = UpdateLodgingSerializer.Meta.fields + ["place"]
+        validators = []
+        
+    def create(self, validated_data):
+        with transaction.atomic():
+            # get or create the place using CreatePlaceSerializer
+            place_data = validated_data.pop("place")
+            place, _ = Place.objects.get_or_create(
+                external_id=place_data['external_id'],
+                defaults=place_data
+            )
+            
+            # Check for overlapping lodging and delete
+            trip = Trip.objects.get(id=self.context["trip_pk"])
+            arrival_date = validated_data["arrival_date"]
+            departure_date = validated_data["departure_date"]
+            
+            overlapping_lodgings = Lodging.objects.filter(
+                trip=trip,
+                arrival_date__lte=departure_date,
+                departure_date__gte=arrival_date
+            )
+            
+            if overlapping_lodgings.exists():
+                overlapping_lodgings.delete()
+            
+            # Create new lodging
+            instance = Lodging.objects.create(
+                trip=trip,
+                place=place,
+                **validated_data
+            )
+            
+            return instance
+      
