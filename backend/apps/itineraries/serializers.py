@@ -196,3 +196,39 @@ class LodgingSerializer(UpdateLodgingSerializer):
             
             return instance
       
+      
+class EventReorderSerializer(serializers.Serializer):
+    event_ids = serializers.ListField(
+        child=serializers.UUIDField(),
+        help_text="List of event IDs in the desired order."
+    )
+    trip_day_id = serializers.PrimaryKeyRelatedField(
+        queryset=TripDay.objects.all(),
+        help_text="ID of the trip day to reorder events for."
+    )
+    
+    class Meta:
+        fields = ["event_ids", "trip_day_id"]
+    
+    def __init__(self, instance=None, data=..., **kwargs):
+        super().__init__(instance, data, **kwargs)
+        trip_pk = self.context["trip_pk"]
+        if trip_pk:
+            self.fields["trip_day_id"].queryset = self.fields["trip_day_id"].queryset.filter(
+                trip=self.context["trip_pk"]
+            )
+    
+    def validate(self, attrs):
+        event_ids = attrs.get("event_ids")
+        trip_day = attrs.get("trip_day_id")
+        
+        # Check if all event IDs exist
+        events_count = Event.objects.filter(
+            id__in=event_ids, 
+            trip_day=trip_day
+        ).count()
+        
+        if events_count != len(event_ids):
+            raise serializers.ValidationError("One or more event IDs do not exist.")
+        
+        return attrs

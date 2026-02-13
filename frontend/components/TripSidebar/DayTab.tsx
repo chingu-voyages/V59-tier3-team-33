@@ -1,9 +1,10 @@
 'use client';
 
-import { FaCalendarDay, FaHotel } from 'react-icons/fa';
+import { FaCalendarDay, FaHotel, FaEdit } from 'react-icons/fa';
 import { useTripStore } from '@/store/tripStore';
 import { PlaceCard } from '@/components/PlaceCard';
 import { LodgingCard } from '@/components/LodgingCard';
+import { useRouter } from 'next/navigation';
 
 interface DayTabProps {
     dayNumber: number;
@@ -11,7 +12,9 @@ interface DayTabProps {
 }
 
 export function DayTab({ dayNumber, date }: DayTabProps) {
+    const router = useRouter();
     const {
+        trip,
         tripDaysById,
         eventsByDayId,
         eventsById,
@@ -57,19 +60,39 @@ export function DayTab({ dayNumber, date }: DayTabProps) {
         );
     }
 
+    const handleEditClick = () => {
+        if (trip) {
+            // Navigate to edit page with the day index
+            router.push(`/trips/${trip.id}/edit?day=${dayNumber - 1}`);
+        }
+    };
+
     return (
         <div className="p-4 space-y-4">
             {/* Day Header */}
             <div className="mb-4">
-                <h3 className="text-lg font-semibold text-neutral-400">
-                    Day {dayNumber}
-                </h3>
-                <p className="text-sm text-neutral-200">{displayDate}</p>
-                <p className="text-xs text-neutral-300 mt-1">
-                    {lodgings.length > 0 && `${lodgings.length} ${lodgings.length === 1 ? 'lodging' : 'lodgings'}`}
-                    {lodgings.length > 0 && events.length > 0 && ' • '}
-                    {events.length > 0 && `${events.length} ${events.length === 1 ? 'event' : 'events'}`}
-                </p>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="text-lg font-semibold text-neutral-400">
+                            Day {dayNumber}
+                        </h3>
+                        <p className="text-sm text-neutral-200">{displayDate}</p>
+                        <p className="text-xs text-neutral-300 mt-1">
+                            {lodgings.length > 0 && `${lodgings.length} ${lodgings.length === 1 ? 'lodging' : 'lodgings'}`}
+                            {lodgings.length > 0 && events.length > 0 && ' • '}
+                            {events.length > 0 && `${events.length} ${events.length === 1 ? 'event' : 'events'}`}
+                        </p>
+                    </div>
+                    {events.length > 0 && (
+                        <button
+                            onClick={handleEditClick}
+                            className="p-2 text-primary-400 hover:text-primary-500 hover:bg-primary-50 rounded-lg transition-colors"
+                            title="Edit day itinerary"
+                        >
+                            <FaEdit className="text-lg" />
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Lodgings Section */}

@@ -1,10 +1,13 @@
 from rest_framework import viewsets, permissions, mixins
 from django.shortcuts import get_object_or_404
-
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from rest_framework import status
 from .models import Event, Lodging
 from .models import Trip, UserTrip, TripDay, TripSavedPlace
 from .permissions import IsTripMember
 from .serializers import (
+    EventReorderSerializer,
     TripDetailSerializer,
     TripSerializer,
     SavePlaceToTripSerializer,
@@ -123,6 +126,40 @@ class TripEventViewset(viewsets.ModelViewSet):
             instance.delete()
             trip_day.normalize_position()
 
+    @action(
+        detail=False, 
+        methods=["post"], 
+        url_path="reorder", 
+        serializer_class=EventReorderSerializer, 
+        permission_classes=[permissions.IsAuthenticated, IsTripMember]
+    )
+    def reorder(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        event_ids = serializer.validated_data["event_ids"]
+        trip_day = serializer.validated_data["trip_day_id"]
+        # Batch Update
+        with transaction.atomic():
+            events_to_update = []
+            events = Event.objects.filter(
+                id__in=event_ids,
+                trip_day_id=trip_day,
+            )
+            event_map = {str(e.id) : e for e in events}
+            
+            for index, event_id in enumerate(event_ids):
+                position = index + 1
+                event = event_map.get(str(event_id))
+                if event:
+                    event.position = position
+                    events_to_update.append(event)
+
+            Event.objects.bulk_update(events_to_update, ["position"])
+        
+        return Response(
+            EventSerializer(events_to_update, many=True).data,
+            status=status.HTTP_200_OK,
+        )
 
 class TripLodgingViewset(viewsets.ModelViewSet):
     queryset = Lodging.objects.all()
