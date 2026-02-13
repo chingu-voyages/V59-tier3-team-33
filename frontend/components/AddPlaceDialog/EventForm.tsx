@@ -108,8 +108,12 @@ export function EventForm({
                             selected={selectedDate}
                             onSelect={setSelectedDate}
                             disabled={(date) => {
-                                if (date < minDate || date > maxDate) return true;
-                                return false;
+                                // Normalize dates to midnight for comparison
+                                const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                                const minDateOnly = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate());
+                                const maxDateOnly = new Date(maxDate.getFullYear(), maxDate.getMonth(), maxDate.getDate());
+
+                                return dateOnly < minDateOnly || dateOnly > maxDateOnly;
                             }}
                             initialFocus
                         />

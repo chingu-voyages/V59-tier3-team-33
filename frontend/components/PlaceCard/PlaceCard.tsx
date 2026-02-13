@@ -36,7 +36,7 @@ export function PlaceCard({ data, type, onClick }: PlaceCardProps) {
     return (
         <div
             onClick={onClick}
-            className="p-4 bg-surface-100 rounded-xl shadow-md hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
+            className="w-full max-w-full p-4 bg-surface-100 rounded-xl shadow-md hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
         >
             <div className="flex gap-3 items-center min-w-0">
                 <div className="shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
@@ -44,10 +44,10 @@ export function PlaceCard({ data, type, onClick }: PlaceCardProps) {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                    <h3 className="text-neutral-400 font-semibold truncate">
+                    <h3 className="text-neutral-400 font-semibold text-pretty">
                         {place.name}
                     </h3>
-                    <p className="text-sm text-neutral-200 truncate">
+                    <p className="text-xs text-neutral-200 text-pretty">
                         {place.address}
                     </p>
 
