@@ -22,6 +22,6 @@
 | Who | Deadline | Task | Status |
 | --- | --- | --- | --- |
 | Kayleigh | 13 Feb midnight ET | Post meeting notes | Done |
-| Kayleigh | 15 Feb midnight ET | Finalize impossible itinerary warning user story | Open |
-| Direwen | 14 Feb midnight ET | Provide project setup instructions, screen recording | Open |
+| Kayleigh | 15 Feb midnight ET | Finalize impossible itinerary warning user story | Done |
+| Direwen | 14 Feb midnight ET | Provide project setup instructions, screen recording | Done |
 | Margaret | 15 Feb midnight ET | Review screen recording and provide feedback | Open |
