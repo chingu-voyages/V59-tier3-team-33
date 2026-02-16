@@ -170,7 +170,7 @@ AUTH_USER_MODEL = "accounts.User"
 
 # SMTP email backend
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
+EMAIL_HOST = "sandbox.smtp.mailtrap.io"
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
@@ -232,25 +232,25 @@ CORS_ALLOW_CREDENTIALS = True
 
 # Allow these headers in requests
 CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
 ]
 
 # CSRF Settings for cookie-based auth
 CSRF_TRUSTED_ORIGINS = [FRONTEND_URL] if FRONTEND_URL else []
 CSRF_COOKIE_HTTPONLY = False  # Allow JS to read CSRF token
-CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
 
 # Session cookie settings
-SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
 
 # FRONTEND CONFIG
@@ -260,3 +260,5 @@ FRONTEND_EMAIL_VERIFICATION_PATH_NAME = os.environ.get(
 FRONTEND_PASSWORD_RESET_PATH_NAME = os.environ.get(
     "FRONTEND_PASSWORD_RESET_PATH_NAME", "reset-password"
 )
+
+GEOAPIFY_API_KEY = os.environ.get("GEOAPIFY_API_KEY")

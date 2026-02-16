@@ -4,27 +4,26 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('itineraries', '0005_remove_lodging_unique_lodging_per_trip_and_more'),
+        ("itineraries", "0005_remove_lodging_unique_lodging_per_trip_and_more"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
-            model_name='event',
-            name='unique_event_per_trip_day',
+            model_name="event",
+            name="unique_event_per_trip_day",
         ),
         migrations.AlterField(
-            model_name='event',
-            name='position',
+            model_name="event",
+            name="position",
             field=models.PositiveIntegerField(),
         ),
         migrations.RemoveField(
-            model_name='event',
-            name='duration',
+            model_name="event",
+            name="duration",
         ),
         migrations.RemoveField(
-            model_name='event',
-            name='start_time',
+            model_name="event",
+            name="start_time",
         ),
     ]

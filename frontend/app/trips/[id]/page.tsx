@@ -37,6 +37,12 @@ export default function TripDetailPage() {
         clearSelectedPlace,
         addFavorite,
         removeFavorite,
+        activeTab,
+        tripDaysById,
+        eventsById,
+        eventsByDayId,
+        lodgingsById,
+        lodgingsByDayId,
     } = useTripStore();
 
     const [isLoading, setIsLoading] = useState(true);
@@ -44,7 +50,6 @@ export default function TripDetailPage() {
     const [selectedLocation, setSelectedLocation] = useState<NominatimResult | null>(null);
 
     const handleLocationSelect = (result: NominatimResult) => {
-        console.log('Location selected:', result);
         setSelectedLocation(result);
         selectPlaceFromSearch(result);
     };
@@ -55,30 +60,19 @@ export default function TripDetailPage() {
     };
 
     const handleToggleFavorite = async (favoriteId?: string) => {
-        console.log('handleToggleFavorite called with favoriteId:', favoriteId);
-        console.log('selectedPlace:', selectedPlace);
-        console.log('selectedLocation:', selectedLocation);
-
         if (favoriteId) {
-            // Remove from favorites
-            console.log('Removing favorite:', favoriteId);
             await removeFavorite(tripId, favoriteId);
         } else {
-            // Add to favorites
-            // Use selectedLocation if available (from search), otherwise use selectedPlace.place
             const placeToFavorite = selectedLocation || selectedPlace?.place;
 
             if (!placeToFavorite) {
-                console.error('Cannot add favorite: no place data available');
                 return;
             }
 
-            console.log('Adding favorite:', placeToFavorite);
             await addFavorite(tripId, placeToFavorite);
         }
     };
 
-    // Convert selectedPlace to map location format
     const mapLocation = selectedPlace ? {
         place_id: parseInt(selectedPlace.place.external_id.replace('nominatim_', '')) || 0,
         licence: '',
@@ -93,13 +87,52 @@ export default function TripDetailPage() {
         importance: 0.5,
     } as NominatimResult : selectedLocation;
 
+    const dayEvents = (() => {
+        if (selectedPlace || !activeTab.startsWith('day-')) {
+            return [];
+        }
+
+        const match = activeTab.match(/day-(\d+)/);
+        if (!match) return [];
+
+        const dayNumber = parseInt(match[1], 10);
+
+        const tripDay = Object.values(tripDaysById).find((day, index) => index + 1 === dayNumber);
+        if (!tripDay) return [];
+
+        const eventIds = eventsByDayId[tripDay.id] || [];
+
+        return eventIds
+            .map(id => eventsById[id])
+            .filter(Boolean)
+            .sort((a, b) => a.position - b.position);
+    })();
+
+    const dayLodging = (() => {
+        if (selectedPlace || !activeTab.startsWith('day-')) {
+            return null;
+        }
+
+        const match = activeTab.match(/day-(\d+)/);
+        if (!match) return null;
+
+        const dayNumber = parseInt(match[1], 10);
+
+        const tripDay = Object.values(tripDaysById).find((day, index) => index + 1 === dayNumber);
+        if (!tripDay) return null;
+
+        const lodgingIds = lodgingsByDayId[tripDay.id] || [];
+        if (lodgingIds.length === 0) return null;
+
+        return lodgingsById[lodgingIds[0]] || null;
+    })();
+
     useEffect(() => {
         const fetchTripData = async () => {
             try {
                 setIsLoading(true);
                 setError(null);
 
-                // Fetch full trip details with trip_days
                 const tripData = await api.get(`/trips/${tripId}/`);
 
                 if (!tripData || !tripData.id) {
@@ -108,34 +141,26 @@ export default function TripDetailPage() {
 
                 setTrip(tripData);
 
-                // Fetch saved places (favorites)
                 try {
                     const savedPlacesData = await api.get(`/trips/${tripId}/saved-places/`);
                     setFavorites(savedPlacesData);
                 } catch (favError) {
-                    console.error('Failed to fetch saved places:', favError);
-                    // Don't fail the whole page if favorites fail
                     setFavorites([]);
                 }
 
-                // Fetch lodgings
                 try {
                     const lodgingsData = await api.get(`/trips/${tripId}/lodgings/`);
                     setLodgings(lodgingsData);
                 } catch (lodgingError) {
-                    console.error('Failed to fetch lodgings:', lodgingError);
-                    // Don't fail the whole page if lodgings fail
                     setLodgings([]);
                 }
 
                 setIsLoading(false);
             } catch (err: any) {
-                console.error('Failed to fetch trip data:', err);
                 const errorMessage = err.response?.data?.message || err.message || 'Failed to load trip';
                 setError(errorMessage);
                 setIsLoading(false);
 
-                // Redirect to trips page after a short delay
                 setTimeout(() => {
                     router.push('/trips');
                 }, 2000);
@@ -146,7 +171,6 @@ export default function TripDetailPage() {
             fetchTripData();
         }
 
-        // Cleanup on unmount
         return () => {
             clearTrip();
         };
@@ -191,6 +215,8 @@ export default function TripDetailPage() {
                 className="absolute inset-0"
                 selectedLocation={mapLocation}
                 onLocationSelect={handleLocationSelect}
+                dayEvents={dayEvents}
+                dayLodging={dayLodging}
             />
 
             {/* Floating Navigation Layer - positioned below navbar */}

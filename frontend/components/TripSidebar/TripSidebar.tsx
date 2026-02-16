@@ -53,7 +53,7 @@ export function TripSidebar() {
                 {activeTab === 'favorites' && <FavoritesTab />}
 
                 {activeTab === 'overview' && (
-                    <OverviewTab trip={trip} favoritesCount={favoriteIds.length} />
+                    <OverviewTab trip={trip} />
                 )}
 
                 {activeTab.startsWith('day-') && (
