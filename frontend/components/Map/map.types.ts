@@ -1,5 +1,5 @@
 import type { LatLngExpression } from 'leaflet';
-import type { Event } from '@/types/trip';
+import type { Event, Lodging } from '@/types/trip';
 
 export interface MapProps {
   initialCenter?: LatLngExpression; // [lat, lng]
@@ -9,6 +9,7 @@ export interface MapProps {
   onLocationSelect?: (result: NominatimResult) => void; // Callback for location selection
   selectedLocation?: NominatimResult | null; // Controlled selected location
   dayEvents?: Event[]; // Events to display with route lines
+  dayLodging?: Lodging | null; // Lodging for the day (if exists)
 }
 
 export interface Coordinates {

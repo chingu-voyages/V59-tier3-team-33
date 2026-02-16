@@ -7,11 +7,24 @@ import L from 'leaflet';
 import { MapSearch } from './MapSearch';
 import type { NominatimResult } from '@/services/nominatim';
 
-// Custom primary color marker icon (larger size)
+// Custom primary color marker icon (larger size) - for events
 const PrimaryIcon = L.icon({
     iconUrl: 'data:image/svg+xml;base64,' + btoa(`
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="32" height="52">
             <path fill="#f59e0b" stroke="#f59e0b" stroke-width="2" d="M12 0C7.03 0 3 4.03 3 9c0 6.75 9 18 9 18s9-11.25 9-18c0-4.97-4.03-9-9-9z"/>
+            <circle cx="12" cy="9" r="3.5" fill="white"/>
+        </svg>
+    `),
+    iconSize: [32, 52],
+    iconAnchor: [16, 52],
+    popupAnchor: [1, -44],
+});
+
+// Lodging marker icon (green color)
+const LodgingIcon = L.icon({
+    iconUrl: 'data:image/svg+xml;base64,' + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="32" height="52">
+            <path fill="#10b981" stroke="#059669" stroke-width="2" d="M12 0C7.03 0 3 4.03 3 9c0 6.75 9 18 9 18s9-11.25 9-18c0-4.97-4.03-9-9-9z"/>
             <circle cx="12" cy="9" r="3.5" fill="white"/>
         </svg>
     `),
@@ -122,6 +135,7 @@ export function Map({
     onLocationSelect,
     selectedLocation: externalSelectedLocation,
     dayEvents = [],
+    dayLodging = null,
 }: MapProps) {
     const [internalSelectedLocation, setInternalSelectedLocation] = useState<NominatimResult | null>(null);
     const [mapCenter, setMapCenter] = useState<[number, number]>(
@@ -144,10 +158,20 @@ export function Map({
 
     // Update map when dayEvents change (center on events)
     useEffect(() => {
-        if (dayEvents.length > 0 && !selectedLocation) {
-            // Calculate center of all events
-            const lats = dayEvents.map(e => parseFloat(e.place_details.latitude));
-            const lons = dayEvents.map(e => parseFloat(e.place_details.longitude));
+        if ((dayEvents.length > 0 || dayLodging) && !selectedLocation) {
+            // Calculate center of all events and lodging
+            const lats: number[] = [];
+            const lons: number[] = [];
+
+            if (dayLodging) {
+                lats.push(parseFloat(dayLodging.place_details.latitude));
+                lons.push(parseFloat(dayLodging.place_details.longitude));
+            }
+
+            dayEvents.forEach(e => {
+                lats.push(parseFloat(e.place_details.latitude));
+                lons.push(parseFloat(e.place_details.longitude));
+            });
 
             const centerLat = lats.reduce((sum, lat) => sum + lat, 0) / lats.length;
             const centerLon = lons.reduce((sum, lon) => sum + lon, 0) / lons.length;
@@ -155,7 +179,7 @@ export function Map({
             setMapCenter([centerLat, centerLon]);
             setMapZoom(12);
         }
-    }, [dayEvents, selectedLocation]);
+    }, [dayEvents, dayLodging, selectedLocation]);
 
     const handleLocationSelect = (result: NominatimResult) => {
         // Update internal state if not controlled
@@ -174,14 +198,28 @@ export function Map({
         [90, 180]    // Northeast coordinates
     ];
 
-    // Generate route coordinates from dayEvents
-    const routeCoordinates: [number, number][] = dayEvents.map(event => [
-        parseFloat(event.place_details.latitude),
-        parseFloat(event.place_details.longitude),
-    ]);
+    // Generate route coordinates from dayEvents (and lodging if exists)
+    const routeCoordinates: [number, number][] = (() => {
+        const coords: [number, number][] = [];
 
-    console.log('Map component - dayEvents:', dayEvents);
-    console.log('Map component - routeCoordinates:', routeCoordinates);
+        // If lodging exists, add it as the starting point
+        if (dayLodging) {
+            coords.push([
+                parseFloat(dayLodging.place_details.latitude),
+                parseFloat(dayLodging.place_details.longitude),
+            ]);
+        }
+
+        // Add all event coordinates
+        dayEvents.forEach(event => {
+            coords.push([
+                parseFloat(event.place_details.latitude),
+                parseFloat(event.place_details.longitude),
+            ]);
+        });
+
+        return coords;
+    })();
 
     return (
         <div className={`relative w-full h-full ${className}`} style={{ zIndex: 0 }}>
@@ -227,6 +265,25 @@ export function Map({
                         position={[parseFloat(selectedLocation.lat), parseFloat(selectedLocation.lon)]}
                         displayName={selectedLocation.display_name}
                     />
+                )}
+
+                {/* Lodging Marker (green) */}
+                {dayLodging && (
+                    <Marker
+                        key={`lodging-${dayLodging.id}`}
+                        position={[
+                            parseFloat(dayLodging.place_details.latitude),
+                            parseFloat(dayLodging.place_details.longitude),
+                        ]}
+                        icon={LodgingIcon}
+                    >
+                        <Popup>
+                            <div className="text-sm">
+                                <div className="font-semibold">🏨 {dayLodging.place_details.name}</div>
+                                <div className="text-gray-600 text-xs mt-1">{dayLodging.place_details.address}</div>
+                            </div>
+                        </Popup>
+                    </Marker>
                 )}
 
                 {/* Day Events Markers (without animation) */}

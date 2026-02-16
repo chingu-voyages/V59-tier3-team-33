@@ -41,6 +41,8 @@ export default function TripDetailPage() {
         tripDaysById,
         eventsById,
         eventsByDayId,
+        lodgingsById,
+        lodgingsByDayId,
     } = useTripStore();
 
     const [isLoading, setIsLoading] = useState(true);
@@ -99,49 +101,52 @@ export default function TripDetailPage() {
 
     // Get events for the active day tab (for route display)
     const dayEvents = (() => {
-        console.log('=== Route Display Debug ===');
-        console.log('activeTab:', activeTab);
-        console.log('selectedPlace:', selectedPlace);
-
         // Only show routes when viewing a specific day tab and no place is selected
         if (selectedPlace || !activeTab.startsWith('day-')) {
-            console.log('Not showing routes - selectedPlace exists or not on day tab');
             return [];
         }
 
         // Extract day number from tab id (e.g., "day-1" -> 1)
         const match = activeTab.match(/day-(\d+)/);
-        if (!match) {
-            console.log('No match for day number');
-            return [];
-        }
+        if (!match) return [];
 
         const dayNumber = parseInt(match[1], 10);
-        console.log('dayNumber:', dayNumber);
-        console.log('tripDaysById:', tripDaysById);
 
         // Find the trip day by matching the day number (1-indexed)
         const tripDay = Object.values(tripDaysById).find((day, index) => index + 1 === dayNumber);
-        console.log('Found tripDay:', tripDay);
-
-        if (!tripDay) {
-            console.log('No trip day found');
-            return [];
-        }
+        if (!tripDay) return [];
 
         // Get events for this day and sort by position
         const eventIds = eventsByDayId[tripDay.id] || [];
-        console.log('eventIds for day:', eventIds);
 
-        const events = eventIds
+        return eventIds
             .map(id => eventsById[id])
             .filter(Boolean)
             .sort((a, b) => a.position - b.position);
+    })();
 
-        console.log('Final events for route:', events);
-        console.log('=== End Debug ===');
+    // Get lodging for the active day tab
+    const dayLodging = (() => {
+        // Only get lodging when viewing a specific day tab and no place is selected
+        if (selectedPlace || !activeTab.startsWith('day-')) {
+            return null;
+        }
 
-        return events;
+        // Extract day number from tab id
+        const match = activeTab.match(/day-(\d+)/);
+        if (!match) return null;
+
+        const dayNumber = parseInt(match[1], 10);
+
+        // Find the trip day
+        const tripDay = Object.values(tripDaysById).find((day, index) => index + 1 === dayNumber);
+        if (!tripDay) return null;
+
+        // Get lodging for this day (should be only one)
+        const lodgingIds = lodgingsByDayId[tripDay.id] || [];
+        if (lodgingIds.length === 0) return null;
+
+        return lodgingsById[lodgingIds[0]] || null;
     })();
 
     useEffect(() => {
@@ -243,6 +248,7 @@ export default function TripDetailPage() {
                 selectedLocation={mapLocation}
                 onLocationSelect={handleLocationSelect}
                 dayEvents={dayEvents}
+                dayLodging={dayLodging}
             />
 
             {/* Floating Navigation Layer - positioned below navbar */}
