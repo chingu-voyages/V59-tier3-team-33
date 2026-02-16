@@ -4,24 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('places', '0001_initial'),
+        ("places", "0001_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='place',
-            name='description',
+            model_name="place",
+            name="description",
         ),
         migrations.AlterField(
-            model_name='place',
-            name='latitude',
+            model_name="place",
+            name="latitude",
             field=models.DecimalField(decimal_places=16, max_digits=20),
         ),
         migrations.AlterField(
-            model_name='place',
-            name='longitude',
+            model_name="place",
+            name="longitude",
             field=models.DecimalField(decimal_places=16, max_digits=20),
         ),
     ]

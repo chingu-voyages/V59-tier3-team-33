@@ -4,18 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('itineraries', '0002_usertrip_unique_user_trip_per_user'),
+        ("itineraries", "0002_usertrip_unique_user_trip_per_user"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='event',
-            name='location_text',
+            model_name="event",
+            name="location_text",
         ),
         migrations.RemoveField(
-            model_name='event',
-            name='name',
+            model_name="event",
+            name="name",
         ),
     ]

@@ -4,22 +4,21 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('itineraries', '0004_remove_tripday_name'),
+        ("itineraries", "0004_remove_tripday_name"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
-            model_name='lodging',
-            name='unique_lodging_per_trip',
+            model_name="lodging",
+            name="unique_lodging_per_trip",
         ),
         migrations.RemoveField(
-            model_name='lodging',
-            name='location_text',
+            model_name="lodging",
+            name="location_text",
         ),
         migrations.RemoveField(
-            model_name='lodging',
-            name='name',
+            model_name="lodging",
+            name="name",
         ),
     ]

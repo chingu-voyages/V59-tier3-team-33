@@ -1,5 +1,3 @@
-from datetime import timedelta, datetime
-
 from django.db import models
 from django.conf import settings
 
@@ -51,11 +49,10 @@ class TripDay(BaseModel):
 
     def __str__(self):
         return f"{self.trip.name} - {self.date}"
-    
+
     def normalize_position(self):
         events = self.events.all().order_by(
-            models.F("position").asc(nulls_last=True),
-            "position"
+            models.F("position").asc(nulls_last=True), "position"
         )
         for index, event in enumerate(events, start=1):
             if event.position != index:
