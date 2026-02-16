@@ -126,6 +126,11 @@ export default function EditItineraryPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [localEvents, setLocalEvents] = useState<Event[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isOptimizing, setIsOptimizing] = useState(false);
+    const [optimizationStats, setOptimizationStats] = useState<{
+        distance: number;
+        time: number;
+    } | null>(null);
 
     // Fetch trip data if not in store
     useEffect(() => {
@@ -259,8 +264,38 @@ export default function EditItineraryPage() {
         }
     };
 
-    const handleOptimizeRoute = () => {
-        alert('Route optimization coming soon!');
+    const handleOptimizeRoute = async () => {
+        if (!currentDayId || localEvents.length < 2) {
+            return;
+        }
+
+        setIsOptimizing(true);
+        try {
+            const response = await api.post(`/trips/${tripId}/events/optimize-route/`, {
+                trip_day_id: currentDayId
+            });
+
+            // Response is already unwrapped by api client
+            // response = { total_distance_km, total_time_hours, ordered_ids }
+            const orderedIds = response.ordered_ids;
+            const optimizedEvents = orderedIds
+                .map((id: string) => localEvents.find(e => e.id === id))
+                .filter(Boolean) as Event[];
+
+            // Update local state
+            setLocalEvents(optimizedEvents);
+            setHasChanges(true);
+
+            // Store stats temporarily
+            setOptimizationStats({
+                distance: response.total_distance_km,
+                time: response.total_time_hours
+            });
+        } catch (error) {
+            console.error('Failed to optimize route:', error);
+        } finally {
+            setIsOptimizing(false);
+        }
     };
 
     const handleDayChange = (index: number) => {
@@ -485,12 +520,46 @@ export default function EditItineraryPage() {
                             </div>
                             <button
                                 onClick={handleOptimizeRoute}
-                                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-primary-600 rounded-xl hover:bg-surface-100 transition-colors font-medium shadow-sm"
+                                disabled={isOptimizing || localEvents.length < 2}
+                                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-primary-600 rounded-xl hover:bg-surface-100 transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                <FaRoute />
-                                <span>Optimize Route</span>
+                                {isOptimizing ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
+                                        <span>Optimizing...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <FaRoute />
+                                        <span>Optimize Route</span>
+                                    </>
+                                )}
                             </button>
                         </div>
+
+                        {/* Optimization Stats Banner */}
+                        {optimizationStats && (
+                            <div className="mb-4 p-3 bg-primary-50 border border-primary-200 rounded-xl">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div>
+                                            <p className="text-xs text-primary-600 font-medium">Total Distance</p>
+                                            <p className="text-lg font-bold text-primary-700">{optimizationStats.distance.toFixed(1)} km</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-primary-600 font-medium">Total Time</p>
+                                            <p className="text-lg font-bold text-primary-700">{optimizationStats.time.toFixed(1)} hrs</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setOptimizationStats(null)}
+                                        className="text-primary-600 hover:text-primary-700 text-sm"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Lodgings Section */}
                         {(() => {

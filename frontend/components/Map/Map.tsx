@@ -1,24 +1,39 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { MapContainer, TileLayer, ZoomControl, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, ZoomControl, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import type { MapProps } from './map.types';
 import L from 'leaflet';
 import { MapSearch } from './MapSearch';
 import type { NominatimResult } from '@/services/nominatim';
 
-// Fix for default marker icons - use CDN URLs instead of imports
-const DefaultIcon = L.icon({
-    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41],
+// Custom primary color marker icon (larger size)
+const PrimaryIcon = L.icon({
+    iconUrl: 'data:image/svg+xml;base64,' + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="32" height="52">
+            <path fill="#f59e0b" stroke="#f59e0b" stroke-width="2" d="M12 0C7.03 0 3 4.03 3 9c0 6.75 9 18 9 18s9-11.25 9-18c0-4.97-4.03-9-9-9z"/>
+            <circle cx="12" cy="9" r="3.5" fill="white"/>
+        </svg>
+    `),
+    iconSize: [32, 52],
+    iconAnchor: [16, 52],
+    popupAnchor: [1, -44],
 });
 
-L.Marker.prototype.options.icon = DefaultIcon;
+// Default marker icon (same as primary for consistency)
+const DefaultIcon = L.icon({
+    iconUrl: 'data:image/svg+xml;base64,' + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="32" height="52">
+            <path fill="#f59e0b" stroke="#f59e0b" stroke-width="2" d="M12 0C7.03 0 3 4.03 3 9c0 6.75 9 18 9 18s9-11.25 9-18c0-4.97-4.03-9-9-9z"/>
+            <circle cx="12" cy="9" r="3.5" fill="white"/>
+        </svg>
+    `),
+    iconSize: [32, 52],
+    iconAnchor: [16, 52],
+    popupAnchor: [1, -44],
+});
+
+L.Marker.prototype.options.icon = PrimaryIcon;
 
 // Component to handle map view changes with smooth fly animation
 function MapViewController({ center, zoom }: { center: [number, number]; zoom: number }) {
@@ -106,6 +121,7 @@ export function Map({
     showSearch = false,
     onLocationSelect,
     selectedLocation: externalSelectedLocation,
+    dayEvents = [],
 }: MapProps) {
     const [internalSelectedLocation, setInternalSelectedLocation] = useState<NominatimResult | null>(null);
     const [mapCenter, setMapCenter] = useState<[number, number]>(
@@ -126,6 +142,21 @@ export function Map({
         }
     }, [selectedLocation]);
 
+    // Update map when dayEvents change (center on events)
+    useEffect(() => {
+        if (dayEvents.length > 0 && !selectedLocation) {
+            // Calculate center of all events
+            const lats = dayEvents.map(e => parseFloat(e.place_details.latitude));
+            const lons = dayEvents.map(e => parseFloat(e.place_details.longitude));
+
+            const centerLat = lats.reduce((sum, lat) => sum + lat, 0) / lats.length;
+            const centerLon = lons.reduce((sum, lon) => sum + lon, 0) / lons.length;
+
+            setMapCenter([centerLat, centerLon]);
+            setMapZoom(12);
+        }
+    }, [dayEvents, selectedLocation]);
+
     const handleLocationSelect = (result: NominatimResult) => {
         // Update internal state if not controlled
         if (externalSelectedLocation === undefined) {
@@ -142,6 +173,15 @@ export function Map({
         [-90, -180], // Southwest coordinates
         [90, 180]    // Northeast coordinates
     ];
+
+    // Generate route coordinates from dayEvents
+    const routeCoordinates: [number, number][] = dayEvents.map(event => [
+        parseFloat(event.place_details.latitude),
+        parseFloat(event.place_details.longitude),
+    ]);
+
+    console.log('Map component - dayEvents:', dayEvents);
+    console.log('Map component - routeCoordinates:', routeCoordinates);
 
     return (
         <div className={`relative w-full h-full ${className}`} style={{ zIndex: 0 }}>
@@ -186,6 +226,37 @@ export function Map({
                         key={`${selectedLocation.lat}-${selectedLocation.lon}`}
                         position={[parseFloat(selectedLocation.lat), parseFloat(selectedLocation.lon)]}
                         displayName={selectedLocation.display_name}
+                    />
+                )}
+
+                {/* Day Events Markers (without animation) */}
+                {dayEvents.map((event) => (
+                    <Marker
+                        key={event.id}
+                        position={[
+                            parseFloat(event.place_details.latitude),
+                            parseFloat(event.place_details.longitude),
+                        ]}
+                        icon={PrimaryIcon}
+                    >
+                        <Popup>
+                            <div className="text-sm">
+                                <div className="font-semibold">{event.place_details.name}</div>
+                                <div className="text-gray-600 text-xs mt-1">{event.place_details.address}</div>
+                            </div>
+                        </Popup>
+                    </Marker>
+                ))}
+
+                {/* Route Polyline - only show if there are 2+ events */}
+                {routeCoordinates.length >= 2 && (
+                    <Polyline
+                        positions={routeCoordinates}
+                        pathOptions={{
+                            color: '#2bb0a6',
+                            weight: 10,
+                            opacity: 1,
+                        }}
                     />
                 )}
             </MapContainer>

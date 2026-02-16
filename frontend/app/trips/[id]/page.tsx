@@ -37,6 +37,10 @@ export default function TripDetailPage() {
         clearSelectedPlace,
         addFavorite,
         removeFavorite,
+        activeTab,
+        tripDaysById,
+        eventsById,
+        eventsByDayId,
     } = useTripStore();
 
     const [isLoading, setIsLoading] = useState(true);
@@ -92,6 +96,53 @@ export default function TripDetailPage() {
         type: 'place',
         importance: 0.5,
     } as NominatimResult : selectedLocation;
+
+    // Get events for the active day tab (for route display)
+    const dayEvents = (() => {
+        console.log('=== Route Display Debug ===');
+        console.log('activeTab:', activeTab);
+        console.log('selectedPlace:', selectedPlace);
+
+        // Only show routes when viewing a specific day tab and no place is selected
+        if (selectedPlace || !activeTab.startsWith('day-')) {
+            console.log('Not showing routes - selectedPlace exists or not on day tab');
+            return [];
+        }
+
+        // Extract day number from tab id (e.g., "day-1" -> 1)
+        const match = activeTab.match(/day-(\d+)/);
+        if (!match) {
+            console.log('No match for day number');
+            return [];
+        }
+
+        const dayNumber = parseInt(match[1], 10);
+        console.log('dayNumber:', dayNumber);
+        console.log('tripDaysById:', tripDaysById);
+
+        // Find the trip day by matching the day number (1-indexed)
+        const tripDay = Object.values(tripDaysById).find((day, index) => index + 1 === dayNumber);
+        console.log('Found tripDay:', tripDay);
+
+        if (!tripDay) {
+            console.log('No trip day found');
+            return [];
+        }
+
+        // Get events for this day and sort by position
+        const eventIds = eventsByDayId[tripDay.id] || [];
+        console.log('eventIds for day:', eventIds);
+
+        const events = eventIds
+            .map(id => eventsById[id])
+            .filter(Boolean)
+            .sort((a, b) => a.position - b.position);
+
+        console.log('Final events for route:', events);
+        console.log('=== End Debug ===');
+
+        return events;
+    })();
 
     useEffect(() => {
         const fetchTripData = async () => {
@@ -191,6 +242,7 @@ export default function TripDetailPage() {
                 className="absolute inset-0"
                 selectedLocation={mapLocation}
                 onLocationSelect={handleLocationSelect}
+                dayEvents={dayEvents}
             />
 
             {/* Floating Navigation Layer - positioned below navbar */}

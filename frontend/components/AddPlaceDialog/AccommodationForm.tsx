@@ -56,7 +56,17 @@ export function AccommodationForm({
                         selected={dateRange}
                         onSelect={setDateRange}
                         disabled={(date) => {
-                            if (date < minDate || date > maxDate) return true;
+                            // Normalize dates to midnight for accurate comparison
+                            const normalizedDate = new Date(date);
+                            normalizedDate.setHours(0, 0, 0, 0);
+
+                            const normalizedMin = new Date(minDate);
+                            normalizedMin.setHours(0, 0, 0, 0);
+
+                            const normalizedMax = new Date(maxDate);
+                            normalizedMax.setHours(0, 0, 0, 0);
+
+                            if (normalizedDate < normalizedMin || normalizedDate > normalizedMax) return true;
                             return false;
                         }}
                         numberOfMonths={1}

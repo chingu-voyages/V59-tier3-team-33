@@ -170,11 +170,47 @@ class TripEventViewset(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         trip_day = serializer.validated_data['trip_day_id']
         route_service = RouteService(trip_day)
-        res = route_service.optimize_route()
-        if not res:
+        agent, res = route_service.optimize_route()
+        parsed_res = self._parse_route_service_response(agent, res)
+        if not parsed_res:
             return Response({"error": "Failed to optimize route"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response(res, status=status.HTTP_200_OK)
+        print(f"Route optimization response: {parsed_res}")
+        return Response(parsed_res, status=status.HTTP_200_OK)
+    
+    def _parse_route_service_response(self, agent: any, data: dict):
+        ordered_ids = []
+        if isinstance(agent, Event):
+            ordered_ids.append(str(agent.id))
+                
+        try:
+            features = data.get("features", [])
+            feature = features[0] if features else None
+            if not feature:
+                print("No features found in route service response")
+                return None
+            
+            props = feature.get("properties", {})
+            # TODO: consider implementing route geometry later
+            # route_geometry = feature.get("geometry", {})
+
+            total_distance_km = props.get("distance", 0) / 1000
+            total_time_hours = props.get("time", 0) / 3600            
         
+            for action in props.get("actions", []):
+                if action["type"] == "job":
+                    # extract job_id (same as event_id provided in the request)
+                    event_id = action["job_id"]
+                    ordered_ids.append(event_id)
+                    
+            return {
+                "total_distance_km": total_distance_km,
+                "total_time_hours": total_time_hours,
+                "ordered_ids": ordered_ids,
+                # "route_geometry": route_geometry,
+            }
+        except Exception as e:
+            print(f"Error parsing route service response: {e}")
+            return None
 
 class TripLodgingViewset(viewsets.ModelViewSet):
     queryset = Lodging.objects.all()
