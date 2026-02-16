@@ -15,9 +15,11 @@ from .serializers import (
     EventSerializer,
     LodgingSerializer,
     UpdateLodgingSerializer,
+    RouteOptimizationSerializer
 )
 from django.db import transaction
 from datetime import timedelta
+from .services import RouteService
 
 
 class TripViewset(viewsets.ModelViewSet):
@@ -126,15 +128,9 @@ class TripEventViewset(viewsets.ModelViewSet):
             instance.delete()
             trip_day.normalize_position()
 
-    @action(
-        detail=False, 
-        methods=["post"], 
-        url_path="reorder", 
-        serializer_class=EventReorderSerializer, 
-        permission_classes=[permissions.IsAuthenticated, IsTripMember]
-    )
-    def reorder(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+    @action(detail=False, methods=["post"], url_path="reorder", serializer_class=EventReorderSerializer, permission_classes=[permissions.IsAuthenticated, IsTripMember])
+    def reorder(self, request, pk=None):
+        serializer = self.get_serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         event_ids = serializer.validated_data["event_ids"]
         trip_day = serializer.validated_data["trip_day_id"]
@@ -160,6 +156,25 @@ class TripEventViewset(viewsets.ModelViewSet):
             EventSerializer(events_to_update, many=True).data,
             status=status.HTTP_200_OK,
         )
+
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="optimize-route",
+        serializer_class=RouteOptimizationSerializer,
+        permission_classes=[permissions.IsAuthenticated, IsTripMember]
+    )
+    def optimize_route(self, request, pk=None, trip_pk=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        trip_day = serializer.validated_data['trip_day_id']
+        route_service = RouteService(trip_day)
+        res = route_service.optimize_route()
+        if not res:
+            return Response({"error": "Failed to optimize route"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(res, status=status.HTTP_200_OK)
+        
 
 class TripLodgingViewset(viewsets.ModelViewSet):
     queryset = Lodging.objects.all()

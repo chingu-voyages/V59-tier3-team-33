@@ -232,3 +232,33 @@ class EventReorderSerializer(serializers.Serializer):
             raise serializers.ValidationError("One or more event IDs do not exist.")
         
         return attrs
+    
+
+class RouteOptimizationSerializer(serializers.Serializer):
+    trip_day_id = serializers.PrimaryKeyRelatedField(queryset=TripDay.objects.all())
+    
+    class Meta:
+        fields = ["trip_day_id"]
+        
+    def __init__(self, instance=None, data=..., **kwargs):
+        super().__init__(instance, data, **kwargs)
+        trip_pk = self.context['trip_pk']
+        if trip_pk:
+            self.fields["trip_day_id"].queryset = self.fields["trip_day_id"].queryset.filter(
+                trip=self.context["trip_pk"]
+            )
+        
+    def validate(self, attrs):
+        trip_day = attrs.get("trip_day_id")
+        
+        # Check if the trip day has events or lodging
+        lodging_exists = trip_day.trip.lodgings.filter(
+            arrival_date__lte=trip_day.date,
+            departure_date__gte=trip_day.date,
+        ).exists()
+        events_count_valid = trip_day.events.count() > (2 if not lodging_exists else 1)
+        
+        if not events_count_valid:
+            raise serializers.ValidationError("Trip day must have at least 3 events or 2 events with a lodging to optimize the route.")
+        
+        return attrs
