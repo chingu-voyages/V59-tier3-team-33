@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { FaRobot } from 'react-icons/fa';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -8,12 +8,19 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { TripDay } from '@/types/trip';
+import type { TripDay, Event, Lodging } from '@/types/trip';
+import { calculateDistance, DISTANCE_WARNING_THRESHOLD_KM } from '@/utils/distance';
 
 interface EventFormProps {
     tripDays: TripDay[];
     tripStartDate: string;
     tripEndDate: string;
+    placeLatitude: string;
+    placeLongitude: string;
+    eventsByDayId: Record<string, string[]>;
+    eventsById: Record<string, Event>;
+    lodgingsByDayId: Record<string, string[]>;
+    lodgingsById: Record<string, Lodging>;
     onSubmit: (data: EventFormData) => void;
     onCancel: () => void;
     isSubmitting?: boolean;
@@ -29,6 +36,12 @@ export function EventForm({
     tripDays,
     tripStartDate,
     tripEndDate,
+    placeLatitude,
+    placeLongitude,
+    eventsByDayId,
+    eventsById,
+    lodgingsByDayId,
+    lodgingsById,
     onSubmit,
     onCancel,
     isSubmitting = false
@@ -62,6 +75,62 @@ export function EventForm({
     };
 
     const dayNumber = selectedDate ? getDayNumber(selectedDate) : null;
+
+    const distanceWarning = useMemo(() => {
+        if (!selectedDate) return null;
+
+        const dateStr = format(selectedDate, 'yyyy-MM-dd');
+        const tripDay = tripDays.find(day => day.date === dateStr);
+        if (!tripDay) return null;
+
+        const newPlaceLat = parseFloat(placeLatitude);
+        const newPlaceLon = parseFloat(placeLongitude);
+
+        const eventIds = eventsByDayId[tripDay.id] || [];
+        const dayEvents = eventIds
+            .map(id => eventsById[id])
+            .filter(Boolean)
+            .sort((a, b) => a.position - b.position);
+
+        const lodgingIds = lodgingsByDayId[tripDay.id] || [];
+        const dayLodgings = lodgingIds.map(id => lodgingsById[id]).filter(Boolean);
+
+        let lastLocation: { lat: number; lon: number; name: string } | null = null;
+
+        if (dayEvents.length > 0) {
+            const lastEvent = dayEvents[dayEvents.length - 1];
+            lastLocation = {
+                lat: parseFloat(lastEvent.place_details.latitude),
+                lon: parseFloat(lastEvent.place_details.longitude),
+                name: lastEvent.place_details.name
+            };
+        } else if (dayLodgings.length > 0) {
+            const lodging = dayLodgings[0];
+            lastLocation = {
+                lat: parseFloat(lodging.place_details.latitude),
+                lon: parseFloat(lodging.place_details.longitude),
+                name: lodging.place_details.name
+            };
+        }
+
+        if (!lastLocation) return null;
+
+        const distance = calculateDistance(
+            lastLocation.lat,
+            lastLocation.lon,
+            newPlaceLat,
+            newPlaceLon
+        );
+
+        if (distance > DISTANCE_WARNING_THRESHOLD_KM) {
+            return {
+                distance: Math.round(distance),
+                fromLocation: lastLocation.name
+            };
+        }
+
+        return null;
+    }, [selectedDate, tripDays, placeLatitude, placeLongitude, eventsByDayId, eventsById, lodgingsByDayId, lodgingsById]);
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -157,6 +226,23 @@ export function EventForm({
                     rows={3}
                 />
             </div>
+
+            {distanceWarning && (
+                <div className="p-3 bg-amber-50 border border-amber-300 rounded-lg">
+                    <div className="flex items-start gap-2">
+                        <span className="text-amber-600 text-lg shrink-0">⚠️</span>
+                        <div className="flex-1">
+                            <p className="text-sm font-medium text-amber-900 mb-1">
+                                Long Distance Detected
+                            </p>
+                            <p className="text-xs text-amber-800">
+                                This location is <strong>{distanceWarning.distance} km</strong> from "{distanceWarning.fromLocation}".
+                                Consider if this is feasible for a single day or if you need to adjust your itinerary.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Actions */}
             <div className="flex gap-3 pt-2">
