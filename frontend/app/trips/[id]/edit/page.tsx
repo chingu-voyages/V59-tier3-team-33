@@ -109,6 +109,7 @@ export default function EditItineraryPage() {
     const {
         trip,
         tripDaysById,
+        tripDayIds,
         eventsByDayId,
         eventsById,
         lodgingsByDayId,
@@ -131,6 +132,7 @@ export default function EditItineraryPage() {
         distance: number;
         time: number;
     } | null>(null);
+    const [optimizationError, setOptimizationError] = useState<string | null>(null);
 
     // Fetch trip data if not in store
     useEffect(() => {
@@ -178,7 +180,7 @@ export default function EditItineraryPage() {
         setIsMounted(true);
     }, []);
 
-    const tripDays = trip?.trip_days || [];
+    const tripDays = tripDayIds.map(id => tripDaysById[id]).filter(Boolean);
     const currentDay = selectedDayIndex >= 0 ? tripDays[selectedDayIndex] : null;
     const currentDayId = currentDay?.id;
 
@@ -190,9 +192,14 @@ export default function EditItineraryPage() {
                 .filter(Boolean)
                 .sort((a, b) => a.position - b.position);
             setLocalEvents(events);
-            setHasChanges(false);
         }
     }, [currentDayId, eventsByDayId, eventsById]);
+
+    useEffect(() => {
+        setHasChanges(false);
+        setOptimizationStats(null);
+        setOptimizationError(null);
+    }, [selectedDayIndex]);
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -225,12 +232,13 @@ export default function EditItineraryPage() {
         setIsDeleting(true);
         try {
             await api.delete(`/trips/${tripId}/events/${eventToDelete}/`);
-            setLocalEvents(prev => prev.filter(e => e.id !== eventToDelete));
-            setHasChanges(true);
+
+            const tripData = await api.get(`/trips/${tripId}/`);
+            setTrip(tripData);
+
             setDeleteDialogOpen(false);
             setEventToDelete(null);
         } catch (error) {
-            console.error('Failed to delete event:', error);
             alert('Failed to delete event. Please try again.');
         } finally {
             setIsDeleting(false);
@@ -238,26 +246,24 @@ export default function EditItineraryPage() {
     };
 
     const handleSave = async () => {
-        if (!currentDayId || !hasChanges) return;
+        if (!currentDayId || !hasChanges || localEvents.length === 0) return;
 
         setIsSaving(true);
         try {
             const eventIds = localEvents.map(e => e.id);
 
-            // Call reorder API endpoint
-            await api.post(`/trips/${tripId}/events/reorder/`, {
+            const payload = {
                 trip_day_id: currentDayId,
                 event_ids: eventIds
-            });
+            };
 
-            // Refetch trip data to get updated positions
+            await api.post(`/trips/${tripId}/events/reorder/`, payload);
+
             const tripData = await api.get(`/trips/${tripId}/`);
             setTrip(tripData);
 
-            // Navigate back to trip page
             router.push(`/trips/${tripId}`);
         } catch (error) {
-            console.error('Failed to save changes:', error);
             alert('Failed to save changes. Please try again.');
         } finally {
             setIsSaving(false);
@@ -270,29 +276,40 @@ export default function EditItineraryPage() {
         }
 
         setIsOptimizing(true);
+        setOptimizationError(null);
         try {
             const response = await api.post(`/trips/${tripId}/events/optimize-route/`, {
                 trip_day_id: currentDayId
             });
 
-            // Response is already unwrapped by api client
-            // response = { total_distance_km, total_time_hours, ordered_ids }
             const orderedIds = response.ordered_ids;
+
+            if (!orderedIds || !Array.isArray(orderedIds)) {
+                throw new Error('Unable to process optimization results. Please try again.');
+            }
+
+            if (orderedIds.length !== localEvents.length) {
+                throw new Error(`Could not optimize all ${localEvents.length} locations. Only ${orderedIds.length} were processed. One or more locations may be inaccessible by road.`);
+            }
+
             const optimizedEvents = orderedIds
                 .map((id: string) => localEvents.find(e => e.id === id))
                 .filter(Boolean) as Event[];
 
-            // Update local state
+            if (optimizedEvents.length !== localEvents.length) {
+                throw new Error('Some locations could not be matched. Please try again or adjust your itinerary.');
+            }
+
             setLocalEvents(optimizedEvents);
             setHasChanges(true);
 
-            // Store stats temporarily
             setOptimizationStats({
                 distance: response.total_distance_km,
                 time: response.total_time_hours
             });
-        } catch (error) {
-            console.error('Failed to optimize route:', error);
+        } catch (error: any) {
+            const errorMessage = error.message || 'Unable to optimize this route. Try removing locations that may be in water, restricted areas, or adjusting the order manually.';
+            setOptimizationError(errorMessage);
         } finally {
             setIsOptimizing(false);
         }
@@ -514,9 +531,6 @@ export default function EditItineraryPage() {
                                 <h2 className="text-2xl font-bold text-neutral-400">
                                     {formatDate(currentDay.date)}
                                 </h2>
-                                <p className="text-sm text-neutral-300 mt-1">
-                                    Est. Exploration Time: 30min - 2hr 15 min
-                                </p>
                             </div>
                             <button
                                 onClick={handleOptimizeRoute}
@@ -536,6 +550,30 @@ export default function EditItineraryPage() {
                                 )}
                             </button>
                         </div>
+
+                        {optimizationError && (
+                            <div className="mb-4 p-4 bg-danger-50 border border-danger-200 rounded-xl">
+                                <div className="flex items-start gap-3">
+                                    <div className="shrink-0 w-5 h-5 text-danger-600 mt-0.5">
+                                        <svg fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="text-sm font-semibold text-danger-800 mb-1">Unable to Optimize Route</h4>
+                                        <p className="text-xs text-danger-600">
+                                            Common causes: locations in water or restricted areas, extreme distances between points, or insufficient routing data for the region.
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => setOptimizationError(null)}
+                                        className="shrink-0 text-danger-600 hover:text-danger-800 text-lg leading-none"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Optimization Stats Banner */}
                         {optimizationStats && (

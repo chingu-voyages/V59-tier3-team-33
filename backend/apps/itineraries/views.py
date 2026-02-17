@@ -136,8 +136,8 @@ class TripEventViewset(viewsets.ModelViewSet):
         serializer_class=EventReorderSerializer,
         permission_classes=[permissions.IsAuthenticated, IsTripMember],
     )
-    def reorder(self, request, pk=None):
-        serializer = self.get_serializer_class(data=request.data)
+    def reorder(self, request, trip_pk=None):
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         event_ids = serializer.validated_data["event_ids"]
         trip_day = serializer.validated_data["trip_day_id"]

@@ -11,7 +11,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EventForm, type EventFormData } from './EventForm';
 import { AccommodationForm, type AccommodationFormData } from './AccommodationForm';
-import type { Place, TripDay } from '@/types/trip';
+import type { Place, TripDay, Event, Lodging } from '@/types/trip';
 
 interface AddPlaceDialogProps {
     open: boolean;
@@ -21,6 +21,10 @@ interface AddPlaceDialogProps {
     tripDays: TripDay[];
     tripStartDate: string;
     tripEndDate: string;
+    eventsByDayId: Record<string, string[]>;
+    eventsById: Record<string, Event>;
+    lodgingsByDayId: Record<string, string[]>;
+    lodgingsById: Record<string, Lodging>;
     onSuccess?: () => void;
 }
 
@@ -32,6 +36,10 @@ export function AddPlaceDialog({
     tripDays,
     tripStartDate,
     tripEndDate,
+    eventsByDayId,
+    eventsById,
+    lodgingsByDayId,
+    lodgingsById,
     onSuccess,
 }: AddPlaceDialogProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -114,6 +122,12 @@ export function AddPlaceDialog({
                             tripDays={tripDays}
                             tripStartDate={tripStartDate}
                             tripEndDate={tripEndDate}
+                            placeLatitude={place.latitude}
+                            placeLongitude={place.longitude}
+                            eventsByDayId={eventsByDayId}
+                            eventsById={eventsById}
+                            lodgingsByDayId={lodgingsByDayId}
+                            lodgingsById={lodgingsById}
                             onSubmit={handleEventSubmit}
                             onCancel={handleCancel}
                             isSubmitting={isSubmitting}

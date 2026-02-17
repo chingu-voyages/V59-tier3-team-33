@@ -26,7 +26,7 @@ export function PlaceDetails({ context, tripId, onClose, onToggleFavorite }: Pla
     const { place, isFavorite, isInItinerary, isLodging, source } = context;
 
     // Get trip data from store for the dialog
-    const { trip, tripDaysById, tripDayIds } = useTripStore();
+    const { trip, tripDaysById, tripDayIds, eventsByDayId, eventsById, lodgingsByDayId, lodgingsById } = useTripStore();
     const tripDays = tripDayIds.map(id => tripDaysById[id]);
 
     const handleToggleFavorite = async () => {
@@ -239,6 +239,10 @@ export function PlaceDetails({ context, tripId, onClose, onToggleFavorite }: Pla
                     tripDays={tripDays}
                     tripStartDate={trip.start_date}
                     tripEndDate={trip.end_date}
+                    eventsByDayId={eventsByDayId}
+                    eventsById={eventsById}
+                    lodgingsByDayId={lodgingsByDayId}
+                    lodgingsById={lodgingsById}
                     onSuccess={handleAddSuccess}
                 />
             )}
