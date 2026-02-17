@@ -47,6 +47,7 @@ export default function TripsPage() {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'name-asc' | 'name-desc' | 'date-asc' | 'date-desc'>('date-desc');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [tripToDelete, setTripToDelete] = useState<Trip | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -99,6 +100,27 @@ export default function TripsPage() {
     alert('Edit feature coming soon!');
   };
 
+  const filteredAndSortedTrips = trips
+    .filter(trip => {
+      if (searchQuery.length < 3) return true;
+      const query = searchQuery.toLowerCase();
+      return trip.name.toLowerCase().includes(query);
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'name-asc':
+          return a.name.localeCompare(b.name);
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        case 'date-asc':
+          return new Date(a.start_date).getTime() - new Date(b.start_date).getTime();
+        case 'date-desc':
+          return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
+        default:
+          return 0;
+      }
+    });
+
   if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -116,25 +138,59 @@ export default function TripsPage() {
         </h1>
 
         {/* Search and Filter Bar */}
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1 relative">
-            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-100" />
-            <input
-              type="text"
-              placeholder="Search trips..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-white border border-surface-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent shadow-sm"
-            />
+        <div className="flex flex-col sm:flex-row gap-4 mb-2">
+          <div className="flex-1">
+            <div className="relative">
+              <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-100" />
+              <input
+                type="text"
+                placeholder="Search trips (min 3 characters)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 bg-white border border-surface-500 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent shadow-sm"
+              />
+            </div>
+            {searchQuery.length > 0 && searchQuery.length < 3 && (
+              <p className="text-xs text-amber-600 mt-1.5 ml-1">
+                Type at least 3 characters to search
+              </p>
+            )}
           </div>
 
-          <button className="flex items-center justify-center gap-2 px-6 py-3 bg-white border border-surface-500 rounded-xl hover:bg-surface-400 transition-colors shadow-sm">
-            <FaSlidersH className="text-neutral-100" />
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center justify-center gap-2 px-6 py-3 bg-white border border-surface-500 rounded-xl hover:bg-surface-100 transition-colors shadow-sm">
+                <FaSlidersH className="text-neutral-300" />
+                <span className="text-neutral-400 font-medium hidden sm:inline">Sort</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem onClick={() => setSortBy('name-asc')}>
+                <span className={sortBy === 'name-asc' ? 'font-semibold' : ''}>
+                  Name (A-Z)
+                </span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy('name-desc')}>
+                <span className={sortBy === 'name-desc' ? 'font-semibold' : ''}>
+                  Name (Z-A)
+                </span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy('date-asc')}>
+                <span className={sortBy === 'date-asc' ? 'font-semibold' : ''}>
+                  Trip Date (Oldest First)
+                </span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy('date-desc')}>
+                <span className={sortBy === 'date-desc' ? 'font-semibold' : ''}>
+                  Trip Date (Newest First)
+                </span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Trips List */}
-        {trips.length === 0 ? (
+        {filteredAndSortedTrips.length === 0 && trips.length === 0 ? (
           <div className="my-4 text-center py-16">
             <div className="w-20 h-20 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-4">
               <FaMapMarkerAlt className="text-3xl text-primary-400" />
@@ -152,6 +208,24 @@ export default function TripsPage() {
               Create Your First Trip
             </button>
           </div>
+        ) : filteredAndSortedTrips.length === 0 ? (
+          <div className="my-4 text-center py-16">
+            <div className="w-20 h-20 bg-surface-200 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FaSearch className="text-3xl text-neutral-300" />
+            </div>
+            <h2 className="text-xl font-semibold text-neutral-300 mb-2">
+              No trips found
+            </h2>
+            <p className="text-neutral-200 mb-6">
+              Try adjusting your search query
+            </p>
+            <button
+              onClick={() => setSearchQuery('')}
+              className="px-6 py-2.5 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium"
+            >
+              Clear Search
+            </button>
+          </div>
         ) : (
           <div className="space-y-4">
             <button
@@ -164,7 +238,7 @@ export default function TripsPage() {
               </span>
             </button>
 
-            {trips.map((trip) => (
+            {filteredAndSortedTrips.map((trip) => (
               <div
                 key={trip.id}
                 className="group relative bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200"
