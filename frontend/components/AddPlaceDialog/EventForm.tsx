@@ -164,7 +164,7 @@ export function EventForm({
                             {selectedDate ? (
                                 <span>
                                     {format(selectedDate, 'PPP')}
-                                    {dayNumber && <span className="ml-2 text-secondary-600">(Day {dayNumber})</span>}
+                                    {dayNumber && <span className="ml-2 text-primary-600">(Day {dayNumber})</span>}
                                 </span>
                             ) : (
                                 <span>Pick a date</span>
