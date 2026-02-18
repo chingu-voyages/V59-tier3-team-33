@@ -90,14 +90,13 @@ export function TabPills({ tabs, activeTab, onTabChange }: TabPillsProps) {
                             {/* Favorites: Only show outline heart icon */}
                             {isFavorites ? (
                                 <FaRegHeart className="text-lg" />
+                            ) : tab.id === 'overview' ? (
+                                <span>{tab.label}</span>
                             ) : (
                                 <>
-                                    {/* Other tabs: Only show label */}
-                                    <span>{tab.label}</span>
+                                    {/* Day tabs: Only show date */}
                                     {tab.displayDate && (
-                                        <span className={`text-xs ${isActive ? 'opacity-90' : 'opacity-70'}`}>
-                                            ({tab.displayDate})
-                                        </span>
+                                        <span>{tab.displayDate}</span>
                                     )}
                                 </>
                             )}
