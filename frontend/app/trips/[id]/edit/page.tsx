@@ -79,7 +79,7 @@ function SortableEventItem({ event, index, onDelete }: SortableEventItemProps) {
                         {event.place_details.address}
                     </p>
                     <div className="flex items-center gap-2 mt-2">
-                        <span className="inline-flex items-center px-2 py-1 bg-secondary-100 text-secondary-600 rounded-full text-xs font-medium capitalize">
+                        <span className="inline-flex items-center px-2 py-1 bg-secondary-200 text-secondary-700 rounded-full text-xs font-medium capitalize">
                             {event.type.toLowerCase()}
                         </span>
                         {event.notes && (
@@ -500,7 +500,7 @@ export default function EditItineraryPage() {
                                                                             {event.place_details.address}
                                                                         </p>
                                                                         <div className="flex items-center gap-2 mt-2">
-                                                                            <span className="inline-flex items-center px-2 py-1 bg-secondary-100 text-secondary-600 rounded-full text-xs font-medium capitalize">
+                                                                            <span className="inline-flex items-center px-2 py-1 bg-secondary-200 text-secondary-700 rounded-full text-xs font-medium capitalize">
                                                                                 {event.type.toLowerCase()}
                                                                             </span>
                                                                             {event.notes && (

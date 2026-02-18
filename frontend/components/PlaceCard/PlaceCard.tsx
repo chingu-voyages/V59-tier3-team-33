@@ -65,7 +65,7 @@ export function PlaceCard({ data, type, onClick }: PlaceCardProps) {
                                     {event.duration} min
                                 </span>
                             )}
-                            <span className="inline-flex items-center px-2 py-1 bg-secondary-100 text-secondary-600 rounded-full text-xs font-medium capitalize">
+                            <span className="inline-flex items-center px-2 py-1 bg-secondary-200 text-secondary-700 rounded-full text-xs font-medium capitalize">
                                 {event.type.toLowerCase().replace('_', ' ')}
                             </span>
                         </div>

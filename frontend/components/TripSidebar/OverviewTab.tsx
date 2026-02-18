@@ -111,7 +111,7 @@ export function OverviewTab({ trip }: OverviewTabProps) {
                                                             {event.place_details.address}
                                                         </p>
                                                         <div className="flex items-center gap-1 mt-1 flex-wrap">
-                                                            <span className="inline-flex items-center px-2 py-0.5 bg-secondary-100 text-secondary-600 rounded-full text-xs font-medium capitalize">
+                                                            <span className="inline-flex items-center px-2 py-0.5 bg-secondary-200 text-secondary-700 rounded-full text-xs font-medium capitalize">
                                                                 {event.type.toLowerCase()}
                                                             </span>
                                                             {event.notes && (
