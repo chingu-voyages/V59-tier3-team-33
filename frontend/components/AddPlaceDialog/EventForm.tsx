@@ -139,7 +139,7 @@ export function EventForm({
                 <div className="flex items-center gap-2 text-primary-600 mb-1">
                     <FaRobot className="text-lg" />
                     <span className="font-semibold text-sm">AI Suggestion</span>
-                    <span className="text-xs px-2 py-0.5 bg-primary-100 rounded-full">Coming Soon</span>
+                    <span className="text-xs px-2 py-0.5 bg-primary-100 text-primary-700 font-medium rounded-full">Coming Soon</span>
                 </div>
                 <p className="text-xs text-primary-600">
                     AI will suggest the best time and day for this activity based on your itinerary.

@@ -102,14 +102,6 @@ export function AddPlaceDialog({
                     </DialogTitle>
                 </DialogHeader>
 
-                {/* Image Placeholder */}
-                <div className="w-full h-48 bg-surface-200 border-2 border-surface-500 rounded-xl flex items-center justify-center overflow-hidden">
-                    <div className="text-center text-neutral-300">
-                        <FaMapMarkerAlt className="text-4xl mx-auto mb-2 opacity-50" />
-                        <p className="text-sm">Image not available</p>
-                    </div>
-                </div>
-
                 {/* Tabs */}
                 <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'event' | 'accommodation')}>
                     <TabsList className="grid w-full grid-cols-2">
