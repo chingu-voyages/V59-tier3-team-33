@@ -26,10 +26,6 @@ export const footerDescription = "text-sm leading-relaxed text-surface-100";
 
 const teamMembers = [
   {
-    name: "Chris",
-    github: "https://github.com/chalrees876",
-  },
-  {
     name: "Samantha",
     github: "https://github.com/samanthakgraham",
   },
@@ -38,24 +34,20 @@ const teamMembers = [
     github: "https://github.com/Direwen",
   },
   {
-    name: "Bastien Winant",
-    github: "https://github.com/BastienWinant",
-  },
-  {
-    name: "Roni Egbu",
-    github: "https://github.com/ronniiii-i",
-  },
-  {
     name: "Margaret Wu",
     github: "https://github.com/margaretcwu",
   },
   {
-    name: "Oshada Kularathne",
-    github: "https://github.com/devimalka",
-  },
-  {
     name: "Chanae Pickett",
     github: "https://github.com/chanaelynease",
+  },
+  {
+    name: "Chris",
+    github: "https://github.com/chalrees876",
+  },
+  {
+    name: "Oshada Kularathne",
+    github: "https://github.com/devimalka",
   },
   {
     name: "Gobinath Varatharajan",
@@ -78,7 +70,7 @@ export const Footer: React.FC<FooterProps> = ({ className }) => {
 
           {/* Team Section */}
           <div className="lg:col-span-2">
-            
+
             <h3 className={footerHeading}>
               <FaGithub className="text-base" />Team
             </h3>
