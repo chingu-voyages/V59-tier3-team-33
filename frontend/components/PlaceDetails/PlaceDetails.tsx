@@ -177,7 +177,7 @@ export function PlaceDetails({ context, tripId, onClose, onToggleFavorite }: Pla
                                 <div className="flex items-center gap-3">
                                     <FaRobot className="text-primary-400" />
                                     <span className="font-semibold text-neutral-400">AI Suggestion</span>
-                                    <span className="text-xs px-2 py-1 bg-primary-100 text-primary-400 rounded-full">
+                                    <span className="text-xs px-2 py-1 bg-primary-100 text-primary-700 rounded-full">
                                         Coming Soon
                                     </span>
                                 </div>
