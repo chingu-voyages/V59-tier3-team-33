@@ -161,7 +161,6 @@ export default function TripsPage() {
             <DropdownMenuTrigger asChild>
               <button className="flex items-center justify-center gap-2 px-6 py-3 bg-white border border-surface-500 rounded-xl hover:bg-surface-100 transition-colors shadow-sm">
                 <FaSlidersH className="text-neutral-300" />
-                <span className="text-neutral-400 font-medium hidden sm:inline">Sort</span>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
