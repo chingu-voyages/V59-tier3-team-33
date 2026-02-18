@@ -29,5 +29,5 @@
 | Who | Deadline | Task | Status |
 | --- | --- | --- | --- |
 | Kayleigh | 16 Feb midnight ET | Post meeting notes | Done |
-| Kayleigh | 17 Feb midnight ET | Update tasks in sprint board | Open |
+| Kayleigh | 17 Feb midnight ET | Update tasks in sprint board | Done |
 | Direwen | 17 Feb midnight ET | Provide project setup instructions | Open |
