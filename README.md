@@ -37,8 +37,6 @@ coding!
 - Chris: [GitHub](https://github.com/chalrees876) / [LinkedIn](https://www.linkedin.com/in/cmckenzie12/)
 - Samantha (Kayleigh): [GitHub](https://github.com/samanthakgraham) / [LinkedIn](www.linkedin.com/in/samantha-graham-339b6b37)
 - Min Sik Hein (Direwen): [GitHub](https://github.com/Direwen) / [LinkedIn](https://www.linkedin.com/in/min-sik-hein/)
-- Bastien Winant: [GitHub](https://github.com/BastienWinant)
-- Roni Egbu: [GitHub](https://github.com/ronniiii-i) / [LinkedIn](https://linkedin.com/in/princess-roni-egbu)
 - Margaret Wu: [GitHub](https://github.com/margaretcwu) / [LinkedIn](https://linkedin.com/in/margaretcwu)
 - Oshada Kularathne: [GitHub](https://github.com/devimalka) / [LinkedIn](https://www.linkedin.com/in/oshada-kularathne/)
 - Chanae Pickett: [GitHub](https://github.com/chanaelynease)
