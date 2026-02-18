@@ -161,7 +161,6 @@ export default function TripsPage() {
             <DropdownMenuTrigger asChild>
               <button className="flex items-center justify-center gap-2 px-6 py-3 bg-white border border-surface-500 rounded-xl hover:bg-surface-100 transition-colors shadow-sm">
                 <FaSlidersH className="text-neutral-300" />
-                <span className="text-neutral-400 font-medium hidden sm:inline">Sort</span>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -203,7 +202,7 @@ export default function TripsPage() {
             </p>
             <button
               onClick={() => router.push('/trips/create')}
-              className="px-6 py-2.5 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium"
+              className="px-6 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-500 transition-colors font-medium"
             >
               Create Your First Trip
             </button>
@@ -230,7 +229,7 @@ export default function TripsPage() {
           <div className="space-y-4">
             <button
               onClick={() => router.push('/trips/create')}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-secondary-300 rounded-xl hover:bg-secondary-400 transition-colors shadow-sm my-4"
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-secondary-400 rounded-xl hover:bg-secondary-300 transition-colors shadow-sm my-4"
             >
               <FaPlus className="text-surface-100" />
               <span className="text-surface-100 font-medium">

@@ -48,9 +48,6 @@ export function DayTab({ dayNumber, date }: DayTabProps) {
                 <div className="w-16 h-16 bg-secondary-50 rounded-full flex items-center justify-center mb-4">
                     <FaCalendarDay className="text-3xl text-secondary-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-neutral-400 mb-1">
-                    Day {dayNumber}
-                </h3>
                 <p className="text-neutral-200 text-sm mb-4">{displayDate}</p>
                 <p className="text-neutral-300 font-medium mb-1">No plans yet</p>
                 <p className="text-neutral-200 text-sm">
@@ -73,10 +70,7 @@ export function DayTab({ dayNumber, date }: DayTabProps) {
             <div className="mb-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h3 className="text-lg font-semibold text-neutral-400">
-                            Day {dayNumber}
-                        </h3>
-                        <p className="text-sm text-neutral-200">{displayDate}</p>
+                        <p className="text-sm text-neutral-400 font-semibold">{displayDate}</p>
                         <p className="text-xs text-neutral-300 mt-1">
                             {lodgings.length > 0 && `${lodgings.length} ${lodgings.length === 1 ? 'lodging' : 'lodgings'}`}
                             {lodgings.length > 0 && events.length > 0 && ' • '}

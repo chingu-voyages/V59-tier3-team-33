@@ -58,7 +58,7 @@ export function TabPills({ tabs, activeTab, onTabChange }: TabPillsProps) {
             {showLeftArrow && (
                 <button
                     onClick={() => scroll('left')}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-surface-50 shadow-lg rounded-full border flex items-center justify-center hover:bg-surface-100 transition-colors"
+                    className="absolute left-2 top-4 z-10 w-10 h-10 bg-surface-50 shadow-lg rounded-full border flex items-center justify-center hover:bg-surface-100 transition-colors"
                     aria-label="Scroll left"
                 >
                     <FaChevronLeft className="text-neutral-400 text-sm" />
@@ -90,14 +90,13 @@ export function TabPills({ tabs, activeTab, onTabChange }: TabPillsProps) {
                             {/* Favorites: Only show outline heart icon */}
                             {isFavorites ? (
                                 <FaRegHeart className="text-lg" />
+                            ) : tab.id === 'overview' ? (
+                                <span>{tab.label}</span>
                             ) : (
                                 <>
-                                    {/* Other tabs: Only show label */}
-                                    <span>{tab.label}</span>
+                                    {/* Day tabs: Only show date */}
                                     {tab.displayDate && (
-                                        <span className={`text-xs ${isActive ? 'opacity-90' : 'opacity-70'}`}>
-                                            ({tab.displayDate})
-                                        </span>
+                                        <span>{tab.displayDate}</span>
                                     )}
                                 </>
                             )}
@@ -110,7 +109,7 @@ export function TabPills({ tabs, activeTab, onTabChange }: TabPillsProps) {
             {showRightArrow && (
                 <button
                     onClick={() => scroll('right')}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-surface-50 shadow-lg rounded-full border flex items-center justify-center hover:bg-surface-100 transition-colors"
+                    className="absolute right-2 top-4 z-10 w-10 h-10 bg-surface-50 shadow-lg rounded-full border flex items-center justify-center hover:bg-surface-100 transition-colors"
                     aria-label="Scroll right"
                 >
                     <FaChevronRight className="text-neutral-400 text-sm" />

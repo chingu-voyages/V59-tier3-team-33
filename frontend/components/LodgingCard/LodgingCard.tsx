@@ -35,7 +35,7 @@ export function LodgingCard({ lodging, onClick }: LodgingCardProps) {
 
                     {/* Date Range */}
                     <div className="flex items-center gap-2 mt-2">
-                        <span className="inline-flex items-center px-2 py-1 bg-primary-100 text-primary-600 rounded-full text-xs font-medium">
+                        <span className="inline-flex items-center px-2 py-1 bg-primary-200 text-primary-700 rounded-full text-xs font-medium">
                             {checkIn} - {checkOut}
                         </span>
                     </div>
