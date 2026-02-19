@@ -6,6 +6,8 @@ export interface Trip {
   created_at: string;
   total_days: number;
   trip_days?: TripDay[];
+  is_public?: boolean;
+  public_url?: string;
 }
 
 export interface Place {

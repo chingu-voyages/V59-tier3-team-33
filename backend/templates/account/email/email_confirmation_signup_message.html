@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your JoyRoute Account</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #0f172a;
+            background-color: #fdfefe;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fcfdfd;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(15, 23, 42, 0.1);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2bb0a6 0%, #228c84 100%);
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .subtitle {
+            color: #aadfdb;
+            font-size: 16px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .greeting {
+            font-size: 20px;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 16px;
+        }
+        
+        .message {
+            color: #6f737f;
+            margin-bottom: 24px;
+            font-size: 16px;
+        }
+        
+        .verification-box {
+            background-color: #fafcfd;
+            border: 2px dashed #7fcfc9;
+            border-radius: 8px;
+            padding: 24px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .verification-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #2bb0a6 0%, #228c84 100%);
+            color: white;
+            padding: 16px 32px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 12px rgba(43, 176, 166, 0.3);
+        }
+        
+        .verification-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(43, 176, 166, 0.4);
+        }
+        
+        .fallback-text {
+            font-size: 14px;
+            color: #3f4554;
+            margin-top: 16px;
+            word-break: break-all;
+        }
+        
+        .security-info {
+            background-color: #f1d1d2;
+            border-left: 4px solid #b91c21;
+            border-radius: 4px;
+            padding: 16px;
+            margin: 24px 0;
+        }
+        
+        .security-title {
+            font-weight: 600;
+            color: #b91c21;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .security-icon {
+            margin-right: 8px;
+        }
+        
+        .security-text {
+            color: #3f4554;
+            font-size: 14px;
+        }
+        
+        .footer {
+            background-color: #0f172a;
+            color: #9fa2a9;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .footer-content {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .footer-links {
+            margin-top: 16px;
+        }
+        
+        .footer-link {
+            color: #55bfb7;
+            text-decoration: none;
+            margin: 0 8px;
+        }
+        
+        .footer-link:hover {
+            color: #7fcfc9;
+        }
+        
+        @media only screen and (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 8px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+            
+            .verification-button {
+                width: 100%;
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="icon">🔐</div>
+            <div class="title">Verify Your Email</div>
+            <div class="subtitle">Complete your JoyRoute registration</div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <h2 class="greeting">Hello {{ user.first_name|default:"Adventurer" }},</h2>
+            
+            <p class="message">
+                Thank you for signing up for JoyRoute! To complete your registration and start planning amazing trips, 
+                please verify your email address by clicking the button below.
+            </p>
+            
+            <!-- Verification Box -->
+            <div class="verification-box">
+                <a href="{{ activate_url }}" class="verification-button">
+                    ✅ Verify Email Address
+                </a>
+                
+                <div class="fallback-text">
+                    If the button doesn't work, copy and paste this link into your browser:<br>
+                    {{ activate_url }}
+                </div>
+            </div>
+            
+            <!-- Security Notice -->
+            <div class="security-info">
+                <div class="security-title">
+                    <span class="security-icon">🛡️</span>
+                    Security Notice
+                </div>
+                <div class="security-text">
+                    This verification link expires in 24 hours for your security. 
+                    If you didn't create an account with JoyRoute, you can safely ignore this email.
+                </div>
+            </div>
+            
+            <p class="message">
+                Once verified, you'll have full access to all JoyRoute features including trip planning, 
+                interactive maps, and sharing capabilities.
+            </p>
+            
+            <p class="message" style="margin-bottom: 0;">
+                Need help? Reply to this email or contact our support team.<br>
+                We're excited to have you join our travel community!
+            </p>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-content">
+                <p>&copy; 2024 JoyRoute. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="{{ frontend_url }}" class="footer-link">Website</a>
+                    <a href="#" class="footer-link">Privacy</a>
+                    <a href="#" class="footer-link">Terms</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
