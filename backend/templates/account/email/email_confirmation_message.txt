@@ -1,0 +1,28 @@
+Verify Your JoyRoute Account 🔐
+
+Hello {{ user.first_name|default:"Adventurer" }},
+
+Thank you for signing up for JoyRoute! To complete your registration and start planning amazing trips, please verify your email address.
+
+Click the link below to verify your email:
+{{ activate_url }}
+
+If the button doesn't work, copy and paste this link into your browser:
+{{ activate_url }}
+
+---
+
+🛡️ Security Notice
+This verification link expires in 24 hours for your security. If you didn't create an account with JoyRoute, you can safely ignore this email.
+
+Once verified, you'll have full access to all JoyRoute features including:
+• Trip planning with interactive maps
+• Accommodation organization
+• Day-by-day event scheduling
+• Trip sharing with friends and family
+
+Need help? Reply to this email or contact our support team.
+We're excited to have you join our travel community!
+
+---
+© 2024 JoyRoute. All rights reserved.

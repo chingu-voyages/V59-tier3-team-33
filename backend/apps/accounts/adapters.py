@@ -1,5 +1,6 @@
 from allauth.account.adapter import DefaultAccountAdapter
 from django.conf import settings
+from django.template.loader import render_to_string
 
 
 class CustomAccountAdapter(DefaultAccountAdapter):
@@ -21,3 +22,26 @@ class CustomAccountAdapter(DefaultAccountAdapter):
             settings.FRONTEND_EMAIL_VERIFICATION_PATH_NAME.rstrip("/")
         )
         return f"{frontend_url}/{frontend_email_verification_path_name}/{emailconfirmation.key}/"
+
+    def send_mail(self, template_prefix, email, context):
+        """
+        Override to send HTML emails for email confirmation.
+        """
+        from django.core.mail import send_mail
+        
+        # Render HTML and text versions
+        html_content = render_to_string(f'{template_prefix}_message.html', context)
+        text_content = render_to_string(f'{template_prefix}_message.txt', context)
+        
+        # Get subject from template
+        subject = render_to_string(f'{template_prefix}_subject.txt', context).strip()
+        
+        # Send both HTML and text versions
+        send_mail(
+            subject=subject,
+            message=text_content,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            html_message=html_content,
+            fail_silently=False,
+        )

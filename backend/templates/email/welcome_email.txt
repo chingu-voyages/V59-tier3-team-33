@@ -1,0 +1,24 @@
+Welcome to JoyRoute! ✈️
+
+Hello {{ user.first_name|default:"Adventurer" }},
+
+Thank you for joining JoyRoute! We're thrilled to have you as part of our travel community.
+
+Your journey to creating amazing trip itineraries starts now. With JoyRoute, you can:
+
+📍 Plan detailed itineraries with interactive maps
+🏨 Save and organize accommodations  
+🗓️ Create day-by-day event schedules
+🔗 Share your trips with friends and family
+
+Start planning your first adventure:
+{{ frontend_url }}/trips
+
+Have questions? Reply to this email or check out our help center. 
+We're here to help you make the most of your travel planning experience.
+
+Happy travels,
+The JoyRoute Team
+
+---
+© 2024 JoyRoute. All rights reserved.
