@@ -29,7 +29,7 @@ class TripViewset(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_serializer_class(self):
-        if self.action in ["retrieve"]:
+        if self.action in ["retrieve", "get_public_trip"]:
             return TripDetailSerializer
         elif self.action in ["toggle_share"]:
             return ShareTripSerializer
@@ -85,6 +85,20 @@ class TripViewset(viewsets.ModelViewSet):
         serializer = self.get_serializer(trip, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="shared/(?P<token>[^/.]+)",
+        serializer_class=TripDetailSerializer,
+        permission_classes=[],
+    )
+    def get_public_trip(self, request, token=None):
+        print(f"token {token}")
+        trip = get_object_or_404(Trip, public_token=token, is_public=True)
+        print(f"trip {trip} | is_public {trip.is_public}")
+        serializer = self.get_serializer(trip)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class TripSavedPlaceViewset(

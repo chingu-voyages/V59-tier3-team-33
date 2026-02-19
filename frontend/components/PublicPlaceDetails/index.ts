@@ -1,0 +1,1 @@
+export { PublicPlaceDetails } from './PublicPlaceDetails';
