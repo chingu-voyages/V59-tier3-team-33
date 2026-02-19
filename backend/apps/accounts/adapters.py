@@ -25,16 +25,22 @@ class CustomAccountAdapter(DefaultAccountAdapter):
 
     def send_mail(self, template_prefix, email, context):
         """
-        Override to send HTML emails for email confirmation.
+        Override to send HTML emails for email confirmation and password reset.
         """
         from django.core.mail import send_mail
         
+        # Handle both email confirmation and password reset
+        if template_prefix == 'account/email/email_confirmation':
+            template_name = 'account/email/email_confirmation_signup'
+        else:
+            template_name = template_prefix
+        
         # Render HTML and text versions
-        html_content = render_to_string(f'{template_prefix}_message.html', context)
-        text_content = render_to_string(f'{template_prefix}_message.txt', context)
+        html_content = render_to_string(f'{template_name}_message.html', context)
+        text_content = render_to_string(f'{template_name}_message.txt', context)
         
         # Get subject from template
-        subject = render_to_string(f'{template_prefix}_subject.txt', context).strip()
+        subject = render_to_string(f'{template_name}_subject.txt', context).strip()
         
         # Send both HTML and text versions
         send_mail(
