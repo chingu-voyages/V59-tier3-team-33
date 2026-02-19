@@ -46,6 +46,7 @@ interface TripState {
   removeFavorite: (tripId: string, favoriteId: string) => Promise<void>;
   addLodging: (tripId: string, data: AccommodationFormData, place: Place) => Promise<void>;
   addEvent: (tripId: string, data: EventFormData, place: Place) => Promise<void>;
+  toggleTripPublic: (tripId: string, isPublic: boolean) => Promise<void>;
   
   // Utility
   clearTrip: () => void;
@@ -485,6 +486,28 @@ export const useTripStore = create<TripState>((set, get) => ({
       
     } catch (error) {
       console.error('Failed to add event:', error);
+      throw error;
+    }
+  },
+  
+  toggleTripPublic: async (tripId: string, isPublic: boolean) => {
+    try {
+      const data = await api.patch<{ is_public: boolean; public_url: string }>(`/trips/${tripId}/share/`, {
+        is_public: isPublic,
+      });
+      
+      const state = get();
+      if (state.trip) {
+        set({
+          trip: {
+            ...state.trip,
+            is_public: data.is_public,
+            public_url: data.public_url,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Failed to toggle trip public status:', error);
       throw error;
     }
   },

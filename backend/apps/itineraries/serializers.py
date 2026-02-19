@@ -1,3 +1,6 @@
+from django.utils import timezone
+import uuid
+from django.conf import settings
 from django.db import transaction
 from rest_framework import serializers
 from .models import Trip, TripDay, TripSavedPlace, Event, Lodging
@@ -7,10 +10,18 @@ from apps.accounts.serializers import UserSimpleSerializer
 
 
 class TripSerializer(serializers.ModelSerializer):
+    
+    public_url = serializers.SerializerMethodField(read_only=True)
+    
+    def get_public_url(self, obj):
+        if obj.is_public and obj.public_token:
+            return f"{settings.FRONTEND_URL}/{settings.FRONTEND_SHARE_PATH_NAME}/{obj.public_token}"
+        return None
+    
     class Meta:
         model = Trip
-        fields = ["id", "name", "start_date", "end_date", "created_at"]
-        read_only_fields = ["id", "created_at"]
+        fields = ["id", "name", "start_date", "end_date", "created_at", "is_public", "public_url"]
+        read_only_fields = ["id", "created_at", "is_public", "public_url"]
 
     def validate(self, attrs):
         if attrs["start_date"] > attrs["end_date"]:
@@ -257,3 +268,35 @@ class RouteOptimizationSerializer(serializers.Serializer):
             )
 
         return attrs
+
+
+class ShareTripSerializer(serializers.ModelSerializer):
+    
+    public_url = serializers.SerializerMethodField(read_only=True)
+    
+    class Meta:
+        model = Trip
+        fields = ["is_public", "public_url"]
+        read_only_fields = ["public_url"]
+        
+    def get_public_url(self, obj):
+        if obj.is_public and obj.public_token:
+            return f"{settings.FRONTEND_URL}/{settings.FRONTEND_SHARE_PATH_NAME}/{obj.public_token}"
+        return None
+    
+    def update(self, instance, validated_data):
+        is_public = validated_data.get("is_public", instance.is_public)
+        
+        # Share Mode: ON
+        if is_public:
+            instance.is_public = True
+            instance.public_token = uuid.uuid4()
+            instance.last_public_token_generated_at = timezone.now()
+        else: 
+            instance.is_public = False
+            instance.public_token = None
+            instance.last_public_token_generated_at = None
+        
+        instance.save()
+        return instance
+        

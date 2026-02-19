@@ -1,15 +1,21 @@
+from email.policy import default
+from enum import unique
 from django.db import models
 from django.conf import settings
 
 from .constants import EventType
 from apps.core.models import BaseModel
-
+import uuid
 
 class Trip(BaseModel):
     name = models.CharField(max_length=255)
     start_date = models.DateField()
     end_date = models.DateField()
-
+    
+    public_token = models.UUIDField(default=uuid.uuid4, editable=False, null=True, blank=True)
+    is_public = models.BooleanField(default=False)
+    last_public_token_generated_at = models.DateTimeField(null=True, blank=True)
+    
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="trips"
     )
@@ -22,7 +28,17 @@ class Trip(BaseModel):
             models.CheckConstraint(
                 condition=models.Q(start_date__lte=models.F("end_date")),
                 name="start_date_before_end_date",
-            )
+            ),
+            models.CheckConstraint(
+                condition=models.Q(is_public=False) | models.Q(public_token__isnull=False),
+                name="public_trip_has_token",
+            ),
+            # Conditional unique constraint for public_token
+            models.UniqueConstraint(
+                fields=["public_token"],
+                condition=models.Q(is_public=True),
+                name="unique_public_token",
+            ),
         ]
 
 

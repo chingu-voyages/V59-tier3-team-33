@@ -260,5 +260,8 @@ FRONTEND_EMAIL_VERIFICATION_PATH_NAME = os.environ.get(
 FRONTEND_PASSWORD_RESET_PATH_NAME = os.environ.get(
     "FRONTEND_PASSWORD_RESET_PATH_NAME", "reset-password"
 )
+FRONTEND_SHARE_PATH_NAME = os.environ.get(
+    "FRONTEND_SHARE_PATH_NAME", "share-trip"
+)
 
 GEOAPIFY_API_KEY = os.environ.get("GEOAPIFY_API_KEY")

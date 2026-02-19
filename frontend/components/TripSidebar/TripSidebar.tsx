@@ -43,7 +43,7 @@ export function TripSidebar() {
     return (
         <div className="flex flex-col h-full bg-surface-50">
             {/* Header */}
-            <SidebarHeader tripName={trip.name} />
+            <SidebarHeader tripName={trip.name} tripId={trip.id} />
 
             {/* Tab Pills */}
             <TabPills tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />

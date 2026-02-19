@@ -16,6 +16,7 @@ from .serializers import (
     LodgingSerializer,
     UpdateLodgingSerializer,
     RouteOptimizationSerializer,
+    ShareTripSerializer
 )
 from django.db import transaction
 from datetime import timedelta
@@ -30,6 +31,8 @@ class TripViewset(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action in ["retrieve"]:
             return TripDetailSerializer
+        elif self.action in ["toggle_share"]:
+            return ShareTripSerializer
         return TripSerializer
 
     def get_queryset(self):
@@ -71,8 +74,18 @@ class TripViewset(viewsets.ModelViewSet):
         if missing_dates:
             TripDay.objects.bulk_create(missing_dates)
 
-    # TODO: Add an action endpoint to manage users who can collaborate on a trip (Nice-To-Have)
-
+    @action(
+        detail=True,
+        methods=["patch"],
+        url_path="share",
+        serializer_class=ShareTripSerializer
+    )
+    def toggle_share(self, request, pk=None):
+        trip = self.get_object()
+        serializer = self.get_serializer(trip, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class TripSavedPlaceViewset(
     viewsets.GenericViewSet,
