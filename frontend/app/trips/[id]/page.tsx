@@ -48,6 +48,7 @@ export default function TripDetailPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedLocation, setSelectedLocation] = useState<NominatimResult | null>(null);
+    const [initialBounds, setInitialBounds] = useState<[[number, number], [number, number]] | null>(null);
 
     const handleLocationSelect = (result: NominatimResult) => {
         setSelectedLocation(result);
@@ -176,6 +177,42 @@ export default function TripDetailPage() {
         };
     }, [tripId, setTrip, setFavorites, setLodgings, clearTrip, router]);
 
+    // Calculate initial map bounds from all trip locations
+    useEffect(() => {
+        const allEvents = Object.values(eventsById);
+        const allLodgings = Object.values(lodgingsById);
+
+        if (allEvents.length === 0 && allLodgings.length === 0) {
+            setInitialBounds(null);
+            return;
+        }
+
+        const lats: number[] = [];
+        const lons: number[] = [];
+
+        allEvents.forEach(event => {
+            lats.push(parseFloat(event.place_details.latitude));
+            lons.push(parseFloat(event.place_details.longitude));
+        });
+
+        allLodgings.forEach(lodging => {
+            lats.push(parseFloat(lodging.place_details.latitude));
+            lons.push(parseFloat(lodging.place_details.longitude));
+        });
+
+        if (lats.length > 0) {
+            const minLat = Math.min(...lats);
+            const maxLat = Math.max(...lats);
+            const minLon = Math.min(...lons);
+            const maxLon = Math.max(...lons);
+
+            setInitialBounds([
+                [minLat, minLon],
+                [maxLat, maxLon],
+            ]);
+        }
+    }, [eventsById, lodgingsById]);
+
     // Loading state
     if (isLoading) {
         return (
@@ -217,6 +254,7 @@ export default function TripDetailPage() {
                 onLocationSelect={handleLocationSelect}
                 dayEvents={dayEvents}
                 dayLodging={dayLodging}
+                initialBounds={initialBounds}
             />
 
             {/* Floating Navigation Layer - positioned below navbar */}

@@ -176,6 +176,7 @@ export function EventForm({
                             mode="single"
                             selected={selectedDate}
                             onSelect={setSelectedDate}
+                            defaultMonth={new Date(tripStartDate)}
                             disabled={(date) => {
                                 // Normalize dates to midnight for comparison
                                 const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());

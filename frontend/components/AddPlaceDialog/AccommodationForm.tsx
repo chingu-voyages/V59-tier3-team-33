@@ -55,6 +55,7 @@ export function AccommodationForm({
                         mode="range"
                         selected={dateRange}
                         onSelect={setDateRange}
+                        defaultMonth={new Date(tripStartDate)}
                         disabled={(date) => {
                             // Normalize dates to midnight for accurate comparison
                             const normalizedDate = new Date(date);
