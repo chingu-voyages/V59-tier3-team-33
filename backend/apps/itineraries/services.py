@@ -1,26 +1,43 @@
 import requests
 from requests.structures import CaseInsensitiveDict
-import json
 from django.conf import settings
-from .models import TripDay, Trip, Lodging, Event
-
+from .models import TripDay, Lodging, Event
 
 class RouteService:
-    
     URL = "https://api.geoapify.com/v1/routeplanner?apiKey={}"
     headers = CaseInsensitiveDict()
     headers["Content-Type"] = "application/json"
-    
-    def __init__(self, trip_day: TripDay, mode = "drive"):
+
+    def __init__(self, trip_day: TripDay, mode="drive"):
         self.trip_day = trip_day
         self.mode = mode
+
+    def optimize_route(self) -> tuple[any, dict]:
+        lodging = Lodging.objects.filter(
+            trip=self.trip_day.trip,
+            arrival_date__lte=self.trip_day.date,
+            departure_date__gte=self.trip_day.date,
+        ).first()
         
-    def optimize_route(self):
-        payload = self._build_payload()
+        events = list(self.trip_day.events.all().order_by("position"))
+
+        if not events and not lodging:
+            return None, None
+
+        # 1. Get the Agent object and the Jobs
+        agent, jobs_list = self._determine_agent_and_jobs(events, lodging)
+
+        if not jobs_list:
+            return None, None
+
+        # 2. Build Payload
+        payload = self._build_payload(agent, jobs_list)
         print("Payload:", payload)
-        if not payload:
-            return {}
         
+        if not payload:
+            return None, None
+
+        # 3. Call API
         try:
             response = requests.post(
                 self.URL.format(settings.GEOAPIFY_API_KEY),
@@ -30,57 +47,50 @@ class RouteService:
             response.raise_for_status()
             data = response.json()
             print("Optimized route:", data)
-            return data
-        
+            
+            # 👇 FIX: Return BOTH the agent object and the response data
+            return agent, data
+
         except Exception as e:
             print("Error optimizing route:", e)
-            return {}
-        
-    def _build_payload(self):
-        
-        lodging = Lodging.objects.filter(
-            trip=self.trip_day.trip,
-            arrival_date__lte=self.trip_day.date,
-            departure_date__gte=self.trip_day.date,
-        ).first()
-        events = self.trip_day.events.all().order_by("position")
-        
-        if not events and not lodging:
-            return {}
-        
-        agent_start_lat, agent_start_lng, jobs_list = self._determine_agent_and_jobs(events, lodging)
-        
-        payload = {
-            "mode": self.mode,
-            "agents": [{
-                "start_location": [agent_start_lng, agent_start_lat],
-                "time_windows": [[0, 86400]],
-            }],
-            "jobs": jobs_list
-        }
-        return payload
-        
-    def _determine_agent_and_jobs(self, events: list[Event], lodging: Lodging) -> tuple[float, float, list[Event]]:
-        agent_start_lat = agent_start_lng = None
-        jobs_list = []
+            return None, None
+
+    def _build_payload(self, agent: any, jobs_list: list[dict]):
+        try:
+            # Handle both Event and Lodging objects safely
+            if hasattr(agent, 'place'):
+                lat = float(agent.place.latitude)
+                lng = float(agent.place.longitude)
+            else:
+                lat = float(agent.latitude)
+                lng = float(agent.longitude)
+
+            return {
+                "mode": self.mode,
+                "agents": [{
+                    "start_location": [lng, lat],
+                    "time_windows": [[0, 86400]],
+                }],
+                "jobs": jobs_list
+            }
+        except AttributeError:
+            return None
+
+    def _determine_agent_and_jobs(self, events: list[Event], lodging: Lodging) -> tuple[any, list[dict]]:
+        agent = None
         jobs_source = []
+
         if lodging:
-            agent_start_lat = float(lodging.place.latitude)
-            agent_start_lng = float(lodging.place.longitude)
+            agent = lodging
             jobs_source = events
         else:
-            first_event = events[0]
-            agent_start_lat = float(first_event.place.latitude)
-            agent_start_lng = float(first_event.place.longitude)
+            agent = events[0]
             jobs_source = events[1:]
-            
+
         jobs_list = [{
             "id": str(event.id),
             "location": [float(event.place.longitude), float(event.place.latitude)],
             "duration": 3600,
         } for event in jobs_source if event.place]
-        return agent_start_lat, agent_start_lng, jobs_list
-    
-    
         
-        
+        return agent, jobs_list

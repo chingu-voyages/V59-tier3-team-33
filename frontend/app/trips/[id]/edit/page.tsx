@@ -277,38 +277,55 @@ export default function EditItineraryPage() {
 
         setIsOptimizing(true);
         setOptimizationError(null);
+        setOptimizationStats(null);
+
         try {
             const response = await api.post(`/trips/${tripId}/events/optimize-route/`, {
                 trip_day_id: currentDayId
             });
 
-            const orderedIds = response.ordered_ids;
-
-            if (!orderedIds || !Array.isArray(orderedIds)) {
-                throw new Error('Unable to process optimization results. Please try again.');
+            // Check if response has the expected structure
+            if (!response.events || !Array.isArray(response.events)) {
+                throw new Error('Invalid response from optimization service');
             }
 
-            if (orderedIds.length !== localEvents.length) {
-                throw new Error(`Could not optimize all ${localEvents.length} locations. Only ${orderedIds.length} were processed. One or more locations may be inaccessible by road.`);
-            }
+            const optimizedEvents = response.events;
 
-            const optimizedEvents = orderedIds
-                .map((id: string) => localEvents.find(e => e.id === id))
-                .filter(Boolean) as Event[];
-
+            // Validate that all events are present
             if (optimizedEvents.length !== localEvents.length) {
-                throw new Error('Some locations could not be matched. Please try again or adjust your itinerary.');
+                throw new Error(`Could not optimize all ${localEvents.length} locations. Only ${optimizedEvents.length} were processed. Some locations may be inaccessible by road.`);
             }
 
+            // Update local events with optimized order
             setLocalEvents(optimizedEvents);
             setHasChanges(true);
 
-            setOptimizationStats({
-                distance: response.total_distance_km,
-                time: response.total_time_hours
-            });
+            // Set stats if available
+            if (response.stats) {
+                setOptimizationStats({
+                    distance: response.stats.total_distance_km || 0,
+                    time: response.stats.total_time_hours || 0
+                });
+            }
+
+            // Show warning if present
+            if (response.warning) {
+                setOptimizationError(response.warning);
+            }
         } catch (error: any) {
-            const errorMessage = error.message || 'Unable to optimize this route. Try removing locations that may be in water, restricted areas, or adjusting the order manually.';
+            let errorMessage = 'Unable to optimize this route.';
+
+            if (error.message) {
+                errorMessage = error.message;
+            } else if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            }
+
+            // Add helpful context
+            if (!errorMessage.includes('locations') && !errorMessage.includes('insufficient')) {
+                errorMessage += ' Common causes: insufficient events (need at least 2), locations in water or restricted areas, or extreme distances between points.';
+            }
+
             setOptimizationError(errorMessage);
         } finally {
             setIsOptimizing(false);
@@ -552,22 +569,20 @@ export default function EditItineraryPage() {
                         </div>
 
                         {optimizationError && (
-                            <div className="mb-4 p-4 bg-danger-50 border border-danger-200 rounded-xl">
+                            <div className="mb-4 p-4 bg-amber-50 border border-amber-300 rounded-xl">
                                 <div className="flex items-start gap-3">
-                                    <div className="shrink-0 w-5 h-5 text-danger-600 mt-0.5">
-                                        <svg fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                                        </svg>
+                                    <div className="shrink-0 text-amber-600 text-xl mt-0.5">
+                                        ⚠️
                                     </div>
                                     <div className="flex-1">
-                                        <h4 className="text-sm font-semibold text-danger-800 mb-1">Unable to Optimize Route</h4>
-                                        <p className="text-xs text-danger-600">
-                                            Common causes: locations in water or restricted areas, extreme distances between points, or insufficient routing data for the region.
+                                        <h4 className="text-sm font-semibold text-amber-900 mb-1">Route Optimization Issue</h4>
+                                        <p className="text-sm text-amber-800">
+                                            {optimizationError}
                                         </p>
                                     </div>
                                     <button
                                         onClick={() => setOptimizationError(null)}
-                                        className="shrink-0 text-danger-600 hover:text-danger-800 text-lg leading-none"
+                                        className="shrink-0 text-amber-600 hover:text-amber-800 text-lg leading-none"
                                     >
                                         ✕
                                     </button>
