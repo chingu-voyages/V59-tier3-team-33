@@ -62,6 +62,32 @@ function MapViewController({ center, zoom }: { center: [number, number]; zoom: n
     return null;
 }
 
+function BoundsController({ bounds }: { bounds: [[number, number], [number, number]] | null }) {
+    const map = useMap();
+    const prevBounds = useRef<[[number, number], [number, number]] | null>(null);
+
+    useEffect(() => {
+        if (!bounds) return;
+
+        const boundsChanged = !prevBounds.current ||
+            prevBounds.current[0][0] !== bounds[0][0] ||
+            prevBounds.current[0][1] !== bounds[0][1] ||
+            prevBounds.current[1][0] !== bounds[1][0] ||
+            prevBounds.current[1][1] !== bounds[1][1];
+
+        if (boundsChanged) {
+            map.fitBounds(bounds, {
+                padding: [50, 50],
+                maxZoom: 13,
+                duration: 1.5,
+            });
+            prevBounds.current = bounds;
+        }
+    }, [bounds, map]);
+
+    return null;
+}
+
 // Animated marker component
 function AnimatedMarker({ position, displayName }: { position: [number, number]; displayName: string }) {
     const markerRef = useRef<L.Marker>(null);
@@ -121,6 +147,7 @@ export function Map({
     selectedLocation: externalSelectedLocation,
     dayEvents = [],
     dayLodging = null,
+    initialBounds = null,
 }: MapProps) {
     const [internalSelectedLocation, setInternalSelectedLocation] = useState<NominatimResult | null>(null);
     const [mapCenter, setMapCenter] = useState<[number, number]>(
@@ -229,6 +256,8 @@ export function Map({
                 <ZoomControl position="bottomleft" />
 
                 <MapViewController center={mapCenter} zoom={mapZoom} />
+
+                {initialBounds && !selectedLocation && <BoundsController bounds={initialBounds} />}
 
                 {selectedLocation && (
                     <AnimatedMarker

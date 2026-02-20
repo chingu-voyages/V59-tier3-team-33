@@ -10,6 +10,7 @@ export interface MapProps {
   selectedLocation?: NominatimResult | null; // Controlled selected location
   dayEvents?: Event[]; // Events to display with route lines
   dayLodging?: Lodging | null; // Lodging for the day (if exists)
+  initialBounds?: [[number, number], [number, number]] | null; // Bounds to fit on initial load
 }
 
 export interface Coordinates {
