@@ -299,4 +299,30 @@ class ShareTripSerializer(serializers.ModelSerializer):
         
         instance.save()
         return instance
-        
+
+
+from rest_framework import serializers
+
+class DailyScheduleSerializer(serializers.Serializer):
+    """Represents the existing plans for a single day."""
+    events = serializers.ListField(
+        child=serializers.CharField(), 
+        help_text="List of events already planned for this day."
+    )
+    lodging = serializers.CharField(
+        allow_null=True, 
+        help_text="Where the user is staying that night."
+    )
+
+class DateSuggestionRequestSerializer(serializers.Serializer):
+    """The payload sent by the frontend to request an AI date suggestion."""
+    
+    place_to_schedule = serializers.CharField(
+        help_text="Name of the new place the user wants to add to their trip."
+    )
+    trip_start_date = serializers.DateField()
+    trip_end_date = serializers.DateField()    
+    itinerary = serializers.DictField(
+        child=DailyScheduleSerializer(),
+        help_text="A dictionary mapping dates (YYYY-MM-DD) to their daily schedules."
+    )

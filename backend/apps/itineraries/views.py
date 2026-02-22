@@ -1,4 +1,5 @@
 from rest_framework import viewsets, permissions, mixins
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -16,11 +17,13 @@ from .serializers import (
     LodgingSerializer,
     UpdateLodgingSerializer,
     RouteOptimizationSerializer,
-    ShareTripSerializer
+    ShareTripSerializer,
+    DateSuggestionRequestSerializer
 )
 from django.db import transaction
 from datetime import timedelta
 from .services.route_optimizer import RouteOptimizer
+from .services.llm.event_date_suggestor.service import EventDateSuggestor
 # from .services import RouteService
 
 
@@ -101,6 +104,7 @@ class TripViewset(viewsets.ModelViewSet):
         print(f"trip {trip} | is_public {trip.is_public}")
         serializer = self.get_serializer(trip)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class TripSavedPlaceViewset(
     viewsets.GenericViewSet,
@@ -282,6 +286,28 @@ class TripEventViewset(viewsets.ModelViewSet):
             print(f"Error parsing route service response: {e}")
             return None
 
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="suggest-date",
+        serializer_class=DateSuggestionRequestSerializer,
+        permission_classes=[permissions.IsAuthenticated, IsTripMember],
+    )
+    def suggest_date(self, request, pk=None, trip_pk=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+        
+        event_date_suggestor = EventDateSuggestor(
+            provider=settings.LLM_PROVIDER,
+            model_name=settings.LLM_MODEL,
+        )
+        suggestion = event_date_suggestor.suggest_date(validated_data)
+        
+        return Response(
+            {"suggestion": suggestion},
+            status=status.HTTP_200_OK,
+        )
 
 class TripLodgingViewset(viewsets.ModelViewSet):
     queryset = Lodging.objects.all()

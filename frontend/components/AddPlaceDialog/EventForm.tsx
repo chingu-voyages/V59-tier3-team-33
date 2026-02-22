@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { FaRobot } from 'react-icons/fa';
+import { FaRobot, FaMagic } from 'react-icons/fa';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -10,8 +10,11 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { TripDay, Event, Lodging } from '@/types/trip';
 import { calculateDistance, DISTANCE_WARNING_THRESHOLD_KM } from '@/utils/distance';
+import { api } from '@/lib/api';
 
 interface EventFormProps {
+    tripId: string;
+    placeName: string;
     tripDays: TripDay[];
     tripStartDate: string;
     tripEndDate: string;
@@ -33,6 +36,8 @@ export interface EventFormData {
 }
 
 export function EventForm({
+    tripId,
+    placeName,
     tripDays,
     tripStartDate,
     tripEndDate,
@@ -51,6 +56,14 @@ export function EventForm({
         type: 'ACTIVITY' as EventFormData['type'],
         notes: '',
     });
+    const [aiSuggestion, setAiSuggestion] = useState<{
+        suggested_date: string;
+        suggested_time: string;
+        reasoning: string;
+        alternative: string;
+    } | null>(null);
+    const [isLoadingSuggestion, setIsLoadingSuggestion] = useState(false);
+    const [suggestionError, setSuggestionError] = useState<string | null>(null);
 
     const minDate = new Date(tripStartDate);
     const maxDate = new Date(tripEndDate);
@@ -132,19 +145,156 @@ export function EventForm({
         return null;
     }, [selectedDate, tripDays, placeLatitude, placeLongitude, eventsByDayId, eventsById, lodgingsByDayId, lodgingsById]);
 
+    const handleGetAISuggestion = async () => {
+        setIsLoadingSuggestion(true);
+        setSuggestionError(null);
+        setAiSuggestion(null);
+
+        try {
+            const itinerary: Record<string, { events: string[]; lodging: string | null }> = {};
+
+            tripDays.forEach(day => {
+                const eventIds = eventsByDayId[day.id] || [];
+                const events = eventIds
+                    .map(id => eventsById[id])
+                    .filter(Boolean)
+                    .sort((a, b) => a.position - b.position)
+                    .map(e => e.place_details.name);
+
+                const lodgingIds = lodgingsByDayId[day.id] || [];
+                const lodgings = lodgingIds.map(id => lodgingsById[id]).filter(Boolean);
+                const lodging = lodgings.length > 0 ? lodgings[0].place_details.name : null;
+
+                itinerary[day.date] = {
+                    events,
+                    lodging
+                };
+            });
+
+            const payload = {
+                place_to_schedule: placeName,
+                trip_start_date: tripStartDate,
+                trip_end_date: tripEndDate,
+                itinerary
+            };
+
+            const response = await api.post<{
+                suggestion: {
+                    suggested_date: string;
+                    suggested_time: string;
+                    reasoning: string;
+                    alternative: string;
+                }
+            }>(`/trips/${tripId}/events/suggest-date/`, payload);
+            setAiSuggestion(response.suggestion);
+        } catch (error: any) {
+            let errorMessage = 'Unable to get AI suggestion. Please try again.';
+
+            if (error.message) {
+                const msg = error.message.toLowerCase();
+                if (msg.includes('rate limit') || msg.includes('quota') || msg.includes('exhausted')) {
+                    errorMessage = 'AI model is temporarily exhausted. Please try again in a few moments.';
+                } else if (msg.includes('timeout') || msg.includes('timed out')) {
+                    errorMessage = 'Request timed out. Please try again.';
+                } else if (msg.includes('network') || msg.includes('fetch')) {
+                    errorMessage = 'Network error. Please check your connection.';
+                } else if (msg.includes('unauthorized') || msg.includes('401')) {
+                    errorMessage = 'Session expired. Please refresh the page.';
+                } else {
+                    errorMessage = error.message;
+                }
+            }
+
+            setSuggestionError(errorMessage);
+        } finally {
+            setIsLoadingSuggestion(false);
+        }
+    };
+
+    const handleApplySuggestion = () => {
+        if (!aiSuggestion) return;
+        const suggestedDate = new Date(aiSuggestion.suggested_date);
+        setSelectedDate(suggestedDate);
+    };
+
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
-            {/* AI Suggestion Placeholder */}
-            <div className="p-3 bg-primary-50 border border-primary-200 rounded-lg">
-                <div className="flex items-center gap-2 text-primary-600 mb-1">
-                    <FaRobot className="text-lg" />
-                    <span className="font-semibold text-sm">AI Suggestion</span>
-                    <span className="text-xs px-2 py-0.5 bg-primary-100 text-primary-700 font-medium rounded-full">Coming Soon</span>
-                </div>
-                <p className="text-xs text-primary-600">
-                    AI will suggest the best time and day for this activity based on your itinerary.
-                </p>
+            {/* AI Suggestion Button */}
+            <div>
+                <button
+                    type="button"
+                    onClick={handleGetAISuggestion}
+                    disabled={isLoadingSuggestion}
+                    className="w-full px-6 py-3 bg-white border-2 border-teal-500 text-neutral-400 rounded-xl font-semibold transition-all hover:bg-teal-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                >
+                    {isLoadingSuggestion ? (
+                        <>
+                            <div className="w-5 h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+                            <span>Getting Suggestion...</span>
+                        </>
+                    ) : (
+                        <>
+                            <svg className="w-6 h-6 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            <span>Suggest A Day</span>
+                        </>
+                    )}
+                </button>
             </div>
+
+            {/* AI Suggestion Display */}
+            {aiSuggestion && (
+                <div className="p-4 bg-surface-100 rounded-lg border border-surface-300">
+                    <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                            <p className="text-base text-neutral-400">
+                                <span className="font-bold text-neutral-400">
+                                    Day {(() => {
+                                        const suggestedDate = new Date(aiSuggestion.suggested_date);
+                                        const dayNum = getDayNumber(suggestedDate);
+                                        return dayNum || '?';
+                                    })()}:
+                                </span>
+                                <span className="text-neutral-300 ml-1">{aiSuggestion.reasoning}</span>
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setAiSuggestion(null)}
+                            className="text-neutral-300 hover:text-neutral-400 text-lg shrink-0 ml-2"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleApplySuggestion}
+                        className="w-full px-4 py-2 bg-secondary-400 hover:bg-secondary-500 text-white rounded-lg text-sm font-medium transition-colors"
+                    >
+                        Apply Suggestion
+                    </button>
+                </div>
+            )}
+
+            {/* Error Display */}
+            {suggestionError && (
+                <div className="p-3 bg-amber-50 border border-amber-300 rounded-lg">
+                    <div className="flex items-start gap-2">
+                        <span className="text-amber-600 text-lg shrink-0">⚠️</span>
+                        <div className="flex-1">
+                            <p className="text-sm text-amber-900">{suggestionError}</p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setSuggestionError(null)}
+                            className="text-amber-600 hover:text-amber-700 text-lg shrink-0"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Date Selector */}
             <div>

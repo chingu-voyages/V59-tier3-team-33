@@ -265,3 +265,6 @@ FRONTEND_SHARE_PATH_NAME = os.environ.get(
 )
 
 GEOAPIFY_API_KEY = os.environ.get("GEOAPIFY_API_KEY")
+LLM_PROVIDER_API_KEY = os.environ.get("LLM_PROVIDER_API_KEY")
+LLM_PROVIDER = os.environ.get("LLM_PROVIDER", "groq")
+LLM_MODEL = os.environ.get("LLM_MODEL", "llama3-8b-8192")
