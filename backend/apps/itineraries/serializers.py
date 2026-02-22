@@ -158,7 +158,7 @@ class UpdateLodgingSerializer(serializers.ModelSerializer):
         # Ensure date range is within the trip
         trip = Trip.objects.get(id=self.context["trip_pk"])
         if arrival_date and departure_date:
-            if arrival_date >= departure_date:
+            if arrival_date > departure_date:
                 raise serializers.ValidationError(
                     {"departure_date": "Departure date must be after arrival date."}
                 )

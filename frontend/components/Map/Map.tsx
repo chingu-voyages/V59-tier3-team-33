@@ -20,15 +20,16 @@ const PrimaryIcon = L.icon({
 });
 
 const LodgingIcon = L.icon({
-    iconUrl: 'data:image/svg+xml;base64=' + btoa(`
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="32" height="52">
+    iconUrl: 'data:image/svg+xml;base64,' + btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="36" height="56">
             <path fill="#10b981" stroke="#059669" stroke-width="2" d="M12 0C7.03 0 3 4.03 3 9c0 6.75 9 18 9 18s9-11.25 9-18c0-4.97-4.03-9-9-9z"/>
-            <circle cx="12" cy="9" r="3.5" fill="white"/>
+            <rect x="7" y="5" width="10" height="6" rx="1" fill="white"/>
+            <rect x="7" y="11" width="10" height="2" fill="white"/>
         </svg>
     `),
-    iconSize: [32, 52],
-    iconAnchor: [16, 52],
-    popupAnchor: [1, -44],
+    iconSize: [36, 56],
+    iconAnchor: [18, 56],
+    popupAnchor: [1, -48],
 });
 
 const DefaultIcon = L.icon({

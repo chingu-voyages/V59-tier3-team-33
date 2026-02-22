@@ -176,12 +176,12 @@ export default function TripsPage() {
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setSortBy('date-asc')}>
                 <span className={sortBy === 'date-asc' ? 'font-semibold' : ''}>
-                  Trip Date (Oldest First)
+                  Soon
                 </span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setSortBy('date-desc')}>
                 <span className={sortBy === 'date-desc' ? 'font-semibold' : ''}>
-                  Trip Date (Newest First)
+                  Latest
                 </span>
               </DropdownMenuItem>
             </DropdownMenuContent>
