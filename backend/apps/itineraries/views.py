@@ -1,4 +1,5 @@
 from rest_framework import viewsets, permissions, mixins
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -16,11 +17,14 @@ from .serializers import (
     LodgingSerializer,
     UpdateLodgingSerializer,
     RouteOptimizationSerializer,
-    ShareTripSerializer
+    ShareTripSerializer,
+    DateSuggestionRequestSerializer,
 )
 from django.db import transaction
 from datetime import timedelta
-from .services import RouteService
+from .services.route_optimizer import RouteOptimizer
+from .services.llm.event_date_suggestor.service import EventDateSuggestor
+# from .services import RouteService
 
 
 class TripViewset(viewsets.ModelViewSet):
@@ -78,7 +82,7 @@ class TripViewset(viewsets.ModelViewSet):
         detail=True,
         methods=["patch"],
         url_path="share",
-        serializer_class=ShareTripSerializer
+        serializer_class=ShareTripSerializer,
     )
     def toggle_share(self, request, pk=None):
         trip = self.get_object()
@@ -100,6 +104,7 @@ class TripViewset(viewsets.ModelViewSet):
         print(f"trip {trip} | is_public {trip.is_public}")
         serializer = self.get_serializer(trip)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class TripSavedPlaceViewset(
     viewsets.GenericViewSet,
@@ -202,49 +207,54 @@ class TripEventViewset(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         trip_day = serializer.validated_data["trip_day_id"]
-        
+
         all_events = list(trip_day.events.all())
         event_map = {str(e.id): e for e in all_events}
-        
-        route_service = RouteService(trip_day)
-        agent, res = route_service.optimize_route()
-        
+
+        optimizer = RouteOptimizer(trip_day)
+        agent, res = optimizer.optimize_route()
+
         if not agent or not res:
             return Response(
                 {"error": "Failed to generate route from API."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-        
+
         parsed_res = self._parse_route_service_response(agent, res)
         if not parsed_res:
             return Response(
                 {"error": "Failed to optimize route"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-            
+
         optimized_ids = parsed_res["ordered_ids"]
         final_event_list = []
-        
+
         for e_id in optimized_ids:
             event = event_map.get(e_id)
             if event:
                 final_event_list.append(event)
-        
+
         optimized_set = set(optimized_ids)
         missing_events = [e for e in all_events if str(e.id) not in optimized_set]
-        
+
         if missing_events:
             final_event_list.extend(missing_events)
-            parsed_res["warning"] = f"Could not route to {len(missing_events)} location(s). They were moved to the end."
-        
-        return Response({
-            "events": EventSerializer(final_event_list, many=True).data,
-            "stats": {
-                "total_distance_km": parsed_res["total_distance_km"],
-                "total_time_hours": parsed_res["total_time_hours"]
+            parsed_res["warning"] = (
+                f"Could not route to {len(missing_events)} location(s). They were moved to the end."
+            )
+
+        return Response(
+            {
+                "events": EventSerializer(final_event_list, many=True).data,
+                "stats": {
+                    "total_distance_km": parsed_res["total_distance_km"],
+                    "total_time_hours": parsed_res["total_time_hours"],
+                },
+                "warning": parsed_res.get("warning"),
             },
-            "warning": parsed_res.get("warning")
-        }, status=status.HTTP_200_OK)
+            status=status.HTTP_200_OK,
+        )
 
     def _parse_route_service_response(self, agent: any, data: dict):
         ordered_ids = []
@@ -280,6 +290,29 @@ class TripEventViewset(viewsets.ModelViewSet):
         except Exception as e:
             print(f"Error parsing route service response: {e}")
             return None
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="suggest-date",
+        serializer_class=DateSuggestionRequestSerializer,
+        permission_classes=[permissions.IsAuthenticated, IsTripMember],
+    )
+    def suggest_date(self, request, pk=None, trip_pk=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+
+        event_date_suggestor = EventDateSuggestor(
+            provider=settings.LLM_PROVIDER,
+            model_name=settings.LLM_MODEL,
+        )
+        suggestion = event_date_suggestor.suggest_date(validated_data)
+
+        return Response(
+            {"suggestion": suggestion},
+            status=status.HTTP_200_OK,
+        )
 
 
 class TripLodgingViewset(viewsets.ModelViewSet):

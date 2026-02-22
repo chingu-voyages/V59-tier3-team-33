@@ -10,17 +10,24 @@ from apps.accounts.serializers import UserSimpleSerializer
 
 
 class TripSerializer(serializers.ModelSerializer):
-    
     public_url = serializers.SerializerMethodField(read_only=True)
-    
+
     def get_public_url(self, obj):
         if obj.is_public and obj.public_token:
             return f"{settings.FRONTEND_URL}/{settings.FRONTEND_SHARE_PATH_NAME}/{obj.public_token}"
         return None
-    
+
     class Meta:
         model = Trip
-        fields = ["id", "name", "start_date", "end_date", "created_at", "is_public", "public_url"]
+        fields = [
+            "id",
+            "name",
+            "start_date",
+            "end_date",
+            "created_at",
+            "is_public",
+            "public_url",
+        ]
         read_only_fields = ["id", "created_at", "is_public", "public_url"]
 
     def validate(self, attrs):
@@ -271,32 +278,56 @@ class RouteOptimizationSerializer(serializers.Serializer):
 
 
 class ShareTripSerializer(serializers.ModelSerializer):
-    
     public_url = serializers.SerializerMethodField(read_only=True)
-    
+
     class Meta:
         model = Trip
         fields = ["is_public", "public_url"]
         read_only_fields = ["public_url"]
-        
+
     def get_public_url(self, obj):
         if obj.is_public and obj.public_token:
             return f"{settings.FRONTEND_URL}/{settings.FRONTEND_SHARE_PATH_NAME}/{obj.public_token}"
         return None
-    
+
     def update(self, instance, validated_data):
         is_public = validated_data.get("is_public", instance.is_public)
-        
+
         # Share Mode: ON
         if is_public:
             instance.is_public = True
             instance.public_token = uuid.uuid4()
             instance.last_public_token_generated_at = timezone.now()
-        else: 
+        else:
             instance.is_public = False
             instance.public_token = None
             instance.last_public_token_generated_at = None
-        
+
         instance.save()
         return instance
-        
+
+
+class DailyScheduleSerializer(serializers.Serializer):
+    """Represents the existing plans for a single day."""
+
+    events = serializers.ListField(
+        child=serializers.CharField(),
+        help_text="List of events already planned for this day.",
+    )
+    lodging = serializers.CharField(
+        allow_null=True, help_text="Where the user is staying that night."
+    )
+
+
+class DateSuggestionRequestSerializer(serializers.Serializer):
+    """The payload sent by the frontend to request an AI date suggestion."""
+
+    place_to_schedule = serializers.CharField(
+        help_text="Name of the new place the user wants to add to their trip."
+    )
+    trip_start_date = serializers.DateField()
+    trip_end_date = serializers.DateField()
+    itinerary = serializers.DictField(
+        child=DailyScheduleSerializer(),
+        help_text="A dictionary mapping dates (YYYY-MM-DD) to their daily schedules.",
+    )
