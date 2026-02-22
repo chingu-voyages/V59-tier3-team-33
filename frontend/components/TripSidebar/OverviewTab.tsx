@@ -2,14 +2,16 @@
 
 import { useTripStore } from '@/store/tripStore';
 import type { Trip } from '@/types/trip';
-import { FaHotel } from 'react-icons/fa';
+import { FaHotel, FaEdit } from 'react-icons/fa';
 import { format } from 'date-fns';
+import { useRouter } from 'next/navigation';
 
 interface OverviewTabProps {
     trip: Trip;
 }
 
 export function OverviewTab({ trip }: OverviewTabProps) {
+    const router = useRouter();
     const {
         eventsByDayId,
         eventsById,
@@ -66,16 +68,27 @@ export function OverviewTab({ trip }: OverviewTabProps) {
                     .map(id => lodgingsById[id])
                     .filter(Boolean);
 
+                const dayIndex = tripDays.findIndex(d => d.id === day.id);
+
                 return (
                     <div key={day.id}>
-                        <div className="mb-3">
-                            <h3 className="text-lg font-bold text-neutral-400">
-                                {formatDate(day.date)}
-                            </h3>
-                            <p className="text-xs text-neutral-300 mt-1">
-                                {dayEvents.length} {dayEvents.length === 1 ? 'event' : 'events'}
-                                {dayLodgings.length > 0 && ` • ${dayLodgings.length} ${dayLodgings.length === 1 ? 'lodging' : 'lodgings'}`}
-                            </p>
+                        <div className="mb-3 flex items-start justify-between gap-2">
+                            <div className="flex-1">
+                                <h3 className="text-lg font-bold text-neutral-400">
+                                    {formatDate(day.date)}
+                                </h3>
+                                <p className="text-xs text-neutral-300 mt-1">
+                                    {dayEvents.length} {dayEvents.length === 1 ? 'event' : 'events'}
+                                    {dayLodgings.length > 0 && ` • ${dayLodgings.length} ${dayLodgings.length === 1 ? 'lodging' : 'lodgings'}`}
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => router.push(`/trips/${trip.id}/edit?day=${dayIndex}`)}
+                                className="shrink-0 p-2 text-primary-400 hover:text-primary-500 hover:bg-primary-50 rounded-lg transition-colors"
+                                title="Edit day itinerary"
+                            >
+                                <FaEdit className="text-lg" />
+                            </button>
                         </div>
 
                         {/* Lodgings */}
