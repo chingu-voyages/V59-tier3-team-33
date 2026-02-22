@@ -115,13 +115,16 @@ export default function EditItineraryPage() {
         lodgingsByDayId,
         lodgingsById,
         setTrip,
-        setLodgings
+        setLodgings,
+        deleteLodging
     } = useTripStore();
 
     const [selectedDayIndex, setSelectedDayIndex] = useState(0);
     const [hasChanges, setHasChanges] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [eventToDelete, setEventToDelete] = useState<string | null>(null);
+    const [deleteLodgingDialogOpen, setDeleteLodgingDialogOpen] = useState(false);
+    const [lodgingToDelete, setLodgingToDelete] = useState<string | null>(null);
     const [isMounted, setIsMounted] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -226,6 +229,11 @@ export default function EditItineraryPage() {
         setDeleteDialogOpen(true);
     };
 
+    const handleDeleteLodgingClick = (lodgingId: string) => {
+        setLodgingToDelete(lodgingId);
+        setDeleteLodgingDialogOpen(true);
+    };
+
     const handleDeleteConfirm = async () => {
         if (!eventToDelete) return;
 
@@ -240,6 +248,22 @@ export default function EditItineraryPage() {
             setEventToDelete(null);
         } catch (error) {
             alert('Failed to delete event. Please try again.');
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const handleDeleteLodgingConfirm = async () => {
+        if (!lodgingToDelete) return;
+
+        setIsDeleting(true);
+        try {
+            await deleteLodging(tripId, lodgingToDelete);
+
+            setDeleteLodgingDialogOpen(false);
+            setLodgingToDelete(null);
+        } catch (error) {
+            alert('Failed to delete lodging. Please try again.');
         } finally {
             setIsDeleting(false);
         }
@@ -467,6 +491,12 @@ export default function EditItineraryPage() {
                                                                     </span>
                                                                 </div>
                                                             </div>
+                                                            <button
+                                                                onClick={() => handleDeleteLodgingClick(lodging.id)}
+                                                                className="p-2 text-danger-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
+                                                            >
+                                                                <FaTrash />
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 ))}
@@ -650,6 +680,12 @@ export default function EditItineraryPage() {
                                                                 </span>
                                                             </div>
                                                         </div>
+                                                        <button
+                                                            onClick={() => handleDeleteLodgingClick(lodging.id)}
+                                                            className="p-2 text-danger-400 hover:text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
+                                                        >
+                                                            <FaTrash />
+                                                        </button>
                                                     </div>
                                                 </div>
                                             ))}
@@ -736,6 +772,27 @@ export default function EditItineraryPage() {
                         <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleDeleteConfirm}
+                            disabled={isDeleting}
+                            className="bg-danger-600 hover:bg-danger-700 focus:ring-danger-600"
+                        >
+                            {isDeleting ? 'Deleting...' : 'Delete'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog open={deleteLodgingDialogOpen} onOpenChange={setDeleteLodgingDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Lodging</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete this lodging? This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDeleteLodgingConfirm}
                             disabled={isDeleting}
                             className="bg-danger-600 hover:bg-danger-700 focus:ring-danger-600"
                         >

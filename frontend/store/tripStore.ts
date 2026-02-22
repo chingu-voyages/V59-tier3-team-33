@@ -46,6 +46,7 @@ interface TripState {
   removeFavorite: (tripId: string, favoriteId: string) => Promise<void>;
   addLodging: (tripId: string, data: AccommodationFormData, place: Place) => Promise<void>;
   addEvent: (tripId: string, data: EventFormData, place: Place) => Promise<void>;
+  deleteLodging: (tripId: string, lodgingId: string) => Promise<void>;
   toggleTripPublic: (tripId: string, isPublic: boolean) => Promise<void>;
   
   // Utility
@@ -486,6 +487,20 @@ export const useTripStore = create<TripState>((set, get) => ({
       
     } catch (error) {
       console.error('Failed to add event:', error);
+      throw error;
+    }
+  },
+  
+  deleteLodging: async (tripId: string, lodgingId: string) => {
+    try {
+      await api.delete(`/trips/${tripId}/lodgings/${lodgingId}/`);
+      
+      // Refetch lodgings
+      const lodgingsData = await api.get(`/trips/${tripId}/lodgings/`);
+      get().setLodgings(lodgingsData);
+      
+    } catch (error) {
+      console.error('Failed to delete lodging:', error);
       throw error;
     }
   },
