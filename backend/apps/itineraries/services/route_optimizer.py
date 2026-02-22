@@ -1,9 +1,9 @@
 import requests
 from requests.structures import CaseInsensitiveDict
 from django.conf import settings
-from .models import TripDay, Lodging, Event
+from ..models import TripDay, Lodging, Event
 
-class RouteService:
+class RouteOptimizer:
     URL = "https://api.geoapify.com/v1/routeplanner?apiKey={}"
     headers = CaseInsensitiveDict()
     headers["Content-Type"] = "application/json"

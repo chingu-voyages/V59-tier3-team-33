@@ -20,7 +20,8 @@ from .serializers import (
 )
 from django.db import transaction
 from datetime import timedelta
-from .services import RouteService
+from .services.route_optimizer import RouteOptimizer
+# from .services import RouteService
 
 
 class TripViewset(viewsets.ModelViewSet):
@@ -206,8 +207,8 @@ class TripEventViewset(viewsets.ModelViewSet):
         all_events = list(trip_day.events.all())
         event_map = {str(e.id): e for e in all_events}
         
-        route_service = RouteService(trip_day)
-        agent, res = route_service.optimize_route()
+        optimizer = RouteOptimizer(trip_day)
+        agent, res = optimizer.optimize_route()
         
         if not agent or not res:
             return Response(
