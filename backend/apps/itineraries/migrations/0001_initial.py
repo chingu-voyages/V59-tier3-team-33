@@ -7,115 +7,289 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('places', '0001_initial'),
+        ("places", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Trip',
+            name="Trip",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=255)),
-                ('start_date', models.DateField()),
-                ('end_date', models.DateField()),
-                ('public_token', models.UUIDField(blank=True, default=uuid.uuid4, editable=False, null=True)),
-                ('is_public', models.BooleanField(default=False)),
-                ('last_public_token_generated_at', models.DateTimeField(blank=True, null=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='trips', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=255)),
+                ("start_date", models.DateField()),
+                ("end_date", models.DateField()),
+                (
+                    "public_token",
+                    models.UUIDField(
+                        blank=True, default=uuid.uuid4, editable=False, null=True
+                    ),
+                ),
+                ("is_public", models.BooleanField(default=False)),
+                (
+                    "last_public_token_generated_at",
+                    models.DateTimeField(blank=True, null=True),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="trips",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Lodging',
+            name="Lodging",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('arrival_date', models.DateField()),
-                ('departure_date', models.DateField()),
-                ('place', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='places.place')),
-                ('trip', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lodgings', to='itineraries.trip')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("arrival_date", models.DateField()),
+                ("departure_date", models.DateField()),
+                (
+                    "place",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="places.place",
+                    ),
+                ),
+                (
+                    "trip",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="lodgings",
+                        to="itineraries.trip",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='TripDay',
+            name="TripDay",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('date', models.DateField()),
-                ('trip', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='trip_days', to='itineraries.trip')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("date", models.DateField()),
+                (
+                    "trip",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="trip_days",
+                        to="itineraries.trip",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Event',
+            name="Event",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('type', models.CharField(choices=[('FLIGHT', 'Flight'), ('TRAIN', 'Train'), ('BUS', 'Bus'), ('MEAL', 'Meal'), ('ACTIVITY', 'Activity'), ('OTHER', 'Other')], default='OTHER', max_length=20)),
-                ('position', models.PositiveIntegerField()),
-                ('notes', models.TextField(blank=True, null=True)),
-                ('place', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='places.place')),
-                ('trip_day', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='events', to='itineraries.tripday')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[
+                            ("FLIGHT", "Flight"),
+                            ("TRAIN", "Train"),
+                            ("BUS", "Bus"),
+                            ("MEAL", "Meal"),
+                            ("ACTIVITY", "Activity"),
+                            ("OTHER", "Other"),
+                        ],
+                        default="OTHER",
+                        max_length=20,
+                    ),
+                ),
+                ("position", models.PositiveIntegerField()),
+                ("notes", models.TextField(blank=True, null=True)),
+                (
+                    "place",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="places.place",
+                    ),
+                ),
+                (
+                    "trip_day",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="events",
+                        to="itineraries.tripday",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='TripSavedPlace',
+            name="TripSavedPlace",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('place', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='trip_saved_places', to='places.place')),
-                ('saved_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='saved_places', to=settings.AUTH_USER_MODEL)),
-                ('trip', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='saved_places', to='itineraries.trip')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "place",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="trip_saved_places",
+                        to="places.place",
+                    ),
+                ),
+                (
+                    "saved_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="saved_places",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "trip",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="saved_places",
+                        to="itineraries.trip",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='UserTrip',
+            name="UserTrip",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('trip', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='user_trips', to='itineraries.trip')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_trips', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "trip",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="user_trips",
+                        to="itineraries.trip",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="user_trips",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.AddConstraint(
-            model_name='trip',
-            constraint=models.CheckConstraint(condition=models.Q(('start_date__lte', models.F('end_date'))), name='start_date_before_end_date'),
+            model_name="trip",
+            constraint=models.CheckConstraint(
+                condition=models.Q(("start_date__lte", models.F("end_date"))),
+                name="start_date_before_end_date",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='trip',
-            constraint=models.CheckConstraint(condition=models.Q(('is_public', False), ('public_token__isnull', False), _connector='OR'), name='public_trip_has_token'),
+            model_name="trip",
+            constraint=models.CheckConstraint(
+                condition=models.Q(
+                    ("is_public", False),
+                    ("public_token__isnull", False),
+                    _connector="OR",
+                ),
+                name="public_trip_has_token",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='trip',
-            constraint=models.UniqueConstraint(condition=models.Q(('is_public', True)), fields=('public_token',), name='unique_public_token'),
+            model_name="trip",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("is_public", True)),
+                fields=("public_token",),
+                name="unique_public_token",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='lodging',
-            constraint=models.CheckConstraint(condition=models.Q(('arrival_date__lte', models.F('departure_date'))), name='arrival_date_before_departure_date'),
+            model_name="lodging",
+            constraint=models.CheckConstraint(
+                condition=models.Q(("arrival_date__lte", models.F("departure_date"))),
+                name="arrival_date_before_departure_date",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='tripday',
-            constraint=models.UniqueConstraint(fields=('trip', 'date'), name='unique_trip_day_per_trip'),
+            model_name="tripday",
+            constraint=models.UniqueConstraint(
+                fields=("trip", "date"), name="unique_trip_day_per_trip"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='tripsavedplace',
-            constraint=models.UniqueConstraint(fields=('trip', 'place'), name='unique_saved_place_per_trip'),
+            model_name="tripsavedplace",
+            constraint=models.UniqueConstraint(
+                fields=("trip", "place"), name="unique_saved_place_per_trip"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='usertrip',
-            constraint=models.UniqueConstraint(fields=('user', 'trip'), name='unique_user_trip_per_user'),
+            model_name="usertrip",
+            constraint=models.UniqueConstraint(
+                fields=("user", "trip"), name="unique_user_trip_per_user"
+            ),
         ),
     ]

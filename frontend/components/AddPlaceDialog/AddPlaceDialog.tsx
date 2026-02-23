@@ -111,6 +111,8 @@ export function AddPlaceDialog({
 
                     <TabsContent value="event" className="mt-4">
                         <EventForm
+                            tripId={tripId}
+                            placeName={place.name}
                             tripDays={tripDays}
                             tripStartDate={tripStartDate}
                             tripEndDate={tripEndDate}

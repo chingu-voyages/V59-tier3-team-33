@@ -5,27 +5,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Place',
+            name="Place",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('external_id', models.CharField(max_length=255, unique=True)),
-                ('name', models.CharField(max_length=255)),
-                ('address', models.CharField(blank=True, max_length=255, null=True)),
-                ('latitude', models.DecimalField(decimal_places=16, max_digits=20)),
-                ('longitude', models.DecimalField(decimal_places=16, max_digits=20)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("external_id", models.CharField(max_length=255, unique=True)),
+                ("name", models.CharField(max_length=255)),
+                ("address", models.CharField(blank=True, max_length=255, null=True)),
+                ("latitude", models.DecimalField(decimal_places=16, max_digits=20)),
+                ("longitude", models.DecimalField(decimal_places=16, max_digits=20)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

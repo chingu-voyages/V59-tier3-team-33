@@ -13,23 +13,22 @@ logger = logging.getLogger(__name__)
 def send_welcome_mail(user: User, max_retries=3):
     time.sleep(5)
 
-    name_to_use = user.first_name if user.first_name else "Traveller"
     subject = "Welcome to JoyRoute"
-    
+
     html_message = render_to_string(
         "email/welcome_email.html",
         {
             "user": user,
             "frontend_url": settings.FRONTEND_URL,
-        }
+        },
     )
-    
+
     text_message = render_to_string(
         "email/welcome_email.txt",
         {
             "user": user,
             "frontend_url": settings.FRONTEND_URL,
-        }
+        },
     )
 
     for attempt in range(max_retries):

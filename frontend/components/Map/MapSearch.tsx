@@ -42,7 +42,6 @@ export function MapSearch({ onLocationSelect, className = '' }: MapSearchProps) 
             setResults(searchResults);
             setIsOpen(true);
         } catch (error) {
-            console.error('Search failed:', error);
             setResults([]);
         } finally {
             setIsLoading(false);
@@ -53,14 +52,14 @@ export function MapSearch({ onLocationSelect, className = '' }: MapSearchProps) 
         const value = e.target.value;
         setQuery(value);
 
-        // Debounce search
+        // Debounce search - increased to 500ms to reduce API calls
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
         }
 
         debounceTimer.current = setTimeout(() => {
             performSearch(value);
-        }, 300);
+        }, 500);
     };
 
     const handleResultClick = (result: NominatimResult) => {
