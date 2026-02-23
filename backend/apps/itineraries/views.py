@@ -310,7 +310,7 @@ class TripEventViewset(viewsets.ModelViewSet):
         suggestion = event_date_suggestor.suggest_date(validated_data)
 
         return Response(
-            {"suggestion": suggestion},
+            suggestion,
             status=status.HTTP_200_OK,
         )
 

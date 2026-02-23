@@ -179,14 +179,12 @@ export function EventForm({
             };
 
             const response = await api.post<{
-                suggestion: {
-                    suggested_date: string;
-                    suggested_time: string;
-                    reasoning: string;
-                    alternative: string;
-                }
+                suggested_date: string;
+                suggested_time: string;
+                reasoning: string;
+                alternative: string;
             }>(`/trips/${tripId}/events/suggest-date/`, payload);
-            setAiSuggestion(response.suggestion);
+            setAiSuggestion(response);
         } catch (error: any) {
             let errorMessage = 'Unable to get AI suggestion. Please try again.';
 
