@@ -6,16 +6,16 @@ JoyRoute is a collaborative trip planning application that helps travelers creat
 
 ---
 
-## 👥 Our Team
+## 👥 Voyage59 - Tier3 - Team33
 
 | Name | Role | GitHub | LinkedIn |
 |------|------|--------|----------|
-| Chris | Developer | [@chalrees876](https://github.com/chalrees876) | [Profile](https://www.linkedin.com/in/cmckenzie12/) |
-| Samantha (Kayleigh) | Developer | [@samanthakgraham](https://github.com/samanthakgraham) | [Profile](https://www.linkedin.com/in/samantha-graham-339b6b37) |
+| Samantha (Kayleigh) | Product Owner | [@samanthakgraham](https://github.com/samanthakgraham) | [Profile](https://www.linkedin.com/in/samantha-graham-339b6b37) |
 | Min Sik Hein (Direwen) | Developer | [@Direwen](https://github.com/Direwen) | [Profile](https://www.linkedin.com/in/min-sik-hein/) |
-| Margaret Wu | Developer | [@margaretcwu](https://github.com/margaretcwu) | [Profile](https://linkedin.com/in/margaretcwu) |
+| Chris | Developer | [@chalrees876](https://github.com/chalrees876) | [Profile](https://www.linkedin.com/in/cmckenzie12/) |
+| Margaret Wu | UI/UX Designer | [@margaretcwu](https://github.com/margaretcwu) | [Profile](https://linkedin.com/in/margaretcwu) |
 | Oshada Kularathne | Developer | [@devimalka](https://github.com/devimalka) | [Profile](https://www.linkedin.com/in/oshada-kularathne/) |
-| Chanae Pickett | Developer | [@chanaelynease](https://github.com/chanaelynease) | - |
+| Chanae Pickett | Agile Scrum Master | [@chanaelynease](https://github.com/chanaelynease) | - |
 | Gobinath Varatharajan | Developer | [@gobinathvaratharajan](https://github.com/gobinathvaratharajan) | [Profile](https://www.linkedin.com/in/gobinathvaratharajan/) |
 
 ---
@@ -474,7 +474,7 @@ joyroute/
 
 ## � Acknowledgments
 
-- Built during **Chingu Voyage 52**
+- Built during **Chingu Voyage 59**
 - **OpenStreetMap** for geocoding services
 - **Geoapify** for route optimization
 - **Groq** for AI capabilities
